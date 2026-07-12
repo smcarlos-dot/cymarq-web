@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import Script from 'next/script';
 import { site } from '@/data/site';
 
 const inter = Inter({
@@ -33,7 +34,14 @@ export const metadata = {
     siteName: 'CYMARQ',
     locale: 'es_CO',
     type: 'website',
-    images: [{ url: '/photos/edificio-cyma.webp', width: 1200, height: 630, alt: 'CYMARQ — Edificio CYMA' }],
+    images: [
+      {
+        url: '/photos/edificio-cyma.webp',
+        width: 1200,
+        height: 630,
+        alt: 'CYMARQ — Edificio CYMA',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
@@ -41,8 +49,13 @@ export const metadata = {
     description: site.seo.description,
     images: ['/photos/edificio-cyma.webp'],
   },
-  robots: { index: true, follow: true },
-  icons: { icon: '/brand/logo.png' },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/brand/logo.png',
+  },
 };
 
 const jsonLd = {
@@ -62,10 +75,29 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans">
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-NTH4PC60N8"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-NTH4PC60N8');
+          `}
+        </Script>
+
+        {/* Datos estructurados SEO */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd),
+          }}
         />
+
         <Navbar />
         <main>{children}</main>
         <Footer />
