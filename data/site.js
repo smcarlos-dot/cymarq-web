@@ -1,7 +1,7 @@
 export const site = {
   name: 'CYMARQ',
   tagline: 'Arquitectura • Diseño • Construcción',
-  url: 'https://cymarq.pages.dev',
+  url: 'https://cymarq.com.co',
   email: 'cyma.obras@gmail.com',
   whatsapp: '+57 322 3656579',
   whatsappLink:
