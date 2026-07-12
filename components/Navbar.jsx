@@ -37,7 +37,7 @@ export default function Navbar() {
       <div className="container-x flex items-center justify-between">
         <Link href="/" aria-label="CYMARQ — Inicio" onClick={() => setOpen(false)}>
           <img
-            src="/brand/logo-blanco.png"
+            src="/brand/logo-negro.png"
             alt="CYMARQ"
             className="h-9 w-auto md:h-10"
           />

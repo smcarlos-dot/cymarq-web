@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-ink text-white">
       <div className="container-x flex flex-col items-center gap-8 py-16 text-center">
-        <img src="/brand/logo-blanco.png" alt="CYMARQ" className="h-14 w-auto" />
+        <img src="/brand/logo-negro.png" alt="CYMARQ" className="h-14 w-auto" />
         <p className="font-sans text-xs uppercase tracking-widest2 text-white/70">
           {site.tagline}
         </p>
