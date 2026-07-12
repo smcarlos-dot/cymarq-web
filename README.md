@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CYMARQ — Sitio web
 
 Sitio premium de arquitectura para **CYMARQ** (Arquitectura • Diseño • Construcción), construido con Next.js, React, TailwindCSS, Framer Motion y GSAP. Exportación 100% estática, lista para **Cloudflare Pages**.
@@ -55,3 +56,7 @@ public/                 # brand/ (logos) · projects/ (renders WebP) · photos/ 
 
 - **Framer Motion:** apariciones por fade/desplazamiento (`Reveal`), menú móvil, hero, botón WhatsApp.
 - **GSAP ScrollTrigger:** parallax del video del hero, parallax del hero de proyecto y galería horizontal fijada (pin) en escritorio con fallback swipe en móvil.
+=======
+# cymarq-web
+Sitio web oficial de CYMARQ
+>>>>>>> 53dcd62c3f5b5e220c911f657eb5250c29c27e72
