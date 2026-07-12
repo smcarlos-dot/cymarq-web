@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #111111;
+  --gold: #d6a300;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--gold);
+  color: #111;
+}
+
+/* Scrollbar minimalista */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f4;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9c9c9;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-6 md:px-10 lg:px-16;
+  }
+  .section-label {
+    @apply mb-4 block font-sans text-xs font-medium uppercase tracking-widest2 text-gold;
+  }
+  .h-display {
+    @apply font-display text-4xl leading-tight md:text-5xl lg:text-6xl;
+  }
+  .btn-line {
+    @apply relative inline-flex items-center gap-3 border border-current px-8 py-4 font-sans text-xs uppercase tracking-widest2 transition-all duration-500 ease-cinema hover:bg-gold hover:border-gold hover:text-ink;
+  }
+}
+
+/* Subrayado animado para enlaces */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-underline:hover::after,
+.link-underline.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* En pantalla completa, los videos se ven enteros (sin recorte ni zoom),
+   respetando su orientación original (vertical u horizontal) */
+video:fullscreen {
+  object-fit: contain !important;
+  background: #111111;
+}
+video:-webkit-full-screen {
+  object-fit: contain !important;
+  background: #111111;
+}
+
+/* Galería horizontal sin scrollbar visible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Zoom suave de imágenes en tarjetas */
+.img-zoom img {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.img-zoom:hover img {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
