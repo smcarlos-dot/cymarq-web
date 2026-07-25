@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Reveal from '@/components/Reveal';
+import AboutCarousel from '@/components/AboutCarousel';
 import { about } from '@/data/site';
 
 export default function About() {
@@ -40,14 +41,7 @@ export default function About() {
 
           {/* Imagen con parallax sutil */}
           <Reveal delay={0.2} className="relative">
-            <div className="img-zoom overflow-hidden">
-              <img
-                src="/photos/living.webp"
-                alt="Interior diseñado por CYMARQ"
-                className="aspect-[4/5] w-full object-cover"
-                loading="lazy"
-              />
-            </div>
+            <AboutCarousel />
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
