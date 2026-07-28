@@ -2,10 +2,38 @@ import Link from 'next/link';
 import PortfolioGrid from '@/components/PortfolioGrid';
 import Reveal from '@/components/Reveal';
 
+const title = 'Portafolio de proyectos';
+const description =
+  'Portafolio de CYMARQ: proyectos residenciales, comerciales, de espacio público e infraestructura diseñados y desarrollados en Colombia.';
+
 export const metadata = {
-  title: 'Portafolio de proyectos',
-  description:
-    'Portafolio de CYMARQ: proyectos residenciales, comerciales, de espacio público e infraestructura diseñados y desarrollados en Colombia.',
+  title,
+  description,
+  alternates: {
+    canonical: '/proyectos/',
+  },
+  openGraph: {
+    title: `${title} | CYMARQ`,
+    description,
+    url: '/proyectos/',
+    siteName: 'CYMARQ',
+    locale: 'es_CO',
+    type: 'website',
+    images: [
+      {
+        url: '/photos/edificio-cyma.webp',
+        width: 1200,
+        height: 630,
+        alt: 'CYMARQ — Edificio CYMA',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${title} | CYMARQ`,
+    description,
+    images: ['/photos/edificio-cyma.webp'],
+  },
 };
 
 export default function ProyectosPage() {

@@ -30,7 +30,7 @@ export const metadata = {
   openGraph: {
     title: site.seo.title,
     description: site.seo.description,
-    url: site.url,
+    url: '/',
     siteName: 'CYMARQ',
     locale: 'es_CO',
     type: 'website',
@@ -63,7 +63,7 @@ const jsonLd = {
   '@type': 'ProfessionalService',
   name: 'CYMARQ',
   description: site.seo.description,
-  url: site.url,
+  url: `${site.url}/`,
   email: site.email,
   telephone: site.whatsapp,
   areaServed: 'Colombia',

@@ -12,13 +12,27 @@ export function generateStaticParams() {
 export function generateMetadata({ params }) {
   const project = getProject(params.slug);
   if (!project) return {};
+  const path = `/proyectos/${project.slug}/`;
   return {
     title: project.name,
     description: project.short,
+    alternates: {
+      canonical: path,
+    },
     openGraph: {
       title: `${project.name} | CYMARQ`,
       description: project.short,
-      images: [{ url: project.cover }],
+      url: path,
+      siteName: 'CYMARQ',
+      locale: 'es_CO',
+      type: 'article',
+      images: [{ url: project.cover, alt: project.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${project.name} | CYMARQ`,
+      description: project.short,
+      images: [project.cover],
     },
   };
 }

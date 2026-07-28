@@ -6,6 +6,12 @@ import PortfolioGrid from '@/components/PortfolioGrid';
 import Renders from '@/components/Renders';
 import Contact from '@/components/Contact';
 
+export const metadata = {
+  alternates: {
+    canonical: '/',
+  },
+};
+
 export default function HomePage() {
   return (
     <>
