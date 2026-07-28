@@ -26,6 +26,13 @@ export const projects = [
       '/projects/casa-moderna-con-patio-cubierto/habitacion-2.webp',
     ],
     video: 'https://youtu.be/Wyi-HZCtkdg',
+    // Modelo 3D interactivo (opcional en cada proyecto).
+    // El GLB sólo se descarga cuando el visitante pulsa "Explorar modelo 3D".
+    model3d: {
+      src: '/models/casa-prueba.glb',
+      poster: '/projects/casa-moderna-con-patio-cubierto/fachada.webp',
+      fileLabel: 'GLB · 11,4 MB',
+    },
     featured: false,
   },
   {

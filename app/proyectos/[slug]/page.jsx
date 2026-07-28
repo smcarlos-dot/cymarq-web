@@ -3,6 +3,7 @@ import { projects, getProject, getAdjacentProjects } from '@/data/projects';
 import ProjectHero from '@/components/project/ProjectHero';
 import ProjectInfo from '@/components/project/ProjectInfo';
 import HorizontalGallery from '@/components/project/HorizontalGallery';
+import Project3DModel from '@/components/project/Project3DModel';
 import NextProject from '@/components/project/NextProject';
 
 export function generateStaticParams() {
@@ -48,6 +49,14 @@ export default function ProjectPage({ params }) {
       <ProjectHero project={project} />
       <ProjectInfo project={project} />
       <HorizontalGallery images={project.gallery} name={project.name} />
+      {project.model3d && (
+        <Project3DModel
+          model={project.model3d.src}
+          title={project.name}
+          poster={project.model3d.poster || project.cover}
+          fileLabel={project.model3d.fileLabel}
+        />
+      )}
       <NextProject prev={prev} next={next} />
     </>
   );
