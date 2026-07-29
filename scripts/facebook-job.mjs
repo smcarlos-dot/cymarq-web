@@ -1,60 +1,43 @@
 /**
- * Definición compartida de la publicación de Facebook y de sus credenciales.
+ * Datos comunes de los scripts de Facebook: Página, credenciales y diario.
  *
- * Lo usan `facebook-verify.mjs`, `facebook-dry-run.mjs` y
- * `facebook-publish.mjs` para no repetir tres veces los mismos datos.
+ * El trabajo concreto (propuesta, metadata e imagen) ya NO vive aquí: llega
+ * por línea de órdenes a través de `job-args.mjs`. Este módulo solo conserva
+ * lo que es fijo de la integración: la Página de destino y dónde se guarda el
+ * diario de publicaciones.
+ *
+ * `facebook-verify.mjs` lo importa sin pasar ningún argumento de trabajo, así
+ * que aquí no puede haber validación de argumentos en el nivel superior.
  */
 
-import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import { readSecret, requireSecret } from './instagram-env.mjs';
+import { leerTrabajo, cargarPropuesta as cargarPropuestaBase } from './job-args.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 /** Diario propio de Facebook. Separado del de Instagram a propósito. */
 export const DIARIO = join(REPO, '.facebook-publish-state.json');
 
-/** Clave del trabajo. Es la misma propuesta que ya se publicó en Instagram. */
-export const JOB_ID = 'CYM-2026-0001';
-
-export const METADATA = resolve(
-  REPO,
-  '../CYMARQ_SOCIAL/PENDIENTES/2026-07-30_CASA_MODERNA_CON_PATIO_CUBIERTO/metadata.json'
-);
-
-export const IMAGEN_URL = 'https://www.cymarq.com.co/social/casa-moderna-patio-interno.jpg';
-
-/** Página de destino, ya verificada manualmente. */
+/** Página de destino, verificada en su día contra la Graph API. */
 export const PAGE_ID_ESPERADO = '316223305905796';
 export const PAGINA_ESPERADA = 'Cymarq';
 
 /**
- * Qué texto de la propuesta se usa.
+ * Lee el trabajo de la línea de órdenes.
  *
- * La propuesta trae DOS versiones redactadas: `texto.instagram` (con 18
- * hashtags y llamada a la acción de IG) y `texto.facebook` (con el título
- * delante, el enlace al vídeo y 6 hashtags). Por defecto se usa la de
- * Facebook, que es la que el sistema redactó para esta plataforma.
- *
- * Se puede forzar la otra con `--caption=instagram`.
+ * La variante de texto por defecto es `facebook`, que es la que el generador
+ * redacta para esta plataforma (título delante, enlace al vídeo y menos
+ * hashtags). Se puede forzar la de Instagram con `--caption=instagram`.
  */
-export function elegirVariante() {
-  const arg = process.argv.find((a) => a.startsWith('--caption='));
-  const valor = arg ? arg.slice('--caption='.length) : 'facebook';
-  if (valor !== 'facebook' && valor !== 'instagram') {
-    throw new Error(`--caption debe ser "facebook" o "instagram", no "${valor}".`);
-  }
-  return valor;
+export function leerTrabajoFacebook(uso) {
+  return leerTrabajo({ varianteCaption: 'facebook', uso });
 }
 
 /** Carga la propuesta y devuelve el texto de la variante elegida. */
-export async function cargarPropuesta() {
-  const metadata = JSON.parse(await readFile(METADATA, 'utf8'));
-  const variante = elegirVariante();
-  return { metadata, variante, caption: metadata?.texto?.[variante] ?? '' };
-}
+export const cargarPropuesta = cargarPropuestaBase;
 
 /** Page Access Token. Aborta con instrucciones claras si falta. */
 export function requirePageToken() {

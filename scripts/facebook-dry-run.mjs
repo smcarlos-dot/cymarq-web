@@ -5,8 +5,8 @@
  * peticiones son GET: identidad del token, datos de la Página y descarga de la
  * imagen. En este archivo no hay ninguna llamada POST.
  *
- *   npm run facebook:dry-run
- *   npm run facebook:dry-run -- --caption=instagram
+ *   npm run facebook:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>
+ *   ... añadiendo --caption=instagram para usar el otro texto de la propuesta.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -24,14 +24,16 @@ import {
   IMAGE_RULES,
 } from '../lib/facebook/publish.mjs';
 import {
+  leerTrabajoFacebook,
   cargarPropuesta,
   requirePageToken,
   readPageId,
-  IMAGEN_URL,
-  JOB_ID,
   DIARIO,
   PAGINA_ESPERADA,
 } from './facebook-job.mjs';
+
+const USO =
+  'npm run facebook:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>';
 
 const bloque = (t) => {
   console.log(`\n${t}`);
@@ -40,9 +42,11 @@ const bloque = (t) => {
 const marca = (ok) => (ok ? 'OK   ' : 'FALLO');
 
 async function main() {
+  const trabajo = leerTrabajoFacebook(USO);
+  const { jobId: JOB_ID, imageUrl: IMAGEN_URL, variante } = trabajo;
   const token = await requirePageToken();
   const pageId = await readPageId();
-  const { metadata, variante, caption } = await cargarPropuesta();
+  const { metadata, caption } = await cargarPropuesta(trabajo);
   const fallos = [];
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');

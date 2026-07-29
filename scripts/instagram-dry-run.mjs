@@ -10,13 +10,8 @@
  *
  * En este archivo NO existe ninguna llamada POST. Ni /media ni /media_publish.
  *
- *   npm run instagram:dry-run
- *   npm run instagram:dry-run -- --metadata=<ruta a metadata.json>
+ *   npm run instagram:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>
  */
-
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
 
 import {
   getAccount,
@@ -31,25 +26,12 @@ import {
   IMAGE_RULES,
 } from '../lib/instagram/publish.mjs';
 import { requireSecret } from './instagram-env.mjs';
-
-const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-/** Propuesta candidata generada por el sistema local CYMARQ_SOCIAL. */
-const METADATA_POR_DEFECTO = resolve(
-  REPO,
-  '../CYMARQ_SOCIAL/PENDIENTES/2026-07-30_CASA_MODERNA_CON_PATIO_CUBIERTO/metadata.json'
-);
-
-/** Derivado JPEG desplegado como asset estático del sitio. */
-const IMAGEN_URL = 'https://www.cymarq.com.co/social/casa-moderna-patio-interno.jpg';
+import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
 
 const CUENTA_ESPERADA = 'cymarq_obras';
 
-function argumento(nombre) {
-  const prefijo = `--${nombre}=`;
-  const encontrado = process.argv.find((a) => a.startsWith(prefijo));
-  return encontrado ? encontrado.slice(prefijo.length) : undefined;
-}
+const USO =
+  'npm run instagram:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>';
 
 function bloque(texto) {
   console.log(`\n${texto}`);
@@ -61,7 +43,8 @@ function marca(ok) {
 }
 
 async function main() {
-  const rutaMetadata = argumento('metadata') ?? METADATA_POR_DEFECTO;
+  const trabajo = leerTrabajo({ varianteCaption: 'instagram', uso: USO });
+  const { metadata, caption } = await cargarPropuesta(trabajo);
   const token = await requireSecret('INSTAGRAM_PUBLISH_TOKEN');
   const fallos = [];
 
@@ -69,21 +52,6 @@ async function main() {
   console.log('║  PASO 3 — ENSAYO EN SECO                                     ║');
   console.log('║  Solo peticiones GET. NO se crea contenedor ni se publica.   ║');
   console.log('╚══════════════════════════════════════════════════════════════╝');
-
-  /* ---------------------------------------------------------------- */
-  /* Propuesta                                                         */
-  /* ---------------------------------------------------------------- */
-  let metadata;
-  try {
-    metadata = JSON.parse(await readFile(rutaMetadata, 'utf8'));
-  } catch (error) {
-    console.error(`\n  No se pudo leer la propuesta en:\n    ${rutaMetadata}`);
-    console.error(`  ${error?.message ?? ''}\n`);
-    process.exitCode = 1;
-    return;
-  }
-
-  const caption = metadata?.texto?.instagram ?? '';
 
   /* ---------------------------------------------------------------- */
   /* Cuenta destino                                                    */
@@ -121,13 +89,14 @@ async function main() {
 
   console.log(`  PROYECTO    : ${metadata.proyecto_nombre ?? '(sin nombre)'}`);
   console.log(`  TÍTULO      : ${metadata.titulo ?? '(sin título)'}`);
-  console.log(`  ID PROPUESTA: ${metadata.id ?? '(sin id)'}`);
+  console.log(`  ID PROPUESTA: ${trabajo.jobId}`);
+  console.log(`  VARIANTE    : ${trabajo.variante}`);
   console.log(`  IMAGEN      : ${metadata.archivo ?? '(sin archivo)'}`);
   console.log(`  ORIGINAL    : ${metadata.ruta_original ?? '(desconocido)'}`);
   console.log(`                (el original no se toca; se publica un derivado JPEG)`);
-  console.log(`\n  URL PÚBLICA : ${IMAGEN_URL}`);
+  console.log(`\n  URL PÚBLICA : ${trabajo.imageUrl}`);
 
-  const imagen = await checkPublicImage(IMAGEN_URL);
+  const imagen = await checkPublicImage(trabajo.imageUrl);
   console.log(`    HTTP status     : ${imagen.status ?? '(sin respuesta)'}`);
   console.log(`    Content-Type    : ${imagen.contentType ?? '(ninguno)'}`);
   console.log(`    Peso            : ${imagen.bytes ?? '?'} bytes` +
@@ -206,7 +175,7 @@ async function main() {
   bloque('LLAMADAS QUE SE HARÍAN AL PUBLICAR  (no se ejecutan ahora)');
 
   console.log(`  1)  POST ${GRAPH_HOST}/${API_VERSION}/${userId ?? '<IG_ID>'}/media`);
-  console.log(`        image_url = ${IMAGEN_URL}`);
+  console.log(`        image_url = ${trabajo.imageUrl}`);
   console.log(`        caption   = (${analisis.characters} caracteres, mostrado arriba)`);
   console.log(`      → devolvería {"id": "<CONTAINER_ID>"}`);
   console.log(`\n  2)  GET  ${GRAPH_HOST}/${API_VERSION}/<CONTAINER_ID>?fields=status_code`);

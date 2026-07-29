@@ -19,8 +19,8 @@
  *
  * Además exige `--confirm`. Sin él no ejecuta ninguna escritura.
  *
- *   npm run facebook:publish              → ensayo
- *   npm run facebook:publish -- --confirm → publica de verdad
+ *   npm run facebook:publish -- --job=<ID> --metadata=<ruta> --image-url=<url>
+ *   ... añadiendo --confirm para publicar de verdad.
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
@@ -37,14 +37,16 @@ import {
   API_VERSION,
 } from '../lib/facebook/publish.mjs';
 import {
+  leerTrabajoFacebook,
   cargarPropuesta,
   requirePageToken,
   readPageId,
-  IMAGEN_URL,
-  JOB_ID,
   DIARIO,
   PAGINA_ESPERADA,
 } from './facebook-job.mjs';
+
+const USO =
+  'npm run facebook:publish -- --job=<ID> --metadata=<ruta> --image-url=<url> [--confirm]';
 
 const bloque = (t) => {
   console.log(`\n${t}`);
@@ -59,11 +61,11 @@ async function leerDiario() {
   }
 }
 
-async function anotar(cambios) {
+async function anotar(jobId, cambios) {
   const diario = await leerDiario();
-  diario[JOB_ID] = { ...(diario[JOB_ID] ?? {}), ...cambios, actualizado: new Date().toISOString() };
+  diario[jobId] = { ...(diario[jobId] ?? {}), ...cambios, actualizado: new Date().toISOString() };
   await writeFile(DIARIO, `${JSON.stringify(diario, null, 2)}\n`, 'utf8');
-  return diario[JOB_ID];
+  return diario[jobId];
 }
 
 function mostrarError(error) {
@@ -78,6 +80,8 @@ function mostrarError(error) {
 
 async function main() {
   const confirmar = process.argv.includes('--confirm');
+  const trabajo = leerTrabajoFacebook(USO);
+  const { jobId: JOB_ID, imageUrl: IMAGEN_URL, variante } = trabajo;
   const token = await requirePageToken();
   const pageId = await readPageId();
 
@@ -111,7 +115,7 @@ async function main() {
   }
 
   /* --- Contenido --------------------------------------------------- */
-  const { metadata, variante, caption } = await cargarPropuesta();
+  const { metadata, caption } = await cargarPropuesta(trabajo);
   const analisis = analyzeMessage(caption);
 
   bloque('CONTENIDO A PUBLICAR');
@@ -168,7 +172,7 @@ async function main() {
   bloque(`1/2  PUBLICAR   POST ${GRAPH_HOST}/${API_VERSION}/${pageId}/photos`);
   console.log('  Esta llamada es IRREVERSIBLE.');
 
-  await anotar({
+  await anotar(JOB_ID, {
     job: JOB_ID,
     page_id: String(pageId),
     page_name: pagina.name,
@@ -186,7 +190,7 @@ async function main() {
     photoId = resultado?.id ? String(resultado.id) : null;
     postId = resultado?.post_id ? String(resultado.post_id) : null;
     if (!photoId && !postId) throw new GraphError('La respuesta no incluyó ni id ni post_id.');
-    await anotar({ photo_id: photoId, post_id: postId, publicado_en: new Date().toISOString() });
+    await anotar(JOB_ID, { photo_id: photoId, post_id: postId, publicado_en: new Date().toISOString() });
     console.log(`  PHOTO_ID : ${photoId ?? '(no devuelto)'}`);
     console.log(`  POST_ID  : ${postId ?? '(no devuelto)'}`);
   } catch (error) {
@@ -206,7 +210,7 @@ async function main() {
   let post = null;
   try {
     post = await getPost(idParaEnlace, token);
-    await anotar({ permalink: post?.permalink_url ?? null, created_time: post?.created_time ?? null });
+    await anotar(JOB_ID, { permalink: post?.permalink_url ?? null, created_time: post?.created_time ?? null });
     console.log(`  permalink : ${post?.permalink_url ?? '(no devuelto)'}`);
     console.log(`  creado    : ${post?.created_time ?? '(no devuelto)'}`);
   } catch (error) {

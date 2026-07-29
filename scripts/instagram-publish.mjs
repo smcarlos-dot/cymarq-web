@@ -25,13 +25,13 @@
  *
  * El token se lee de `.env.local` y no se imprime nunca, en ningún camino.
  *
- *   npm run instagram:publish              → ensayo, explica qué haría
- *   npm run instagram:publish -- --confirm → publica de verdad
+ *   npm run instagram:publish -- --job=<ID> --metadata=<ruta> --image-url=<url>
+ *   ... añadiendo --confirm para publicar de verdad.
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import {
   getAccount,
@@ -47,24 +47,15 @@ import {
   GRAPH_HOST,
 } from '../lib/instagram/publish.mjs';
 import { requireSecret } from './instagram-env.mjs';
+import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIARIO = join(REPO, '.instagram-publish-state.json');
 
-/* ------------------------------------------------------------------ */
-/* La publicación concreta autorizada                                  */
-/* ------------------------------------------------------------------ */
-
-/** Identificador de la propuesta; es la clave del diario. */
-const JOB_ID = 'CYM-2026-0001';
-
-const METADATA = resolve(
-  REPO,
-  '../CYMARQ_SOCIAL/PENDIENTES/2026-07-30_CASA_MODERNA_CON_PATIO_CUBIERTO/metadata.json'
-);
-
-const IMAGEN_URL = 'https://www.cymarq.com.co/social/casa-moderna-patio-interno.jpg';
 const CUENTA_ESPERADA = 'cymarq_obras';
+
+const USO =
+  'npm run instagram:publish -- --job=<ID> --metadata=<ruta> --image-url=<url> [--confirm]';
 
 /** Sondeo del estado del contenedor. Una imagen suele estar lista al instante. */
 const SONDEO_MAX_INTENTOS = 20;
@@ -86,12 +77,12 @@ async function guardarDiario(diario) {
   await writeFile(DIARIO, `${JSON.stringify(diario, null, 2)}\n`, 'utf8');
 }
 
-/** Actualiza la entrada del trabajo actual y la persiste inmediatamente. */
-async function anotar(cambios) {
+/** Actualiza la entrada del trabajo indicado y la persiste inmediatamente. */
+async function anotar(jobId, cambios) {
   const diario = await leerDiario();
-  diario[JOB_ID] = { ...(diario[JOB_ID] ?? {}), ...cambios, actualizado: new Date().toISOString() };
+  diario[jobId] = { ...(diario[jobId] ?? {}), ...cambios, actualizado: new Date().toISOString() };
   await guardarDiario(diario);
-  return diario[JOB_ID];
+  return diario[jobId];
 }
 
 /* ------------------------------------------------------------------ */
@@ -115,6 +106,9 @@ function mostrarError(error) {
 
 async function main() {
   const confirmar = process.argv.includes('--confirm');
+  const trabajo = leerTrabajo({ varianteCaption: 'instagram', uso: USO });
+  const JOB_ID = trabajo.jobId;
+  const IMAGEN_URL = trabajo.imageUrl;
   const token = await requireSecret('INSTAGRAM_PUBLISH_TOKEN');
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
@@ -147,8 +141,7 @@ async function main() {
   }
 
   /* --- Contenido -------------------------------------------------- */
-  const metadata = JSON.parse(await readFile(METADATA, 'utf8'));
-  const caption = metadata?.texto?.instagram ?? '';
+  const { metadata, caption } = await cargarPropuesta(trabajo);
   const analisis = analyzeCaption(caption);
 
   bloque('CONTENIDO A PUBLICAR');
@@ -221,7 +214,7 @@ async function main() {
       if (!containerId) throw new GraphError('La respuesta no incluyó el id del contenedor.');
       // Se anota ANTES de cualquier otra cosa: si el proceso muere ahora, la
       // próxima ejecución reutilizará este contenedor en vez de crear otro.
-      await anotar({
+      await anotar(JOB_ID, {
         job: JOB_ID,
         container_id: containerId,
         creado_en: new Date().toISOString(),
@@ -264,7 +257,7 @@ async function main() {
       console.error(`\n  ABORTADO: el contenedor está en ${estado}. NO se publica.`);
       const detalle = await getContainerErrorDetail(containerId, token);
       if (detalle) console.error(`  Detalle de Meta: ${detalle}`);
-      await anotar({ estado_final_contenedor: estado });
+      await anotar(JOB_ID, { estado_final_contenedor: estado });
       process.exitCode = 1;
       return;
     }
@@ -275,7 +268,7 @@ async function main() {
   if (estado !== 'FINISHED') {
     console.error(`\n  ABORTADO: el contenedor no llegó a FINISHED (último: ${estado}).`);
     console.error('  NO se publica. El contenedor caducará solo en 24 h.');
-    await anotar({ estado_final_contenedor: estado });
+    await anotar(JOB_ID, { estado_final_contenedor: estado });
     process.exitCode = 1;
     return;
   }
@@ -287,14 +280,14 @@ async function main() {
   console.log('  Esta llamada es IRREVERSIBLE.');
 
   // Marca previa: si la respuesta se pierde, el script se negará a reintentar.
-  await anotar({ publish_attempted: true, publish_intentado_en: new Date().toISOString() });
+  await anotar(JOB_ID, { publish_attempted: true, publish_intentado_en: new Date().toISOString() });
 
   let mediaId = null;
   try {
     const publicado = await publishContainer({ igId, token, creationId: containerId });
     mediaId = publicado?.id ? String(publicado.id) : null;
     if (!mediaId) throw new GraphError('La respuesta no incluyó el media_id.');
-    await anotar({ media_id: mediaId, publicado_en: new Date().toISOString() });
+    await anotar(JOB_ID, { media_id: mediaId, publicado_en: new Date().toISOString() });
     console.log(`  MEDIA_ID: ${mediaId}`);
   } catch (error) {
     console.error('\n  FALLO en media_publish.');
@@ -312,7 +305,7 @@ async function main() {
   let media = null;
   try {
     media = await getMedia(mediaId, token);
-    await anotar({ permalink: media?.permalink ?? null, timestamp_meta: media?.timestamp ?? null });
+    await anotar(JOB_ID, { permalink: media?.permalink ?? null, timestamp_meta: media?.timestamp ?? null });
     console.log(`  permalink : ${media?.permalink ?? '(no devuelto)'}`);
     console.log(`  tipo      : ${media?.media_type ?? '(no devuelto)'}`);
     console.log(`  timestamp : ${media?.timestamp ?? '(no devuelto)'}`);
