@@ -346,19 +346,32 @@ def regenerar_texto(id_publicacion: str) -> dict[str, Any] | None:
 
 
 def generar_otra(id_publicacion: str) -> dict[str, Any]:
-    """Descarta la propuesta actual y genera una realmente distinta.
+    """Genera una propuesta distinta y solo entonces descarta la anterior.
 
-    Al cancelar, la imagen vuelve al pool y el proyecto deja de contar como
-    publicado; sin excluirlos explicitamente la rotacion propondria otra vez
-    exactamente lo mismo.
+    El orden importa y antes estaba al reves. Cancelar primero y generar
+    despues deja el sistema sin propuesta si la generacion falla: la anterior
+    ya esta cancelada y no hay reemplazo, asi que el panel se queda sin
+    `propuesta_actual` y el boton deja de responder. Generando primero, un
+    fallo no destruye nada: la propuesta actual sigue en pie.
+
+    La anterior se excluye por id de imagen y por proyecto para que la
+    rotacion no devuelva exactamente lo mismo.
     """
     anterior = historial.buscar(id_publicacion)
-    cancelar(id_publicacion, "reemplazada por 'generar otra'")
-
     if not anterior:
         return generar_propuesta()
 
-    return generar_propuesta(
+    # Solo se descarta lo que ocupa sitio. Una propuesta ya publicada no se
+    # toca: cancelarla liberaria su imagen y la rotacion podria volver a
+    # proponer algo que ya esta en Instagram o Facebook.
+    reemplazable = anterior.get("estado") in ("propuesta", "aprobada")
+
+    nueva = generar_propuesta(
         excluir_ids={anterior.get("id_archivo", "")} - {""},
         excluir_proyectos={anterior.get("proyecto", "")} - {""},
     )
+
+    if reemplazable:
+        cancelar(id_publicacion, "reemplazada por 'generar otra'")
+
+    return nueva

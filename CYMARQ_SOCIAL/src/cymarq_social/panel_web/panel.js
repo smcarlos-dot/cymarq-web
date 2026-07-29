@@ -298,7 +298,13 @@ $('btn-rechazar').onclick = () => {
 
 $('btn-otra').onclick = () => {
   const id = idActual();
-  if (!id) return;
+  // Sin propuesta actual no hay nada que reemplazar, pero se genera una nueva
+  // en vez de no hacer nada: un botón que no responde ni avisa es un fallo
+  // invisible, y así fue como este mismo caso pasó desapercibido.
+  if (!id) {
+    generar(null);
+    return;
+  }
   accion('/api/otra', { id }, 'Se generó una propuesta distinta.');
 };
 

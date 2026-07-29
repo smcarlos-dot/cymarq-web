@@ -197,7 +197,24 @@ def cargar() -> dict[str, Any]:
     inv = seguridad.leer_json(rutas.ARCHIVO_INVENTARIO, por_defecto=None)
     if not inv:
         inv = escanear()
+    _rehacer_rutas_absolutas(inv)
     return inv
+
+
+def _rehacer_rutas_absolutas(inv: dict[str, Any]) -> None:
+    """Recalcula `ruta_absoluta` a partir de la ruta relativa, al cargar.
+
+    El inventario guarda la ruta absoluta de cuando se escaneo. Si la carpeta
+    del sistema cambia de sitio, esa ruta apunta a un archivo que ya no existe
+    y la generacion de propuestas falla con "El archivo de origen no existe",
+    aunque el material siga intacto. La ruta relativa, en cambio, no envejece:
+    se recalcula desde ella y el inventario deja de depender de donde estuviera
+    instalado el sistema el dia del escaneo.
+    """
+    for item in inv.get("items", []):
+        relativa = item.get("ruta") or ""
+        if relativa.startswith("PROYECTOS/"):
+            item["ruta_absoluta"] = str(rutas.RAIZ / relativa)
 
 
 def guardar(inventario: dict[str, Any]) -> None:
