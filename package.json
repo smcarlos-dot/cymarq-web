@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node --test \"tests/**/*.test.mjs\"",
-    "webhook:dev": "node scripts/instagram-webhook-dev.mjs"
+    "webhook:dev": "node scripts/instagram-webhook-dev.mjs",
+    "instagram:verify": "node scripts/instagram-verify.mjs",
+    "instagram:dry-run": "node scripts/instagram-dry-run.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",
