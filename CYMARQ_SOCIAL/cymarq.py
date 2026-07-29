@@ -13,6 +13,7 @@ Este programa NO publica en Instagram ni en Facebook.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -36,6 +37,7 @@ from cymarq_social import (  # noqa: E402
     programacion,
     puente_node,
     rotacion,
+    salud as salud_mod,
     rutas,
 )
 
@@ -224,6 +226,85 @@ def cmd_programar(args: argparse.Namespace) -> int:
     print("  No se ha publicado nada. Llegada la hora, el scheduler solo la")
     print("  marcara como lista_para_publicar.")
     return 0
+
+
+def _pinta_chequeo(c, sangria="    "):
+    marca = {"OK": "OK   ", "ADVERTENCIA": "AVISO", "ERROR": "ERROR"}.get(c["estado"], "?")
+    print(f"{sangria}[{marca}] {c['nombre']:<24} {c['mensaje']}")
+
+
+def cmd_salud(args: argparse.Namespace) -> int:
+    """Comprueba credenciales y sistema. No publica ni escribe nada."""
+    inf = salud_mod.salud(con_meta=not args.sin_meta)
+
+    if args.json:
+        print(json.dumps(inf, ensure_ascii=False, indent=2))
+        return 0 if inf["general"] != salud_mod.ERROR else 1
+
+    print(LINEA)
+    print("  CYMARQ SOCIAL — salud del sistema")
+    print(LINEA)
+    print(f"  Comprobado : {programacion.formato_humano(inf['comprobado_en'])}")
+    print()
+    print("  SISTEMA")
+    for c in inf["sistema"]:
+        _pinta_chequeo(c)
+    print()
+    meta = inf["meta"]
+    for nombre, d in (meta.get("plataformas") or {}).items():
+        print(f"  {nombre.upper()}  ->  {d.get('estado')}")
+        for clave in ("credencial", "token", "cuenta", "identidad", "pagina",
+                      "publicada", "permisos", "cuota"):
+            c = d.get(clave)
+            if not c:
+                continue
+            _pinta_chequeo({"nombre": clave, "estado": c["estado"], "mensaje": c["mensaje"]})
+            if clave == "token":
+                if c.get("expiracion_determinable"):
+                    print(f"           caduca el {c.get('expira_en')}"
+                          f"  ({c.get('dias_restantes')} dias)")
+                else:
+                    print("           fecha de expiracion: no determinable de forma fiable")
+        if d.get("error"):
+            print(f"    [ERROR] {d['error']}")
+        print()
+    if meta.get("error"):
+        print(f"  [ERROR] {meta['error']}")
+        print()
+    print("  GATE")
+    _pinta_chequeo(inf["gate"])
+    print()
+    print(LINEA)
+    print(f"  SALUD GENERAL: {inf['general']}")
+    if not inf["publicacion_segura"]:
+        print("  PUBLICACION AUTOMATICA NO SEGURA")
+    print(LINEA)
+    return 0 if inf["general"] != salud_mod.ERROR else 1
+
+
+def cmd_preflight(args: argparse.Namespace) -> int:
+    """Comprueba si un job concreto podria publicarse. No publica."""
+    inf = salud_mod.preflight(args.id, con_meta=not args.sin_meta,
+                              con_red=not args.sin_red)
+    if args.json:
+        print(json.dumps(inf, ensure_ascii=False, indent=2))
+        return 0 if inf.get("general") == salud_mod.OK else 1
+
+    print(LINEA)
+    print(f"  PREFLIGHT {inf['job']}  {inf.get('proyecto','')}")
+    print(LINEA)
+    for c in inf["chequeos"]:
+        _pinta_chequeo(c, "  ")
+    print()
+    print(LINEA)
+    print(f"  RESULTADO: {inf['resultado']}")
+    if inf["razones"]:
+        print("  Motivos:")
+        for r in inf["razones"]:
+            print(f"    · {r}")
+    print("  No se ha publicado nada ni se ha cambiado ningun estado.")
+    print(LINEA)
+    return 0 if inf.get("general") == salud_mod.OK else 1
 
 
 def cmd_autorizar(args: argparse.Namespace) -> int:
@@ -631,6 +712,18 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--cancelar", action="store_true",
                    help="Quita la programacion y vuelve a 'aprobada'")
     s.set_defaults(func=cmd_programar)
+
+    s = sub.add_parser("salud", help="Comprueba credenciales y sistema. No publica.")
+    s.add_argument("--json", action="store_true", help="Salida estructurada")
+    s.add_argument("--sin-meta", action="store_true", help="Solo comprobaciones locales")
+    s.set_defaults(func=cmd_salud)
+
+    s = sub.add_parser("preflight", help="Comprueba si un job podria publicarse. No publica.")
+    s.add_argument("id")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--sin-meta", action="store_true", help="No consulta credenciales")
+    s.add_argument("--sin-red", action="store_true", help="No comprueba la URL de la imagen")
+    s.set_defaults(func=cmd_preflight)
 
     s = sub.add_parser("autorizar",
                        help="Autoriza la publicacion real de UNA propuesta concreta")

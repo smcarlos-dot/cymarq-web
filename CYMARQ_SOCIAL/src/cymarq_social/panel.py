@@ -28,6 +28,7 @@ from . import (
     perfiles as perfiles_mod,
     programacion,
     rotacion,
+    salud as salud_mod,
     rutas,
 )
 
@@ -254,6 +255,15 @@ class Manejador(BaseHTTPRequestHandler):
                 self._json(_estado_completo())
             except Exception as exc:  # pragma: no cover
                 self._json({"error": str(exc)}, 500)
+            return
+
+        if camino == "/api/salud":
+            # Aparte de /api/estado a proposito: consulta a Meta y tarda, y el
+            # panel se refresca a menudo. La CLI sigue siendo la via operativa.
+            try:
+                self._json(salud_mod.salud())
+            except Exception as exc:  # pragma: no cover
+                self._json({"general": "ERROR", "error": str(exc)}, 500)
             return
 
         if camino.startswith("/imagen/"):

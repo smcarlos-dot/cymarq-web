@@ -450,4 +450,28 @@ $('btn-texto').onclick = () => {
   accion('/api/texto', { id }, 'Textos reescritos con otra variante.');
 };
 
+/* Salud del sistema. Se pide en una llamada aparte porque consulta a Meta y
+   tarda unos segundos; el panel se refresca a menudo y no debe quedarse
+   esperando. La CLI (`python cymarq.py salud`) sigue siendo la vía operativa. */
+async function cargarSalud() {
+  const el = $('txt-salud');
+  if (!el) return;
+  el.textContent = 'salud: comprobando…';
+  try {
+    const s = await api('/api/salud');
+    const plat = (s.meta && s.meta.plataformas) || {};
+    const ig = (plat.instagram || {}).estado || '—';
+    const fb = (plat.facebook || {}).estado || '—';
+    const auto = ((s.gate || {}).detalle || {}).publicacion_automatica || '—';
+    el.textContent = `salud ${s.general} · IG ${ig} · FB ${fb} · auto ${auto}`;
+    el.title = 'Última comprobación: ' + (s.comprobado_en || '')
+      + ' · publicación automática: ' + auto;
+    el.className = 'salud ' + (s.general === 'OK' ? 'verde' : 'roja');
+  } catch (e) {
+    el.textContent = 'salud: no disponible';
+    el.className = 'salud roja';
+  }
+}
+
 cargar();
+cargarSalud();

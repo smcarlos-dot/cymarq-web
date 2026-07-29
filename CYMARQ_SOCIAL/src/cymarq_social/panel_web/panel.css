@@ -264,3 +264,15 @@ footer{
   color: #ff9b9b;
   border-color: rgba(220, 70, 70, .35);
 }
+
+/* --- Salud del sistema en la cabecera (fase 6) --- */
+.estado-seguridad .salud {
+  margin-left: .6rem;
+  font-size: .76rem;
+  padding: .1rem .45rem;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  opacity: .85;
+}
+.estado-seguridad .salud.verde { color: #9be7a1; border-color: rgba(120, 220, 130, .35); }
+.estado-seguridad .salud.roja  { color: #ff9b9b; border-color: rgba(220, 70, 70, .35); }
