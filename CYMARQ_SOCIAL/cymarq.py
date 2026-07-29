@@ -27,6 +27,7 @@ except Exception:  # pragma: no cover
 from cymarq_social import (  # noqa: E402
     catalogo_social,
     config as cfg_mod,
+    ejecutor,
     generador,
     historial,
     inventario,
@@ -222,6 +223,70 @@ def cmd_programar(args: argparse.Namespace) -> int:
     print()
     print("  No se ha publicado nada. Llegada la hora, el scheduler solo la")
     print("  marcara como lista_para_publicar.")
+    return 0
+
+
+def cmd_ejecutar_programadas(args: argparse.Namespace) -> int:
+    """Motor de ejecucion. En esta fase NO publica: el gate esta cerrado."""
+    try:
+        momento = programacion.parsear(args.ahora) if args.ahora else None
+        simular = ejecutor.parsear_escenarios(args.simular) if args.simular else None
+    except ValueError as exc:
+        print(f"  [!] {exc}")
+        return 1
+
+    motor = ejecutor.estado_motor()
+
+    print(LINEA)
+    print("  CYMARQ SOCIAL — motor de ejecucion")
+    print(LINEA)
+    print(f"  PUBLICACION AUTOMATICA : {motor['publicacion_automatica']}")
+    print(f"  MOTOR                  : {motor['motor']}")
+    print(f"  MODO                   : {motor['modo']}")
+    if simular is not None:
+        print(f"  Escenarios simulados   : "
+              + ', '.join(f'{k}={v}' for k, v in sorted(simular.items())))
+        print("                           (no se invoca a Node ni a Meta)")
+    print()
+
+    r = ejecutor.ejecutar_programadas(momento=momento, simular=simular, solo=args.solo)
+
+    print(f"  Hora de referencia : {programacion.formato_humano(r['momento'])}"
+          + ("   [SIMULADA]" if r["simulado_reloj"] else ""))
+    print(f"  Listas para publicar: {len(r['listas'])}   |   Futuras: {r['futuras']}")
+    print()
+
+    if not r["ejecuciones"]:
+        print("  Nada que ejecutar en este momento.")
+    for e in r["ejecuciones"]:
+        print(LINEA)
+        print(f"  {e.job_id}  {e.proyecto}")
+        if e.omitida:
+            print(f"    OMITIDA: {e.omitida}")
+            continue
+        for p, d in sorted(e.plataformas.items()):
+            linea = f"    {p:<10} {d.get('estado','?'):<22}"
+            if d.get("id"):
+                linea += f" id={d['id']}"
+            if d.get("permalink"):
+                linea += f" {d['permalink']}"
+            print(linea)
+            if d.get("error"):
+                print(f"               error: {str(d['error'])[:100]}")
+        print(f"    global     {e.global_antes} -> {e.global_despues}")
+        for a in e.acciones:
+            print(f"    · {a}")
+        for p in e.problemas:
+            print(f"    [!] validacion: {p}")
+        if e.bloqueada_por_gate:
+            print("    PUBLICACION REAL: BLOQUEADA POR CONFIGURACION")
+
+    print(LINEA)
+    if simular is None and motor["publicacion_automatica"] == "DESACTIVADA":
+        print("  No se ha invocado a ningun publicador. 0 POST a Meta.")
+    elif simular is not None:
+        print("  Resultados SIMULADOS. 0 POST a Meta.")
+    print(LINEA)
     return 0
 
 
@@ -531,6 +596,15 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--cancelar", action="store_true",
                    help="Quita la programacion y vuelve a 'aprobada'")
     s.set_defaults(func=cmd_programar)
+
+    s = sub.add_parser("ejecutar-programadas",
+                       help="Motor de ejecucion. No publica: el gate esta cerrado.")
+    s.add_argument("--ahora", default="", help="Hora simulada, solo para pruebas")
+    s.add_argument("--simular", default="",
+                   help="Escenarios por plataforma, p. ej. 'instagram=ok,facebook=fallo'. "
+                        f"Resultados: {', '.join(ejecutor.ESCENARIOS)}")
+    s.add_argument("--solo", default=None, help="Procesar solo este ID")
+    s.set_defaults(func=cmd_ejecutar_programadas)
 
     s = sub.add_parser("calendarizar-banco",
                        help="Asigna martes y viernes 18:30 a todo el banco apto")

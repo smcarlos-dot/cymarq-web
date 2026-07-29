@@ -23,6 +23,7 @@ from . import (
     historial,
     inventario,
     catalogo_social,
+    ejecutor,
     limites_redes,
     perfiles as perfiles_mod,
     programacion,
@@ -82,9 +83,15 @@ def _estado_completo() -> dict[str, Any]:
     # vez: con el banco completo son decenas de publicaciones y no tiene
     # sentido releer el archivo por cada una.
     catalogo = catalogo_social.cargar_manifiesto().get("imagenes", {})
-    for p in pendientes:
+    for p in pendientes + publicadas:
         entrada = catalogo.get(p.get("id_archivo", ""))
         p["imagen_publica"] = (entrada or {}).get("url")
+        # Estado por plataforma: se deduce si el registro es anterior a la
+        # fase 5, para que la vista funcione con todo el historial.
+        p["plataformas"] = ejecutor.estado_plataformas(p)
+        p["resultado_global"] = p.get("resultado_global") or ejecutor.resultado_global(
+            p["plataformas"]
+        )
 
     # Orden cronologico: primero lo que ya tiene fecha, en el orden en que va a
     # salir; despues lo que aun no la tiene, por ID. Asi la lista ES el
@@ -127,6 +134,7 @@ def _estado_completo() -> dict[str, Any]:
             # a traves del puente hacia los publicadores Node.
             "publicacion_desde_el_panel": False,
             "scheduler": "OPERATIVO — MODO SIMULACIÓN",
+            **{f"motor_{k}": v for k, v in ejecutor.estado_motor().items()},
         },
         "programacion": {
             "zona": programacion.NOMBRE_ZONA,

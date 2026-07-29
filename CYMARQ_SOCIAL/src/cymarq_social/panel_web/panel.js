@@ -237,6 +237,8 @@ function filasBanco(lista, vacio) {
           ${prog}
         </div>
         <div class="detalle oculto">
+          <h4>Resultado por plataforma</h4>
+          ${porPlataforma(p)}
           <h4>Instagram</h4>
           <pre>${esc((p.texto || {}).instagram || '')}</pre>
           <h4>Facebook</h4>
@@ -247,6 +249,33 @@ function filasBanco(lista, vacio) {
         </div>
       </div>`;
   }).join('');
+}
+
+/* Resultado independiente de cada plataforma, con su enlace si existe. */
+function porPlataforma(p) {
+  const plat = p.plataformas || {};
+  const clase = {
+    publicada: 'verde',
+    fallida: 'roja',
+    verificacion_requerida: 'roja',
+    publicando: 'gris',
+    pendiente: 'gris',
+  };
+  const filas = Object.keys(plat).sort().map((nombre) => {
+    const d = plat[nombre] || {};
+    const e = d.estado || 'pendiente';
+    const enlace = d.permalink
+      ? ` <a href="${esc(d.permalink)}" target="_blank" rel="noopener">${esc(d.permalink)}</a>`
+      : '';
+    const err = d.error ? `<div class="tenue mini">${esc(String(d.error).slice(0, 160))}</div>` : '';
+    return `<div class="mini">
+        <strong>${esc(nombre)}</strong>
+        <span class="etiqueta ${clase[e] || 'gris'}">${esc(e)}</span>
+        ${d.id ? `<span class="tenue">id ${esc(d.id)}</span>` : ''}${enlace}
+        ${err}
+      </div>`;
+  }).join('');
+  return filas + `<div class="mini tenue">global: ${esc(p.resultado_global || 'pendiente')}</div>`;
 }
 
 function fechaCorta(iso) {

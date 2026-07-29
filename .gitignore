@@ -80,3 +80,6 @@ desktop.ini
 # ---------- Temporales ----------
 *.tmp
 .tmp_*
+
+# Locks de ejecucion del motor. Estado de runtime de esta maquina.
+**/CONFIG/locks/
