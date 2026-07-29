@@ -9,3 +9,4 @@ out
 # Diario local de publicaciones de Instagram (ids de contenedor y de media).
 # No contiene credenciales, pero es estado de ejecución de esta máquina.
 .instagram-publish-state.json
+.facebook-publish-state.json

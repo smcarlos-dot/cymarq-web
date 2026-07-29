@@ -11,7 +11,10 @@
     "webhook:dev": "node scripts/instagram-webhook-dev.mjs",
     "instagram:verify": "node scripts/instagram-verify.mjs",
     "instagram:dry-run": "node scripts/instagram-dry-run.mjs",
-    "instagram:publish": "node scripts/instagram-publish.mjs"
+    "instagram:publish": "node scripts/instagram-publish.mjs",
+    "facebook:verify": "node scripts/facebook-verify.mjs",
+    "facebook:dry-run": "node scripts/facebook-dry-run.mjs",
+    "facebook:publish": "node scripts/facebook-publish.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",
