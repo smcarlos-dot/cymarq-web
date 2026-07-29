@@ -375,3 +375,58 @@ def generar_otra(id_publicacion: str) -> dict[str, Any]:
         cancelar(id_publicacion, "reemplazada por 'generar otra'")
 
     return nueva
+
+
+def generar_banco(maximo: int | None = None,
+                  avance=None) -> dict[str, Any]:
+    """Genera propuestas hasta agotar el inventario publicable.
+
+    NO es una segunda logica de generacion: llama en bucle a
+    `generar_propuesta()`, exactamente la misma que usa el panel. Cada pasada
+    reserva su imagen en el historial, asi que la siguiente ya no la ve y la
+    rotacion va avanzando sola hasta que no queda material.
+
+    Es IDEMPOTENTE por construccion. Al terminar no queda ninguna imagen libre,
+    de modo que una segunda ejecucion crea cero propuestas. No reutiliza una
+    imagen en dos propuestas porque el filtro de ocupadas es el mismo que
+    protege a las ya publicadas.
+
+    No publica nada ni prepara imagenes publicas: eso es `catalogo_social`.
+    """
+    cfg = cfg_mod.cargar()
+    libres_al_empezar = len([
+        it for it in inventario.candidatos(inventario.cargar(), cfg)
+        if it["id"] not in historial.ids_archivo_ocupados()
+    ])
+
+    # Tope de seguridad: aunque el bucle termina solo cuando se agota el
+    # material, un fallo que dejara de reservar imagenes lo convertiria en
+    # infinito. El limite lo impide sin afectar al funcionamiento normal.
+    tope = maximo if maximo is not None else libres_al_empezar + 5
+
+    creadas: list[dict[str, Any]] = []
+    motivo_fin = ""
+
+    while len(creadas) < tope:
+        try:
+            reg = generar_propuesta()
+        except SinContenido as exc:
+            motivo_fin = str(exc)
+            break
+        creadas.append(reg)
+        if avance:
+            avance(reg)
+    else:
+        motivo_fin = f"Alcanzado el limite de {tope} propuestas."
+
+    restantes = len([
+        it for it in inventario.candidatos(inventario.cargar(), cfg)
+        if it["id"] not in historial.ids_archivo_ocupados()
+    ])
+
+    return {
+        "libres_al_empezar": libres_al_empezar,
+        "creadas": creadas,
+        "restantes": restantes,
+        "motivo_fin": motivo_fin,
+    }

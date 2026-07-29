@@ -197,10 +197,64 @@ function barras(obj) {
 }
 
 function pintarListas() {
-  $('lista-pendientes').innerHTML =
-    filas(ESTADO.pendientes, 'No hay publicaciones pendientes.');
+  $('lista-pendientes').innerHTML = filasBanco(
+    ESTADO.pendientes, 'No hay publicaciones pendientes.');
   $('lista-publicadas').innerHTML =
-    filas(ESTADO.publicadas, 'Todavía no se ha publicado nada. Fase 1.');
+    filas(ESTADO.publicadas, 'Todavía no se ha publicado nada.');
+  engancharDetalle();
+}
+
+/* Banco de publicaciones: una fila por propuesta almacenada.
+   Los textos NO se regeneran: se muestran los que ya están guardados. */
+function filasBanco(lista, vacio) {
+  if (!lista || !lista.length) return `<p class="tenue">${vacio}</p>`;
+
+  const cab = `<p class="tenue mini">${lista.length} publicaciones almacenadas.
+    Los textos ya están guardados; abrir una no vuelve a generarlos.</p>`;
+
+  return cab + lista.map((p) => {
+    const prog = p.programado_para
+      ? `<span class="etiqueta verde">${esc(fechaCorta(p.programado_para))}</span>`
+      : '<span class="tenue mini">sin fecha</span>';
+    const pub = p.imagen_publica
+      ? '<span class="etiqueta verde" title="Derivado JPEG publicado">imagen lista</span>'
+      : '<span class="etiqueta gris" title="Sin derivado público">sin imagen pública</span>';
+    return `
+      <div class="fila banco" data-id="${esc(p.id)}">
+        <img class="miniatura" src="/imagen/${encodeURIComponent(p.id)}" alt="" loading="lazy">
+        <div class="izq">
+          <div class="titulo">${esc(p.titulo || p.proyecto_nombre)}</div>
+          <div class="tenue mini">${esc(p.id)} · ${esc(p.proyecto_nombre || '')}</div>
+          <div class="tenue mini">${esc(p.archivo)} · ${esc(p.ambiente || 'sin clasificar')}</div>
+          <div class="tenue mini">${(p.plataforma || []).map(esc).join(' · ')}</div>
+        </div>
+        <div class="der">
+          <span class="etiqueta ${p.estado === 'aprobada' ? 'verde' : 'gris'}">${esc(p.estado)}</span>
+          ${pub}
+          ${prog}
+        </div>
+        <div class="detalle oculto">
+          <h4>Instagram</h4>
+          <pre>${esc((p.texto || {}).instagram || '')}</pre>
+          <h4>Facebook</h4>
+          <pre>${esc((p.texto || {}).facebook || '')}</pre>
+          <p class="tenue mini">id_archivo: ${esc(p.id_archivo || '')}</p>
+          ${p.imagen_publica
+            ? `<p class="tenue mini">URL pública: ${esc(p.imagen_publica)}</p>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function fechaCorta(iso) {
+  const m = String(iso).slice(0, 16);
+  return m.slice(8, 10) + '/' + m.slice(5, 7) + '/' + m.slice(0, 4) + ' ' + m.slice(11, 16);
+}
+
+function engancharDetalle() {
+  document.querySelectorAll('.fila.banco').forEach((f) => {
+    f.onclick = () => f.querySelector('.detalle').classList.toggle('oculto');
+  });
 }
 
 function filas(lista, vacio) {

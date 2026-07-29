@@ -155,6 +155,49 @@ def cmd_panel(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_generar_banco(args: argparse.Namespace) -> int:
+    """Genera propuestas hasta agotar el inventario publicable. No publica."""
+    print(LINEA)
+    print("  CYMARQ SOCIAL — banco de publicaciones")
+    print(LINEA)
+    print("  Usa el generador de siempre, en bucle. No cambia las reglas de")
+    print("  redaccion ni toca los originales de PROYECTOS.")
+    print()
+
+    antes = {p["id"] for p in historial.listar()}
+
+    def avance(reg):
+        print(f"    {reg['id']}  {reg['proyecto_nombre'][:34]:<34} {reg['archivo'][:26]}")
+
+    print("  Generando:")
+    resultado = generador.generar_banco(maximo=args.maximo, avance=avance)
+    creadas = resultado["creadas"]
+    if not creadas:
+        print("    (ninguna)")
+    print()
+
+    pubs = historial.listar()
+    por_estado: dict[str, int] = {}
+    for p in pubs:
+        por_estado[p["estado"]] = por_estado.get(p["estado"], 0) + 1
+
+    print(LINEA)
+    print(f"  Nuevas publicaciones generadas : {len(creadas)}")
+    print(f"  Ya almacenadas/reservadas      : {len(antes)}")
+    print(f"  Disponibles sin preparar       : {resultado['restantes']}")
+    print(f"  Total del banco                : {len(pubs)}")
+    print(f"  Motivo de parada               : {resultado['motivo_fin']}")
+    print()
+    print("  Por estado:")
+    for estado, n in sorted(por_estado.items()):
+        print(f"    {estado:<22} {n}")
+    print(LINEA)
+    print("  Nada se ha publicado en Meta. Las nuevas quedan como 'propuesta',")
+    print("  sin fecha: el calendario se asigna en otra fase.")
+    print(LINEA)
+    return 0
+
+
 def cmd_programar(args: argparse.Namespace) -> int:
     """Fija la fecha y hora de una propuesta aprobada. No publica."""
     try:
@@ -429,6 +472,12 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--puerto", type=int)
     s.add_argument("--sin-navegador", action="store_true")
     s.set_defaults(func=cmd_panel)
+
+    s = sub.add_parser("generar-banco",
+                       help="Genera propuestas hasta agotar el material publicable")
+    s.add_argument("--maximo", type=int, default=None,
+                   help="Tope de propuestas a crear en esta pasada")
+    s.set_defaults(func=cmd_generar_banco)
 
     s = sub.add_parser("programar", help="Fija fecha y hora de una propuesta aprobada")
     s.add_argument("id")

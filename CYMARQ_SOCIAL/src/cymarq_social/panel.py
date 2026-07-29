@@ -22,6 +22,7 @@ from . import (
     generador,
     historial,
     inventario,
+    catalogo_social,
     limites_redes,
     perfiles as perfiles_mod,
     programacion,
@@ -76,6 +77,14 @@ def _estado_completo() -> dict[str, Any]:
     EN_CURSO = ("propuesta", "aprobada", "programada", "lista_para_publicar")
     pendientes = [p for p in pubs if p.get("estado") in EN_CURSO]
     publicadas = [p for p in pubs if p.get("estado") == "publicada"]
+
+    # La URL publica de cada imagen sale del manifiesto, que se lee una sola
+    # vez: con el banco completo son decenas de publicaciones y no tiene
+    # sentido releer el archivo por cada una.
+    catalogo = catalogo_social.cargar_manifiesto().get("imagenes", {})
+    for p in pendientes:
+        entrada = catalogo.get(p.get("id_archivo", ""))
+        p["imagen_publica"] = (entrada or {}).get("url")
 
     # Se muestra primero lo que reclama una decision, en ese orden.
     actual = None
