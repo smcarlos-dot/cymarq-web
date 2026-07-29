@@ -8,14 +8,17 @@ import assert from 'node:assert/strict';
 
 import {
   computeSignature,
+  diagnoseSignature,
   handleInstagramWebhook,
   maskId,
   safeCompare,
+  secretFingerprint,
   summarizeEvents,
 } from '../lib/instagram/webhook.mjs';
 
 const VERIFY_TOKEN = 'token-de-verificacion-de-prueba-suficientemente-largo';
 const APP_SECRET = 'app-secret-de-prueba';
+const APP_SECRET_ALT = 'app-secret-alternativo-de-prueba';
 const ENV = { INSTAGRAM_VERIFY_TOKEN: VERIFY_TOKEN, INSTAGRAM_APP_SECRET: APP_SECRET };
 
 const URL_BASE = 'https://www.cymarq.com.co/api/instagram/webhook';
@@ -164,6 +167,150 @@ test('los logs no contienen secretos ni el texto del mensaje', async () => {
   assert.ok(!output.includes('quiero información'), 'el texto del mensaje apareció en los logs');
   assert.ok(!output.includes('9876543210987654'), 'el ID del remitente apareció sin enmascarar');
   assert.ok(output.includes('messaging.message'), 'no se registró el tipo de evento');
+});
+
+/* ------------------------------------------------------------------ */
+/* Diagnóstico de la firma: dos candidatos a App Secret                */
+/* ------------------------------------------------------------------ */
+
+test('acepta la firma cuando coincide el candidato ALT y no el principal', async () => {
+  const raw = JSON.stringify(MESSAGE_PAYLOAD);
+  const req = new Request(URL_BASE, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-hub-signature-256': await computeSignature(raw, APP_SECRET_ALT),
+    },
+    body: raw,
+  });
+  const res = await handleInstagramWebhook(
+    req,
+    { ...ENV, INSTAGRAM_APP_SECRET: 'clave-equivocada', INSTAGRAM_APP_SECRET_ALT: APP_SECRET_ALT },
+    makeLogger()
+  );
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), 'EVENT_RECEIVED');
+});
+
+test('rechaza con 403 cuando NINGUNO de los dos candidatos coincide', async () => {
+  const res = await handleInstagramWebhook(
+    await postRequest(MESSAGE_PAYLOAD, { secret: 'un-tercer-secreto' }),
+    { ...ENV, INSTAGRAM_APP_SECRET: APP_SECRET, INSTAGRAM_APP_SECRET_ALT: APP_SECRET_ALT },
+    makeLogger()
+  );
+  assert.equal(res.status, 403);
+});
+
+test('un secreto con salto de línea al final se acepta tras trim()', async () => {
+  const res = await handleInstagramWebhook(
+    await postRequest(MESSAGE_PAYLOAD, { secret: APP_SECRET }),
+    { ...ENV, INSTAGRAM_APP_SECRET: `${APP_SECRET}\n` },
+    makeLogger()
+  );
+  assert.equal(res.status, 200);
+});
+
+test('diagnoseSignature informa de la longitud original y la recortada', async () => {
+  const raw = JSON.stringify(MESSAGE_PAYLOAD);
+  const { matched, secretos } = await diagnoseSignature(
+    new TextEncoder().encode(raw),
+    await computeSignature(raw, APP_SECRET),
+    { INSTAGRAM_APP_SECRET: `  ${APP_SECRET}  ` }
+  );
+  const [principal] = secretos;
+  assert.equal(principal.nombre, 'INSTAGRAM_APP_SECRET');
+  assert.equal(principal.presente, true);
+  assert.equal(principal.longitud, APP_SECRET.length + 4);
+  assert.equal(principal.longitudTrim, APP_SECRET.length);
+  assert.equal(principal.espaciosSobrantes, true);
+  assert.equal(principal.coincide, false);
+  assert.equal(principal.coincideTrim, true);
+  assert.deepEqual(matched, { name: 'INSTAGRAM_APP_SECRET', usedTrim: true });
+});
+
+test('diagnoseSignature marca como ausentes los candidatos no configurados', async () => {
+  const { matched, secretos } = await diagnoseSignature(new Uint8Array(), 'sha256=nada', {});
+  assert.equal(matched, null);
+  assert.equal(secretos.length, 2);
+  assert.deepEqual(
+    secretos.map((s) => [s.nombre, s.presente]),
+    [
+      ['INSTAGRAM_APP_SECRET', false],
+      ['INSTAGRAM_APP_SECRET_ALT', false],
+    ]
+  );
+});
+
+test('el informe de diagnóstico NO contiene el valor de ningún secreto', async () => {
+  const raw = JSON.stringify(MESSAGE_PAYLOAD);
+  const { secretos } = await diagnoseSignature(
+    new TextEncoder().encode(raw),
+    await computeSignature(raw, APP_SECRET),
+    { INSTAGRAM_APP_SECRET: APP_SECRET, INSTAGRAM_APP_SECRET_ALT: APP_SECRET_ALT }
+  );
+  const serializado = JSON.stringify(secretos);
+  assert.ok(!serializado.includes(APP_SECRET), 'se filtró el App Secret principal');
+  assert.ok(!serializado.includes(APP_SECRET_ALT), 'se filtró el App Secret alternativo');
+});
+
+test('la huella es estable, irreversible y de 12 hex', async () => {
+  const a = await secretFingerprint(APP_SECRET);
+  const b = await secretFingerprint(APP_SECRET);
+  const c = await secretFingerprint(APP_SECRET_ALT);
+  assert.match(a, /^[0-9a-f]{12}$/);
+  assert.equal(a, b);
+  assert.notEqual(a, c);
+  assert.ok(!APP_SECRET.includes(a));
+});
+
+test('INSTAGRAM_WEBHOOK_DEBUG activa el bloque [diag] y sin él no se emite', async () => {
+  const conDebug = makeLogger();
+  await handleInstagramWebhook(await postRequest(MESSAGE_PAYLOAD), { ...ENV, INSTAGRAM_WEBHOOK_DEBUG: '1' }, conDebug);
+  const salida = conDebug.lines.join('\n');
+  assert.ok(salida.includes('[instagram-webhook][diag]'), 'no se emitió el diagnóstico');
+  assert.ok(salida.includes('rawBodyBytes'), 'falta la longitud del cuerpo en bytes');
+  assert.ok(salida.includes('huella'), 'falta la huella del secreto');
+  assert.ok(!salida.includes(APP_SECRET), 'el diagnóstico filtró el App Secret');
+  assert.ok(!salida.includes(VERIFY_TOKEN), 'el diagnóstico filtró el verify token');
+  assert.ok(!salida.includes('quiero información'), 'el diagnóstico filtró el texto del mensaje');
+
+  const sinDebug = makeLogger();
+  await handleInstagramWebhook(await postRequest(MESSAGE_PAYLOAD), ENV, sinDebug);
+  assert.ok(!sinDebug.lines.join('\n').includes('[diag]'), 'se emitió el diagnóstico sin activarlo');
+});
+
+/* ------------------------------------------------------------------ */
+/* Firma sobre los BYTES crudos                                        */
+/* ------------------------------------------------------------------ */
+
+test('computeSignature da el mismo resultado con cadena y con bytes', async () => {
+  const raw = JSON.stringify(MESSAGE_PAYLOAD);
+  const desdeCadena = await computeSignature(raw, APP_SECRET);
+  const desdeBytes = await computeSignature(new TextEncoder().encode(raw), APP_SECRET);
+  assert.equal(desdeCadena, desdeBytes);
+});
+
+test('valida la firma de un cuerpo con UTF-8 multibyte (tildes y emoji)', async () => {
+  const payload = {
+    object: 'instagram',
+    entry: [
+      {
+        id: '17841466818245536',
+        time: 1769000000000,
+        messaging: [
+          {
+            sender: { id: '934175829696014' },
+            recipient: { id: '17841466818245536' },
+            timestamp: 1769000000000,
+            message: { mid: 'aWc6bWlk', text: '¿Diseñáis también reformas? 🏗️🙌' },
+          },
+        ],
+      },
+    ],
+  };
+  const res = await handleInstagramWebhook(await postRequest(payload), ENV, makeLogger());
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), 'EVENT_RECEIVED');
 });
 
 /* ------------------------------------------------------------------ */
