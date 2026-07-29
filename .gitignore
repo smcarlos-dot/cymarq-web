@@ -4,3 +4,5 @@ out
 .DS_Store
 *.log
 .env*
+# La plantilla sin valores sí se versiona
+!.env.example
