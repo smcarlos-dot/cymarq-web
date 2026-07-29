@@ -10,7 +10,8 @@
     "test": "node --test \"tests/**/*.test.mjs\"",
     "webhook:dev": "node scripts/instagram-webhook-dev.mjs",
     "instagram:verify": "node scripts/instagram-verify.mjs",
-    "instagram:dry-run": "node scripts/instagram-dry-run.mjs"
+    "instagram:dry-run": "node scripts/instagram-dry-run.mjs",
+    "instagram:publish": "node scripts/instagram-publish.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",
