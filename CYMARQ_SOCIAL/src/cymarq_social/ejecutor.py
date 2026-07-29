@@ -89,17 +89,112 @@ class BloqueoActivo(RuntimeError):
 
 
 def publicacion_real_habilitada() -> bool:
-    """Unica fuente de verdad sobre si se puede publicar de verdad."""
+    """¿Esta abierto el interruptor general?"""
     return bool(cfg_mod.cargar().get("publicacion_automatica", False))
+
+
+# --- Segunda cerradura: autorizacion por propuesta -------------------- #
+
+ARCHIVO_AUTORIZACIONES = rutas.CONFIG / "autorizaciones.json"
+
+
+def cargar_autorizaciones() -> dict[str, Any]:
+    try:
+        return json.loads(ARCHIVO_AUTORIZACIONES.read_text(encoding="utf-8"))
+    except Exception:
+        return {"jobs": {}}
+
+
+def _guardar_autorizaciones(datos: dict[str, Any]) -> None:
+    ARCHIVO_AUTORIZACIONES.parent.mkdir(parents=True, exist_ok=True)
+    ARCHIVO_AUTORIZACIONES.write_text(
+        json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def autorizar_job(job_id: str, minutos: int = 30, nota: str = "") -> dict[str, Any]:
+    """Autoriza UNA propuesta concreta a publicarse de verdad, con caducidad."""
+    from datetime import timedelta
+
+    datos = cargar_autorizaciones()
+    expira = programacion.ahora() + timedelta(minutes=minutos)
+    datos.setdefault("jobs", {})[job_id] = {
+        "autorizado_en": programacion.guardar_iso(programacion.ahora()),
+        "expira_en": programacion.guardar_iso(expira),
+        "nota": nota,
+    }
+    _guardar_autorizaciones(datos)
+    return datos["jobs"][job_id]
+
+
+def limpiar_autorizaciones() -> int:
+    """Vacia la lista. Se llama al terminar cualquier prueba."""
+    datos = cargar_autorizaciones()
+    n = len(datos.get("jobs") or {})
+    _guardar_autorizaciones({"jobs": {}})
+    return n
+
+
+def jobs_autorizados() -> list[str]:
+    """Autorizaciones vigentes, descartando las caducadas."""
+    ahora = programacion.ahora()
+    vigentes = []
+    for job, d in (cargar_autorizaciones().get("jobs") or {}).items():
+        expira = programacion.leer_iso(d.get("expira_en"))
+        if expira is None or expira > ahora:
+            vigentes.append(job)
+    return sorted(vigentes)
+
+
+def job_autorizado(job_id: str) -> bool:
+    """¿Esta ESTA propuesta autorizada a publicarse de verdad?
+
+    Es la segunda cerradura. El interruptor general no basta: aunque
+    `publicacion_automatica` este en true, una propuesta que no aparezca aqui
+    NO puede publicarse. Asi una prueba supervisada de un job no abre la puerta
+    a las otras 48 del calendario.
+    """
+    return job_id in jobs_autorizados()
+
+
+def puede_publicar(job_id: str) -> tuple[bool, str]:
+    """LA barrera. Unico sitio del sistema que decide si algo puede publicarse.
+
+    Dos llaves, y la estrecha es la preferente:
+
+    1. AUTORIZACION PUNTUAL por propuesta (`autorizar_job`), con caducidad. Es
+       la que se usa en una prueba supervisada: abre exactamente un job y nada
+       mas. Aunque otras 48 esten listas, se rechazan por no estar autorizadas.
+
+    2. `publicacion_automatica` en config, para la futura ejecucion desatendida.
+       Hoy esta forzada a false por `config._BLOQUEADAS_EN_FASE_1`.
+
+    Sin ninguna de las dos, no hay ruta posible hacia Meta.
+    """
+    if job_autorizado(job_id):
+        return True, "autorizacion puntual vigente"
+    if publicacion_real_habilitada():
+        return True, "publicacion_automatica activada"
+    vigentes = jobs_autorizados()
+    return False, (
+        f"{job_id} no puede publicarse: publicacion_automatica=false y no tiene "
+        "autorizacion puntual. Autorizadas ahora mismo: "
+        + (", ".join(vigentes) if vigentes else "NINGUNA")
+    )
 
 
 def estado_motor() -> dict[str, str]:
     """Lo que se muestra al usuario, sin ambiguedad."""
     habilitada = publicacion_real_habilitada()
+    autorizados = jobs_autorizados()
     return {
         "publicacion_automatica": "ACTIVADA" if habilitada else "DESACTIVADA",
         "motor": "OPERATIVO",
-        "modo": "PUBLICACION REAL" if habilitada else "SIMULACION",
+        # El modo dice la verdad: si hay una autorizacion puntual vigente, esto
+        # ya NO es simulacion, aunque el interruptor general siga cerrado.
+        "modo": ("PUBLICACION REAL" if habilitada
+                 else "PUBLICACION REAL AUTORIZADA POR JOB" if autorizados
+                 else "SIMULACION"),
+        "publicaciones_reales_autorizadas": ", ".join(autorizados) if autorizados else "NINGUNA",
     }
 
 
@@ -402,11 +497,9 @@ def _invocar_node(plataforma: str, job_id: str, metadata: Path, url_imagen: str,
     false. Sin esta comprobacion no hay ruta alternativa: el resto del modulo
     no sabe hablar con Meta.
     """
-    if not publicacion_real_habilitada():
-        raise PublicacionBloqueada(
-            "publicacion_automatica=false en CONFIG/config.json. "
-            "El motor no puede publicar de verdad."
-        )
+    permitido, motivo = puede_publicar(job_id)
+    if not permitido:
+        raise PublicacionBloqueada(motivo)
 
     node = shutil.which("node")
     if not node:
@@ -569,7 +662,8 @@ class Ejecucion:
 
 
 def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
-                         forzar_real: bool = False) -> Ejecucion:
+                         forzar_real: bool = False,
+                         parar_si_falla: bool = True) -> Ejecucion:
     """Procesa una propuesta: solo las plataformas que siguen pendientes.
 
     Nunca vuelve a llamar a una plataforma que ya esta publicada, ni a una que
@@ -626,7 +720,7 @@ def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
 
             if simular is not None:
                 contrato = _simular_node(p, job_id, simular.get(p, "no_ejecutado"))
-            elif not (publicacion_real_habilitada() or forzar_real):
+            elif not puede_publicar(job_id)[0]:
                 e.bloqueada_por_gate = True
                 e.acciones.append(f"{p}: BLOQUEADA POR CONFIGURACION (no se invoco a Node)")
                 plataformas[p] = actual
@@ -649,6 +743,16 @@ def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
             plataformas[p] = aplicar_contrato(actual, contrato)
             e.acciones.append(f"{p}: {contrato.get('status')} -> {plataformas[p]['estado']}")
 
+            # Orden estricto: si una plataforma no queda confirmada, se para y
+            # no se toca la siguiente. Encadenar publicaciones sobre un estado
+            # dudoso es como se acumulan los problemas difíciles de deshacer.
+            if parar_si_falla and plataformas[p]["estado"] != PUBLICADA:
+                e.acciones.append(
+                    f"DETENIDO tras {p} ({plataformas[p]['estado']}): "
+                    "no se intenta ninguna plataforma mas en esta pasada."
+                )
+                break
+
         e.plataformas = plataformas
         e.global_despues = resultado_global(plataformas)
         _guardar_plataformas(job_id, plataformas)
@@ -659,7 +763,8 @@ def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
 
 def ejecutar_programadas(momento: datetime | None = None,
                          simular: dict[str, str] | None = None,
-                         solo: str | None = None) -> dict[str, Any]:
+                         solo: str | None = None,
+                         parar_si_falla: bool = True) -> dict[str, Any]:
     """Revisa el calendario y procesa lo que ya toca.
 
     Primero deja que el scheduler marque como listas las programaciones
@@ -671,7 +776,8 @@ def ejecutar_programadas(momento: datetime | None = None,
     if solo:
         ids = [i for i in ids if i == solo]
 
-    ejecuciones = [ejecutar_publicacion(i, simular=simular) for i in ids]
+    ejecuciones = [ejecutar_publicacion(i, simular=simular, parar_si_falla=parar_si_falla)
+                   for i in ids]
 
     return {
         "momento": informe.momento,

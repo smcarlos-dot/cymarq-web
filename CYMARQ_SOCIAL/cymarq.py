@@ -226,6 +226,30 @@ def cmd_programar(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_autorizar(args: argparse.Namespace) -> int:
+    """Autoriza o revoca la publicacion real de UNA propuesta concreta."""
+    if args.limpiar:
+        n = ejecutor.limpiar_autorizaciones()
+        print(f"  Autorizaciones eliminadas: {n}")
+        print("  PUBLICACIONES REALES AUTORIZADAS: NINGUNA")
+        return 0
+    if not args.id:
+        vigentes = ejecutor.jobs_autorizados()
+        print("  PUBLICACIONES REALES AUTORIZADAS: "
+              + (", ".join(vigentes) if vigentes else "NINGUNA"))
+        return 0
+    reg = historial.buscar(args.id)
+    if not reg:
+        print(f"  [!] No existe la publicacion {args.id}")
+        return 1
+    d = ejecutor.autorizar_job(args.id, minutos=args.minutos, nota=args.nota)
+    print(f"  AUTORIZADA: {args.id}  ({reg.get('proyecto_nombre','')})")
+    print(f"    caduca en : {programacion.formato_humano(d['expira_en'])}")
+    print(f"    vigentes  : {', '.join(ejecutor.jobs_autorizados())}")
+    print("  Ninguna otra propuesta puede publicarse, aunque este lista.")
+    return 0
+
+
 def cmd_ejecutar_programadas(args: argparse.Namespace) -> int:
     """Motor de ejecucion. En esta fase NO publica: el gate esta cerrado."""
     try:
@@ -282,10 +306,21 @@ def cmd_ejecutar_programadas(args: argparse.Namespace) -> int:
             print("    PUBLICACION REAL: BLOQUEADA POR CONFIGURACION")
 
     print(LINEA)
-    if simular is None and motor["publicacion_automatica"] == "DESACTIVADA":
-        print("  No se ha invocado a ningun publicador. 0 POST a Meta.")
-    elif simular is not None:
+    # El mensaje debe reflejar lo que REALMENTE paso. Decir "0 POST" cuando una
+    # autorizacion puntual acaba de publicar de verdad seria mentir en el sitio
+    # donde mas importa la exactitud.
+    publicadas = sum(
+        1 for e in r["ejecuciones"] for d in e.plataformas.values()
+        if d.get("estado") == "publicada" and (d.get("ultimo_intento") or "")
+    )
+    if simular is not None:
         print("  Resultados SIMULADOS. 0 POST a Meta.")
+    elif any(e.bloqueada_por_gate for e in r["ejecuciones"]) or not r["ejecuciones"]:
+        print("  No se ha invocado a ningun publicador. 0 POST a Meta.")
+    else:
+        print(f"  Se invocaron publicadores REALES. Plataformas publicadas: {publicadas}.")
+        print("  Autorizaciones vigentes: "
+              + (", ".join(ejecutor.jobs_autorizados()) or "NINGUNA"))
     print(LINEA)
     return 0
 
@@ -596,6 +631,14 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--cancelar", action="store_true",
                    help="Quita la programacion y vuelve a 'aprobada'")
     s.set_defaults(func=cmd_programar)
+
+    s = sub.add_parser("autorizar",
+                       help="Autoriza la publicacion real de UNA propuesta concreta")
+    s.add_argument("id", nargs="?", default="", help="ID a autorizar; sin ID, lista las vigentes")
+    s.add_argument("--minutos", type=int, default=30, help="Caducidad de la autorizacion")
+    s.add_argument("--nota", default="")
+    s.add_argument("--limpiar", action="store_true", help="Revoca todas las autorizaciones")
+    s.set_defaults(func=cmd_autorizar)
 
     s = sub.add_parser("ejecutar-programadas",
                        help="Motor de ejecucion. No publica: el gate esta cerrado.")

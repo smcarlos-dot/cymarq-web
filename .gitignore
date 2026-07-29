@@ -83,3 +83,6 @@ desktop.ini
 
 # Locks de ejecucion del motor. Estado de runtime de esta maquina.
 **/CONFIG/locks/
+
+# Autorizaciones puntuales de publicacion real. Runtime local.
+autorizaciones.json
