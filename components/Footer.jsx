@@ -51,6 +51,12 @@ export default function Footer() {
           <Link href="/#contacto" className="hover:text-white">Contacto</Link>
         </nav>
 
+        <nav className="flex flex-wrap items-center justify-center gap-6 text-xs uppercase tracking-widest2 text-white/50">
+          <Link href="/politica-de-privacidad/" className="hover:text-white">Privacidad</Link>
+          <Link href="/terminos-y-condiciones/" className="hover:text-white">Términos</Link>
+          <Link href="/eliminacion-de-datos/" className="hover:text-white">Eliminación de datos</Link>
+        </nav>
+
         <div className="h-px w-24 bg-gold/60" />
 
         <p className="text-xs text-white/40">

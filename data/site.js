@@ -3,6 +3,10 @@ export const site = {
   tagline: 'Arquitectura • Diseño • Construcción',
   url: 'https://www.cymarq.com.co',
   email: 'contacto@cymarq.com.co',
+  // Canal para asuntos de privacidad, datos personales y solicitudes de
+  // eliminación (el que figura en las páginas legales y ante Meta).
+  privacyEmail: 'carloslassor@hotmail.com',
+  instagramHandle: '@cymarq_obras',
   whatsapp: '+57 322 3656579',
   whatsappLink:
     'https://wa.me/573223656579?text=Hola%20CYMARQ%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20servicios.',

@@ -12,5 +12,8 @@ export default function sitemap() {
       url: `${base}/proyectos/${p.slug}/`,
       priority: 0.8,
     })),
+    { url: `${base}/politica-de-privacidad/`, priority: 0.3 },
+    { url: `${base}/terminos-y-condiciones/`, priority: 0.3 },
+    { url: `${base}/eliminacion-de-datos/`, priority: 0.3 },
   ];
 }
