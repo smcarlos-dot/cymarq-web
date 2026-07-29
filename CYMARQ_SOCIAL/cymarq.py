@@ -32,6 +32,7 @@ from cymarq_social import (  # noqa: E402
     inventario,
     panel,
     perfiles,
+    programacion,
     puente_node,
     rotacion,
     rutas,
@@ -151,6 +152,94 @@ def cmd_estado(args: argparse.Namespace) -> int:
 
 def cmd_panel(args: argparse.Namespace) -> int:
     panel.iniciar(puerto=args.puerto, abrir_navegador=not args.sin_navegador)
+    return 0
+
+
+def cmd_programar(args: argparse.Namespace) -> int:
+    """Fija la fecha y hora de una propuesta aprobada. No publica."""
+    try:
+        if args.cancelar:
+            reg = programacion.cancelar_programacion(args.id)
+            print(f"  Programacion cancelada. {reg['id']} vuelve a '{reg['estado']}'.")
+            return 0
+        reg = programacion.programar(args.id, args.fecha, args.hora)
+    except (programacion.ErrorProgramacion, historial.TransicionInvalida, ValueError) as exc:
+        print(f"  [!] {exc}")
+        return 1
+
+    print(LINEA)
+    print(f"  {reg['id']} — {reg.get('proyecto_nombre', '')}")
+    print(LINEA)
+    print(f"  Estado             {reg['estado']}")
+    print(f"  Programada para    {programacion.formato_humano(reg.get('programado_para'))}")
+    print(f"  Zona horaria       {programacion.NOMBRE_ZONA}")
+    print(f"  Guardado como      {reg.get('programado_para')}")
+    if reg.get("programacion_anterior"):
+        print(f"  Programacion previa {reg['programacion_anterior']}")
+    print()
+    print("  No se ha publicado nada. Llegada la hora, el scheduler solo la")
+    print("  marcara como lista_para_publicar.")
+    return 0
+
+
+def cmd_programadas(args: argparse.Namespace) -> int:
+    """Scheduler. SOLO DETECTA: nunca publica ni llama a Meta."""
+    try:
+        momento = programacion.parsear(args.ahora) if args.ahora else None
+    except ValueError as exc:
+        print(f"  [!] {exc}")
+        return 1
+
+    inf = programacion.revisar(momento=momento, aplicar=not args.solo_ver)
+
+    print(LINEA)
+    print("  CYMARQ SOCIAL — publicaciones programadas")
+    print(LINEA)
+    cfg = cfg_mod.cargar()
+    print(f"  PUBLICACION AUTOMATICA : {'ACTIVADA' if cfg.get('publicacion_automatica') else 'DESACTIVADA'}")
+    print(f"  Scheduler              : OPERATIVO — MODO SIMULACION")
+    print(f"  Hora actual            : {programacion.formato_humano(inf.momento)}"
+          + ("   [HORA SIMULADA]" if inf.simulado else ""))
+    if args.solo_ver:
+        print("  Modo                   : solo lectura (--solo-ver), sin transiciones")
+    print()
+
+    if inf.futuras:
+        print("  PROGRAMADAS (aun no les toca)")
+        for e in inf.futuras:
+            print(f"    {e.id}  {e.proyecto}")
+            print(f"      Programada: {e.texto_programada}")
+            print(f"      Estado: PROGRAMADA")
+        print()
+
+    if inf.listas:
+        print("  LISTAS PARA PUBLICAR")
+        for e in inf.listas:
+            print(f"    {e.id}  {e.proyecto}")
+            print(f"      Programada: {e.texto_programada}")
+            print(f"      Hora actual: {programacion.formato_humano(inf.momento)}")
+            print(f"      Estado: LISTA PARA PUBLICAR")
+            if e.transicion:
+                print(f"      (transicion aplicada ahora; retraso {e.minutos_retraso} min)")
+            else:
+                print(f"      (ya estaba lista; sin cambios)")
+        print()
+
+    if inf.sin_hora:
+        print("  PROGRAMADAS SIN HORA (revisar a mano)")
+        for e in inf.sin_hora:
+            print(f"    {e.id}  {e.proyecto}")
+        print()
+
+    if not (inf.futuras or inf.listas or inf.sin_hora):
+        print("  No hay ninguna publicacion programada.")
+        print()
+
+    print(LINEA)
+    print(f"  Programadas {len(inf.futuras)} | Listas {len(inf.listas)} | "
+          f"Transiciones en este pase {len(inf.transiciones)} | Ignoradas {inf.ignoradas}")
+    print("  MODO SIMULACION — NO SE ENVIO NADA A META")
+    print(LINEA)
     return 0
 
 
@@ -340,6 +429,23 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--puerto", type=int)
     s.add_argument("--sin-navegador", action="store_true")
     s.set_defaults(func=cmd_panel)
+
+    s = sub.add_parser("programar", help="Fija fecha y hora de una propuesta aprobada")
+    s.add_argument("id")
+    s.add_argument("--fecha", default="", help="AAAA-MM-DD (hora de Colombia)")
+    s.add_argument("--hora", default="18:30", help="HH:MM (hora de Colombia)")
+    s.add_argument("--cancelar", action="store_true",
+                   help="Quita la programacion y vuelve a 'aprobada'")
+    s.set_defaults(func=cmd_programar)
+
+    s = sub.add_parser("programadas",
+                       help="Scheduler: detecta que toca publicar. NO publica.")
+    s.add_argument("--ahora", default="",
+                   help="Hora simulada SOLO para pruebas, p. ej. '2026-07-30 18:31'. "
+                        "No altera el reloj del sistema ni habilita publicar.")
+    s.add_argument("--solo-ver", action="store_true",
+                   help="No aplica ninguna transicion, solo informa")
+    s.set_defaults(func=cmd_programadas)
 
     s = sub.add_parser("catalogo", help="Prepara el catalogo de imagenes publicas")
     s.add_argument("--simular", action="store_true", help="No escribe nada")

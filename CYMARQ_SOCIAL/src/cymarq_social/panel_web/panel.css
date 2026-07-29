@@ -182,3 +182,35 @@ footer{
   padding:1rem 1.4rem;border-top:1px solid var(--linea);
   color:var(--tenue);font-size:.78rem;background:var(--fondo-2);margin-top:2rem;
 }
+
+/* --- Programación (fase 4) --- */
+#bloque-programacion .acciones {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+#bloque-programacion label {
+  font-size: .8rem;
+  opacity: .75;
+}
+#bloque-programacion input[type="date"],
+#bloque-programacion input[type="time"] {
+  font: inherit;
+  padding: .35rem .5rem;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .04);
+  color: inherit;
+}
+#bloque-programacion .zona {
+  font-size: .78rem;
+  opacity: .6;
+  letter-spacing: .02em;
+}
+#estado-actual,
+#programada-para {
+  margin: .2rem 0;
+}
+#programada-para {
+  font-weight: 600;
+}

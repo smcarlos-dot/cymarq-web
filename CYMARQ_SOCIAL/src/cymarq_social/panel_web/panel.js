@@ -108,9 +108,37 @@ function pintarPropuesta() {
   $('txt-hashtags').textContent = (p.hashtags || []).join(' ');
   $('cta').textContent = p.llamada_a_la_accion || '—';
 
+  pintarProgramacion(p);
+
   if ((ESTADO.avisos || []).length) {
     aviso('Revisión técnica: ' + ESTADO.avisos.join(' | '), 'error');
   }
+}
+
+/* Programación: estado actual, instante fijado y controles. */
+function pintarProgramacion(p) {
+  const g = ESTADO.programacion || {};
+
+  $('estado-actual').textContent = 'Estado actual: ' + (p.estado || '—');
+
+  $('programada-para').textContent = g.programado_para
+    ? 'Programada para: ' + g.texto
+    : 'Sin programar. Hora del sistema: ' + (g.ahora || '—');
+
+  // Se rellena con lo ya programado; si no hay nada, con la fecha que propone
+  // la rotación. Así el caso normal es pulsar PROGRAMAR sin escribir nada.
+  const base = (g.programado_para || g.sugerida || '').slice(0, 16);
+  if (base && !$('fecha-prog').dataset.tocado) {
+    $('fecha-prog').value = base.slice(0, 10);
+    $('hora-prog').value = base.slice(11, 16);
+  }
+
+  $('btn-programar').textContent = g.programado_para ? 'REPROGRAMAR' : 'PROGRAMAR';
+  $('btn-programar').disabled = !g.programable;
+  $('btn-desprogramar').disabled = !g.programado_para;
+  $('bloque-programacion').title = g.programable
+    ? ''
+    : 'Solo se puede programar una propuesta aprobada.';
 }
 
 function pintarProyectos() {
@@ -306,6 +334,28 @@ $('btn-otra').onclick = () => {
     return;
   }
   accion('/api/otra', { id }, 'Se generó una propuesta distinta.');
+};
+
+['fecha-prog', 'hora-prog'].forEach((id) => {
+  $(id).oninput = () => { $('fecha-prog').dataset.tocado = '1'; };
+});
+
+$('btn-programar').onclick = () => {
+  const id = idActual();
+  if (!id) return;
+  const fecha = $('fecha-prog').value;
+  const hora = $('hora-prog').value || '18:30';
+  if (!fecha) {
+    aviso('Indica la fecha de publicación.', 'error');
+    return;
+  }
+  accion('/api/programar', { id, fecha, hora }, 'Propuesta programada.');
+};
+
+$('btn-desprogramar').onclick = () => {
+  const id = idActual();
+  if (!id) return;
+  accion('/api/cancelar-programacion', { id }, 'Programación cancelada.');
 };
 
 $('btn-texto').onclick = () => {

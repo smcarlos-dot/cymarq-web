@@ -24,6 +24,7 @@ from . import (
     inventario,
     limites_redes,
     perfiles as perfiles_mod,
+    programacion,
     rotacion,
     rutas,
 )
@@ -69,12 +70,19 @@ def _estado_completo() -> dict[str, Any]:
         })
     proyectos.sort(key=lambda p: p["carpeta"])
 
-    pendientes = [p for p in pubs if p.get("estado") in ("propuesta", "aprobada")]
+    # "Pendiente" es todo lo que sigue vivo y aun no se ha publicado. Incluye
+    # lo programado y lo que ya vencio: si no apareciera aqui, no habria forma
+    # de verlo ni de reprogramarlo desde el panel.
+    EN_CURSO = ("propuesta", "aprobada", "programada", "lista_para_publicar")
+    pendientes = [p for p in pubs if p.get("estado") in EN_CURSO]
     publicadas = [p for p in pubs if p.get("estado") == "publicada"]
 
-    actual = next((p for p in pendientes if p.get("estado") == "propuesta"), None)
-    if actual is None and pendientes:
-        actual = pendientes[0]
+    # Se muestra primero lo que reclama una decision, en ese orden.
+    actual = None
+    for estado in EN_CURSO:
+        actual = next((p for p in pendientes if p.get("estado") == estado), None)
+        if actual is not None:
+            break
 
     avisos: list[str] = []
     if actual:
@@ -100,6 +108,17 @@ def _estado_completo() -> dict[str, Any]:
             # La publicacion no la hace este proceso: la ejecuta el operador
             # a traves del puente hacia los publicadores Node.
             "publicacion_desde_el_panel": False,
+            "scheduler": "OPERATIVO — MODO SIMULACIÓN",
+        },
+        "programacion": {
+            "zona": programacion.NOMBRE_ZONA,
+            "ahora": programacion.formato_humano(programacion.ahora()),
+            "programado_para": (actual or {}).get("programado_para"),
+            "texto": programacion.formato_humano((actual or {}).get("programado_para")),
+            "programable": (actual or {}).get("estado") in programacion.PROGRAMABLES,
+            "sugerida": programacion.guardar_iso(
+                programacion.a_zona(rotacion.proxima_fecha(cfg))
+            ),
         },
         "resumen": {
             "total_archivos": inv.get("total_archivos", 0),
@@ -242,7 +261,7 @@ class Manejador(BaseHTTPRequestHandler):
                     "mensaje": (
                         "Propuesta APROBADA y guardada. No se publico nada en "
                         "Instagram ni Facebook: la publicacion automatica esta "
-                        "desactivada (fase 1)."
+                        "desactivada."
                     ),
                 })
                 return
@@ -252,6 +271,33 @@ class Manejador(BaseHTTPRequestHandler):
                     datos.get("id", ""), datos.get("motivo", "")
                 )
                 self._json({"ok": bool(reg), "publicacion": reg})
+                return
+
+            if camino == "/api/programar":
+                reg = programacion.programar(
+                    datos.get("id", ""),
+                    datos.get("fecha", ""),
+                    datos.get("hora", "18:30"),
+                )
+                self._json({
+                    "ok": True,
+                    "publicacion": reg,
+                    "mensaje": (
+                        "Programada para: "
+                        + programacion.formato_humano(reg.get("programado_para"))
+                        + ". No se publicara sola: llegada la hora solo quedara"
+                        " marcada como lista para publicar."
+                    ),
+                })
+                return
+
+            if camino == "/api/cancelar-programacion":
+                reg = programacion.cancelar_programacion(datos.get("id", ""))
+                self._json({
+                    "ok": True,
+                    "publicacion": reg,
+                    "mensaje": "Programacion cancelada. La propuesta sigue aprobada.",
+                })
                 return
 
             if camino == "/api/otra":
@@ -271,6 +317,9 @@ class Manejador(BaseHTTPRequestHandler):
                 return
 
         except generador.SinContenido as exc:
+            self._json({"ok": False, "error": str(exc)}, 409)
+            return
+        except (programacion.ErrorProgramacion, historial.TransicionInvalida, ValueError) as exc:
             self._json({"ok": False, "error": str(exc)}, 409)
             return
         except Exception as exc:  # pragma: no cover
@@ -308,7 +357,8 @@ def iniciar(
     print("  CYMARQ SOCIAL - Panel local")
     print("=" * 62)
     print(f"  URL        : {url}")
-    print("  Publicacion: DESACTIVADA (fase 1, nada se envia a Meta)")
+    print("  Publicacion automatica: DESACTIVADA")
+    print("  Scheduler  : OPERATIVO - MODO SIMULACION (detecta, no publica)")
     print("  PROYECTOS  : solo lectura")
     print("  Detener    : Ctrl + C en esta ventana")
     print("=" * 62)
