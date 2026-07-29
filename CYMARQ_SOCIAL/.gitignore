@@ -1,0 +1,60 @@
+# =====================================================================
+#  CYMARQ SOCIAL - .gitignore
+#  Objetivo principal: que NUNCA salga de este equipo una credencial de
+#  Meta, ni el material original de los proyectos.
+# =====================================================================
+
+# ---------- Credenciales y secretos (FASE 2) ----------
+.env
+.env.*
+*.env
+credenciales.json
+credentials.json
+token*.json
+*token*.txt
+*.pem
+*.key
+*.p12
+secretos/
+CONFIG/secretos*
+CONFIG/*token*
+CONFIG/*credencial*
+
+# ---------- Material original de los proyectos ----------
+# Son archivos pesados y propiedad de los clientes: no se versionan.
+PROYECTOS/
+
+# ---------- Contenido generado ----------
+PENDIENTES/
+PUBLICADOS/
+CONFIG/inventario_contenido.json
+CONFIG/historial_publicaciones.json
+CONFIG/perfiles_proyectos.json
+
+# Se versiona la plantilla de configuracion, no la configuracion real
+# si algun dia llega a contener datos sensibles.
+# CONFIG/config.json
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- Sistema operativo / editores ----------
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# ---------- Temporales ----------
+*.log
+*.tmp
+.tmp_*

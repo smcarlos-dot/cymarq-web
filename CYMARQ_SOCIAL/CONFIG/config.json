@@ -1,0 +1,37 @@
+{
+  "nombre_empresa": "CYMARQ",
+  "eslogan": "Arquitectura - Diseño - Construccion",
+  "sitio_web": "",
+  "instagram": "https://www.instagram.com/cymarq_obras/",
+  "instagram_usuario": "@cymarq_obras",
+  "facebook": "https://www.facebook.com/cymarq.obras",
+  "whatsapp": "+57 322 3656579",
+  "correo": "contacto@cymarq.com.co",
+  "ubicacion": "Colombia",
+  "frecuencia_publicacion": "semanal",
+  "publicaciones_por_semana": 2,
+  "dias_publicacion": [
+    "martes",
+    "jueves"
+  ],
+  "hora_publicacion": "18:30",
+  "numero_hashtags": 18,
+  "numero_hashtags_facebook": 6,
+  "plataformas": [
+    "instagram",
+    "facebook"
+  ],
+  "usar_renders": true,
+  "usar_planos": false,
+  "usar_videos": false,
+  "usar_fotografias": true,
+  "incluir_marca_agua": false,
+  "rotacion_activa": true,
+  "proyectos_a_esperar_antes_de_repetir": 4,
+  "dias_minimos_entre_publicaciones_mismo_proyecto": 14,
+  "no_repetir_imagen": true,
+  "modo_aprobacion": true,
+  "publicacion_automatica": false,
+  "puerto_panel": 8787,
+  "host_panel": "127.0.0.1"
+}

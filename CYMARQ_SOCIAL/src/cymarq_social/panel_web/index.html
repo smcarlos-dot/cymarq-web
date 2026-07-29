@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CYMARQ SOCIAL · Panel local</title>
+  <link rel="stylesheet" href="/panel.css">
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca">
+    <span class="logo">CYMARQ</span>
+    <span class="sub">SOCIAL · panel local de contenido</span>
+  </div>
+  <div class="estado-seguridad" id="banda-seguridad">
+    <span class="punto"></span>
+    <span id="txt-seguridad">Publicación automática desactivada · nada se envía a Meta</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab activo" data-vista="propuesta">Propuesta</button>
+  <button class="tab" data-vista="proyectos">Proyectos</button>
+  <button class="tab" data-vista="contenido">Contenido</button>
+  <button class="tab" data-vista="pendientes">Pendientes</button>
+  <button class="tab" data-vista="publicadas">Publicadas</button>
+  <button class="tab" data-vista="historial">Historial</button>
+  <div class="tabs-acciones">
+    <button class="btn fantasma" id="btn-escanear">Reescanear PROYECTOS</button>
+  </div>
+</nav>
+
+<div id="aviso" class="aviso oculto"></div>
+
+<main>
+
+  <!-- ======================= PROPUESTA ======================= -->
+  <section class="vista activo" id="vista-propuesta">
+    <div id="propuesta-vacia" class="vacio oculto">
+      <h2>No hay ninguna propuesta pendiente</h2>
+      <p>Genera una nueva y revísala antes de publicar.</p>
+      <button class="btn primario" id="btn-generar-vacio">Generar propuesta</button>
+    </div>
+
+    <div class="propuesta" id="propuesta">
+      <div class="columna-imagen">
+        <div class="marco-imagen">
+          <img id="img-propuesta" alt="Imagen seleccionada">
+        </div>
+        <div class="pie-imagen">
+          <div><strong id="img-nombre">—</strong></div>
+          <div class="tenue" id="img-ruta">—</div>
+          <div class="tenue" id="img-formato">—</div>
+        </div>
+      </div>
+
+      <div class="columna-texto">
+        <div class="cabecera-propuesta">
+          <span class="etiqueta" id="etq-estado">propuesta</span>
+          <span class="etiqueta gris" id="etq-id">—</span>
+          <span class="etiqueta gris" id="etq-fecha">—</span>
+        </div>
+
+        <p class="tenue mini" id="proyecto-linea">—</p>
+        <h1 id="titulo-propuesta">—</h1>
+        <p class="tenue mini" id="rotacion-linea">—</p>
+
+        <div class="bloque">
+          <div class="bloque-cabecera">
+            <h3>Instagram</h3>
+            <button class="btn mini fantasma" data-copiar="txt-instagram">Copiar</button>
+          </div>
+          <pre class="copy" id="txt-instagram">—</pre>
+        </div>
+
+        <div class="bloque">
+          <div class="bloque-cabecera">
+            <h3>Facebook</h3>
+            <button class="btn mini fantasma" data-copiar="txt-facebook">Copiar</button>
+          </div>
+          <pre class="copy" id="txt-facebook">—</pre>
+        </div>
+
+        <div class="bloque">
+          <div class="bloque-cabecera">
+            <h3>Hashtags</h3>
+            <button class="btn mini fantasma" data-copiar="txt-hashtags">Copiar</button>
+          </div>
+          <div class="hashtags" id="hashtags"></div>
+          <pre class="oculto" id="txt-hashtags"></pre>
+        </div>
+
+        <div class="bloque">
+          <h3>Llamada a la acción</h3>
+          <p id="cta">—</p>
+        </div>
+
+        <div class="acciones">
+          <button class="btn aprobar" id="btn-aprobar">APROBAR</button>
+          <button class="btn rechazar" id="btn-rechazar">RECHAZAR</button>
+          <button class="btn" id="btn-otra">GENERAR OTRA</button>
+          <button class="btn fantasma" id="btn-texto">Reescribir texto</button>
+        </div>
+        <p class="nota-seguridad">
+          APROBAR solo marca la propuesta como aprobada en el historial local.
+          No publica en Instagram ni en Facebook.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PROYECTOS ======================= -->
+  <section class="vista" id="vista-proyectos">
+    <div class="tarjetas" id="tarjetas-resumen"></div>
+    <h2>Proyectos encontrados en PROYECTOS/</h2>
+    <div class="tabla-scroll">
+      <table id="tabla-proyectos">
+        <thead><tr>
+          <th>Proyecto</th><th>Ubicación</th><th>Año</th><th>Tipología</th>
+          <th>Archivos</th><th>Publicables</th><th>Disponibles</th>
+          <th>Publicaciones</th><th></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= CONTENIDO ======================= -->
+  <section class="vista" id="vista-contenido">
+    <h2>Material clasificado</h2>
+    <p class="tenue">Distribución del inventario por tipo y por estado.</p>
+    <div class="dos-columnas">
+      <div class="panel-caja"><h3>Por tipo</h3><div id="barras-tipo"></div></div>
+      <div class="panel-caja"><h3>Por estado</h3><div id="barras-estado"></div></div>
+    </div>
+    <p class="tenue mini" id="pie-escaneo">—</p>
+  </section>
+
+  <!-- ======================= PENDIENTES ======================= -->
+  <section class="vista" id="vista-pendientes">
+    <h2>Publicaciones pendientes</h2>
+    <div class="lista" id="lista-pendientes"></div>
+  </section>
+
+  <!-- ======================= PUBLICADAS ======================= -->
+  <section class="vista" id="vista-publicadas">
+    <h2>Publicaciones publicadas</h2>
+    <p class="tenue">
+      Vacío por diseño: en la fase 1 el sistema no publica en redes sociales.
+      Esta sección se llenará cuando se active la integración con Meta.
+    </p>
+    <div class="lista" id="lista-publicadas"></div>
+  </section>
+
+  <!-- ======================= HISTORIAL ======================= -->
+  <section class="vista" id="vista-historial">
+    <h2>Historial completo</h2>
+    <p class="tenue">
+      Cada imagen usada queda registrada aquí. Es lo que evita repetir
+      accidentalmente la misma foto.
+    </p>
+    <div class="tabla-scroll">
+      <table id="tabla-historial">
+        <thead><tr>
+          <th>ID</th><th>Fecha</th><th>Proyecto</th><th>Archivo</th>
+          <th>Plataforma</th><th>Estado</th><th>URL</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span id="pie-proxima">—</span>
+  <span class="tenue">PROYECTOS se lee en modo solo lectura · ningún original se modifica</span>
+</footer>
+
+<script src="/panel.js"></script>
+</body>
+</html>
