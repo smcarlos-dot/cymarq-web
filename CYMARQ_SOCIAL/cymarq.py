@@ -225,6 +225,51 @@ def cmd_programar(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_calendarizar_banco(args: argparse.Namespace) -> int:
+    """Asigna martes y viernes 18:30 a todo el banco apto. No publica."""
+    print(LINEA)
+    print("  CYMARQ SOCIAL — calendarizar el banco")
+    print(LINEA)
+    print(f"  Franjas   : martes y viernes a las 18:30 ({programacion.NOMBRE_ZONA})")
+    print(f"  Modo      : {'SIMULACION (no escribe)' if args.simular else 'asignacion real de fechas'}")
+    print("  Calendarizar solo asigna fechas: no toca imagenes ni textos.")
+    print()
+
+    r = programacion.calendarizar_banco(simular=args.simular)
+
+    if r["asignadas"]:
+        print("  NUEVAS PROGRAMACIONES")
+        for a in r["asignadas"]:
+            print(f"    {a['id']}  {programacion.formato_humano(a['cuando'])}"
+                  f"  {a['proyecto'][:34]}")
+        print()
+
+    if r["ya_programadas"]:
+        print("  YA PROGRAMADAS (no se tocan)")
+        for a in r["ya_programadas"]:
+            print(f"    {a['id']}  {programacion.formato_humano(a['programado_para'])}"
+                  f"  {a['proyecto'][:34]}")
+        print()
+
+    if r["excluidas"]:
+        print("  EXCLUIDAS")
+        for a in r["excluidas"]:
+            print(f"    {a['id']}  {a['motivo']:<34} {a['proyecto'][:28]}")
+        print()
+
+    print(LINEA)
+    print(f"  Nuevas programaciones : {len(r['asignadas'])}")
+    print(f"  Ya programadas        : {len(r['ya_programadas'])}")
+    print(f"  Excluidas/no aptas    : {len(r['excluidas'])}")
+    if r["asignadas"]:
+        print(f"  Primera franja nueva  : {programacion.formato_humano(r['asignadas'][0]['cuando'])}")
+        print(f"  Ultima franja         : {programacion.formato_humano(r['asignadas'][-1]['cuando'])}")
+    print(LINEA)
+    print("  Nada se ha publicado en Meta.")
+    print(LINEA)
+    return 0
+
+
 def cmd_programadas(args: argparse.Namespace) -> int:
     """Scheduler. SOLO DETECTA: nunca publica ni llama a Meta."""
     try:
@@ -486,6 +531,12 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--cancelar", action="store_true",
                    help="Quita la programacion y vuelve a 'aprobada'")
     s.set_defaults(func=cmd_programar)
+
+    s = sub.add_parser("calendarizar-banco",
+                       help="Asigna martes y viernes 18:30 a todo el banco apto")
+    s.add_argument("--simular", action="store_true",
+                   help="Muestra el calendario que asignaria, sin escribir")
+    s.set_defaults(func=cmd_calendarizar_banco)
 
     s = sub.add_parser("programadas",
                        help="Scheduler: detecta que toca publicar. NO publica.")

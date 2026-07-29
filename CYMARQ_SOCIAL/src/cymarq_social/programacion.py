@@ -321,3 +321,133 @@ def revisar(momento: datetime | None = None, aplicar: bool = True) -> Informe:
     informe.futuras.sort(key=lambda e: e.programado_para or referencia)
     informe.listas.sort(key=lambda e: e.programado_para or referencia)
     return informe
+
+
+# --------------------------------------------------------------------- #
+# Calendarizacion masiva                                                 #
+# --------------------------------------------------------------------- #
+
+#: Dias de publicacion del calendario, en numeracion de datetime.weekday().
+DIAS_CALENDARIO = (1, 4)          # martes, viernes
+HORA_CALENDARIO = (18, 30)        # 18:30 hora de Colombia
+
+
+def franjas(desde: datetime, dias: tuple[int, ...] = DIAS_CALENDARIO):
+    """Genera los instantes de publicacion, en orden y sin fin.
+
+    Solo devuelve franjas ESTRICTAMENTE posteriores a `desde`, para no pisar
+    una programacion que ya existe en ese mismo momento.
+    """
+    hh, mm = HORA_CALENDARIO
+    dia = a_zona(desde).date()
+    while True:
+        candidato = a_zona(datetime(dia.year, dia.month, dia.day, hh, mm))
+        if candidato > a_zona(desde) and candidato.weekday() in dias:
+            yield candidato
+        dia += timedelta(days=1)
+
+
+def apta_para_calendario(pub: dict[str, Any],
+                         catalogo: dict[str, Any]) -> tuple[bool, str]:
+    """¿Se le puede asignar fecha a esta publicacion?
+
+    Devuelve (apta, motivo). El motivo explica la exclusion, para poder
+    reportarla en vez de fallar en silencio.
+    """
+    estado = pub.get("estado", "")
+    if estado == "publicada":
+        return False, "ya publicada"
+    if estado in ("rechazada", "cancelada"):
+        return False, f"descartada ({estado})"
+    if pub.get("programado_para"):
+        return False, "ya tiene programacion"
+    if estado not in ("propuesta", "aprobada"):
+        return False, f"estado no calendarizable ({estado})"
+
+    if not catalogo.get(pub.get("id_archivo", "")):
+        return False, "sin imagen publica preparada"
+
+    textos = pub.get("texto") or {}
+    if not textos.get("instagram"):
+        return False, "sin caption de Instagram"
+    if not textos.get("facebook"):
+        return False, "sin caption de Facebook"
+
+    plataformas = set(pub.get("plataforma") or [])
+    if not {"instagram", "facebook"} <= plataformas:
+        return False, f"no destinada a ambas plataformas ({', '.join(sorted(plataformas)) or 'ninguna'})"
+
+    return True, ""
+
+
+def calendarizar_banco(dias: tuple[int, ...] = DIAS_CALENDARIO,
+                       simular: bool = False) -> dict[str, Any]:
+    """Asigna fecha y hora a todo el banco apto, en martes y viernes 18:30.
+
+    Calendarizar es SOLO asignar fechas. No elige imagenes, no toca textos, no
+    genera nada y no publica.
+
+    IDEMPOTENTE: lo que ya tiene `programado_para` se salta sin tocarlo, asi
+    que una segunda pasada asigna cero y ninguna fecha se desplaza. Eso vale
+    tambien para las fechas que cambies a mano: se respetan.
+
+    El orden es el del banco (por ID), que es el que produjo la rotacion. No se
+    reordena para favorecer a ningun proyecto.
+
+    Arranca despues de la ultima programacion existente, y comprueba cada
+    franja contra las ya ocupadas: nunca dos publicaciones en el mismo instante.
+    """
+    pubs = sorted(historial.cargar().get("publicaciones", []),
+                  key=lambda p: p.get("id", ""))
+
+    from . import catalogo_social  # import local: evita un ciclo de importacion
+    catalogo = catalogo_social.cargar_manifiesto().get("imagenes", {})
+
+    ocupadas: set[datetime] = set()
+    for p in pubs:
+        cuando = leer_iso(p.get("programado_para"))
+        if cuando and p.get("estado") not in ("rechazada", "cancelada"):
+            ocupadas.add(cuando)
+
+    # El calendario nuevo empieza despues de todo lo ya programado.
+    base = max(ocupadas) if ocupadas else ahora()
+
+    asignadas: list[dict[str, Any]] = []
+    excluidas: list[dict[str, Any]] = []
+    ya_programadas: list[dict[str, Any]] = []
+
+    generador_franjas = franjas(base, dias)
+
+    for pub in pubs:
+        apta, motivo = apta_para_calendario(pub, catalogo)
+        if not apta:
+            destino = ya_programadas if motivo == "ya tiene programacion" else excluidas
+            destino.append({"id": pub.get("id"), "motivo": motivo,
+                            "proyecto": pub.get("proyecto_nombre", ""),
+                            "programado_para": pub.get("programado_para")})
+            continue
+
+        # Siguiente franja libre.
+        franja = next(generador_franjas)
+        while franja in ocupadas:
+            franja = next(generador_franjas)
+        ocupadas.add(franja)
+
+        if not simular:
+            # propuesta -> aprobada -> programada. La maquina de estados no
+            # admite saltar directamente de propuesta a programada.
+            if pub.get("estado") == "propuesta":
+                historial.cambiar_estado(pub["id"], "aprobada",
+                                         "aprobada al calendarizar el banco")
+            programar(pub["id"], franja)
+
+        asignadas.append({"id": pub.get("id"),
+                          "proyecto": pub.get("proyecto_nombre", ""),
+                          "cuando": franja})
+
+    return {
+        "asignadas": asignadas,
+        "ya_programadas": ya_programadas,
+        "excluidas": excluidas,
+        "simulado": simular,
+    }

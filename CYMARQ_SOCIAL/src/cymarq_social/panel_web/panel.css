@@ -258,3 +258,9 @@ footer{
   opacity: .9;
 }
 .oculto { display: none; }
+
+.etiqueta.roja {
+  background: rgba(220, 70, 70, .18);
+  color: #ff9b9b;
+  border-color: rgba(220, 70, 70, .35);
+}

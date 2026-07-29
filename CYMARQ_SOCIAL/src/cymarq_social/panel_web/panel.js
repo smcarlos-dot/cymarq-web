@@ -209,8 +209,11 @@ function pintarListas() {
 function filasBanco(lista, vacio) {
   if (!lista || !lista.length) return `<p class="tenue">${vacio}</p>`;
 
-  const cab = `<p class="tenue mini">${lista.length} publicaciones almacenadas.
-    Los textos ya están guardados; abrir una no vuelve a generarlos.</p>`;
+  const conFecha = lista.filter((p) => p.programado_para).length;
+  const cab = `<p class="tenue mini">${lista.length} publicaciones almacenadas ·
+    ${conFecha} programadas · ${lista.length - conFecha} sin fecha.
+    En orden cronológico de publicación. Los textos ya están guardados;
+    abrir una no vuelve a generarlos.</p>`;
 
   return cab + lista.map((p) => {
     const prog = p.programado_para
@@ -218,7 +221,7 @@ function filasBanco(lista, vacio) {
       : '<span class="tenue mini">sin fecha</span>';
     const pub = p.imagen_publica
       ? '<span class="etiqueta verde" title="Derivado JPEG publicado">imagen lista</span>'
-      : '<span class="etiqueta gris" title="Sin derivado público">sin imagen pública</span>';
+      : '<span class="etiqueta roja" title="Relación de aspecto no admitida por Instagram: no apta, no programada">NO APTA</span>';
     return `
       <div class="fila banco" data-id="${esc(p.id)}">
         <img class="miniatura" src="/imagen/${encodeURIComponent(p.id)}" alt="" loading="lazy">

@@ -86,6 +86,15 @@ def _estado_completo() -> dict[str, Any]:
         entrada = catalogo.get(p.get("id_archivo", ""))
         p["imagen_publica"] = (entrada or {}).get("url")
 
+    # Orden cronologico: primero lo que ya tiene fecha, en el orden en que va a
+    # salir; despues lo que aun no la tiene, por ID. Asi la lista ES el
+    # calendario, sin necesidad de una vista aparte.
+    pendientes.sort(key=lambda p: (
+        p.get("programado_para") is None,
+        p.get("programado_para") or "",
+        p.get("id", ""),
+    ))
+
     # Se muestra primero lo que reclama una decision, en ese orden.
     actual = None
     for estado in EN_CURSO:
