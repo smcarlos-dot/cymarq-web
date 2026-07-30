@@ -54,6 +54,7 @@ inventario_contenido.json
 historial_publicaciones.json
 perfiles_proyectos.json
 imagenes_publicas.json
+videos_publicos.json
 **/CONFIG/secretos*
 **/CONFIG/*token*
 **/CONFIG/*credencial*

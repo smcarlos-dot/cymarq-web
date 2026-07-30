@@ -14,7 +14,9 @@
     "instagram:publish": "node scripts/instagram-publish.mjs",
     "facebook:verify": "node scripts/facebook-verify.mjs",
     "facebook:dry-run": "node scripts/facebook-dry-run.mjs",
-    "facebook:publish": "node scripts/facebook-publish.mjs"
+    "facebook:publish": "node scripts/facebook-publish.mjs",
+    "video:dry-run": "node scripts/social-video-dry-run.mjs",
+    "social:health": "node scripts/social-health.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",

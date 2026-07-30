@@ -373,7 +373,104 @@ python cymarq.py express --listar
 El derivado JPEG se prepara solo, pero **hay que desplegarlo** (commit y push)
 antes de publicar: el preflight lo comprueba.
 
-## 7. Preguntas frecuentes
+## 8. Vídeo y Reels
+
+El sistema publica vídeo además de imágenes. El flujo es el mismo y las seis
+barreras son las mismas: lo único que cambia es el medio y el endpoint.
+
+### Qué endpoint usa cada red
+
+| Tipo | Instagram | Facebook |
+|---|---|---|
+| `image` | `/media` (`image_url`) | `/<PAGE_ID>/photos` |
+| `reels` | `/media` con `media_type=REELS` + `video_url` | `/<PAGE_ID>/video_reels`, 3 fases |
+| `video` | **no existe** — en IG todo vídeo es Reel | `/<PAGE_ID>/videos` (`file_url`) |
+
+Instagram no tiene «vídeo de feed» por API. Si una propuesta pide `video` y la
+plataforma es Instagram, el motor lo traduce a `reels` solo.
+
+Los Reels de Facebook van en tres fases y **solo la tercera publica**:
+`start` (reserva) → subida alojada por `file_url` → `finish` (irreversible).
+Que las dos primeras no publiquen es lo que permite reanudarlas: si el proceso
+muere después del `start`, la ejecución siguiente reutiliza ese `video_id` en
+vez de reservar otro, igual que Instagram reutiliza el contenedor.
+
+### La URL pública
+
+Meta no acepta que le subamos bytes en este flujo: descarga el medio ella misma
+desde una URL, con peticiones de rango. La solución es la que ya funciona para
+las imágenes, sin infraestructura nueva:
+
+```
+PUBLICAR/…/video.mp4
+   → catalogo_video.preparar_video()      copia sin recodificar
+   → 09 WEB/public/social/video/<nombre>-<huella>.mp4
+   → commit + push  →  Cloudflare Pages
+   → https://www.cymarq.com.co/social/video/<nombre>-<huella>.mp4
+```
+
+Cloudflare sirve estos archivos con `Content-Type: video/mp4` y
+`Accept-Ranges: bytes`, que es exactamente lo que necesita el descargador de
+Meta. Sin servidor propio, sin túneles y sin tokens en la URL.
+
+**El vídeo se COPIA, no se recodifica.** Recodificar exigiría ffmpeg en la VM y
+una segunda pasada de H.264 solo degradaría un archivo que ya cumple. El
+catálogo valida y copia.
+
+> El preflight comprueba que el derivado exista en disco. Si falta el commit y
+> el push, Meta recibiría un 404 en mitad de la publicación.
+
+### Límites que se comprueban
+
+Se valida contra el techo más bajo de los dos, que es Facebook Reels: si un
+vídeo pasa, sirve en las dos redes.
+
+| | Instagram Reels | Facebook Reels | FB vídeo de feed |
+|---|---|---|---|
+| Duración | 3 s – 15 min | 3 s – 90 s | 1 s – 4 h |
+| Relación | 0,01 – 10 | **9:16 obligatorio** | 0,01 – 10 |
+| Mínimo | — | 540x960 | — |
+| Códecs | H.264/HEVC + AAC | H.264/HEVC + AAC | H.264/HEVC + AAC |
+
+El MP4 se inspecciona recorriendo sus cajas (ISO/IEC 14496-12), sin ffmpeg y
+sin dependencias. Hay dos lectores espejo, uno en Node
+(`09 WEB/lib/social/video.mjs`) y uno en Python (`catalogo_video.py`), y las
+pruebas comprueban que ambos coinciden con lo que dice ffprobe.
+
+### Ensayos
+
+```bash
+npm run video:dry-run -- --file="C:\ruta\video.mp4"
+```
+
+```bash
+npm run video:dry-run -- --url=https://www.cymarq.com.co/social/video/x.mp4
+```
+
+Con `--file` no hace falta red ni despliegue: sirve para descartar un archivo
+antes de subirlo. Con `--url` se descarga igual que hará Meta y se comprueba
+además el HTTP, el `Content-Type` y el soporte de rangos.
+
+El ensayo de los publicadores es el de siempre — sin `--confirm` no hay ninguna
+escritura:
+
+```bash
+npm run instagram:publish -- --job=<ID> --metadata=<ruta> --media-type=reels --video-url=<url>
+```
+
+### `usar_videos` NO es el interruptor de esto
+
+`usar_videos` en `config.json` decide si los vídeos de `PROYECTOS/` entran en el
+**pool de la rotación automática**, es decir, si el calendario desatendido puede
+proponerlos por su cuenta. No tiene nada que ver con la capacidad de publicar
+vídeo: una express de vídeo funciona con `usar_videos: false`.
+
+Se deja en `false` a propósito. Activarlo cambia lo que hace el piloto
+automático, no lo que puede hacer el sistema.
+
+---
+
+## 9. Preguntas frecuentes
 
 **¿Puede este sistema borrar o dañar mis renders?**
 No. Cualquier escritura cuyo destino esté dentro de `PROYECTOS/` lanza una

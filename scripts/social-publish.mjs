@@ -107,9 +107,22 @@ async function main() {
              message: `--platform debe ser instagram o facebook, no "${platform}"` });
     return;
   }
-  if (!jobId || !metadata || !imageUrl) {
+  const mediaType = arg('media-type') ?? 'image';
+  const videoUrl = arg('video-url');
+
+  if (!['image', 'reels', 'video'].includes(mediaType)) {
     emitir({ ...base, status: 'failed', retry_safe: true,
-             message: 'faltan --job, --metadata o --image-url' });
+             message: `--media-type debe ser image, reels o video, no "${mediaType}"` });
+    return;
+  }
+  // El medio obligatorio depende del tipo: un job de vídeo sin --video-url no
+  // se puede intentar, y aceptar la imagen "por si acaso" publicaria otra cosa.
+  const medio = mediaType === 'image' ? imageUrl : videoUrl;
+  if (!jobId || !metadata || !medio) {
+    emitir({ ...base, status: 'failed', retry_safe: true,
+             message: mediaType === 'image'
+               ? 'faltan --job, --metadata o --image-url'
+               : `faltan --job, --metadata o --video-url (media-type=${mediaType})` });
     return;
   }
 
@@ -142,7 +155,16 @@ async function main() {
     return;
   }
 
-  const argumentos = [`--job=${jobId}`, `--metadata=${metadata}`, `--image-url=${imageUrl}`];
+  const argumentos = [`--job=${jobId}`, `--metadata=${metadata}`];
+  if (imageUrl) argumentos.push(`--image-url=${imageUrl}`);
+  if (videoUrl) argumentos.push(`--video-url=${videoUrl}`);
+  if (mediaType !== 'image') argumentos.push(`--media-type=${mediaType}`);
+
+  const coverUrl = arg('cover-url');
+  if (coverUrl) argumentos.push(`--cover-url=${coverUrl}`);
+  const thumbOffset = arg('thumb-offset');
+  if (thumbOffset) argumentos.push(`--thumb-offset=${thumbOffset}`);
+
   const varianteCaption = arg('caption');
   if (varianteCaption) argumentos.push(`--caption=${varianteCaption}`);
   if (confirmar) argumentos.push('--confirm');

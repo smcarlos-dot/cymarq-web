@@ -36,6 +36,7 @@ import { dirname, join } from 'node:path';
 import {
   getAccount,
   createMediaContainer,
+  createReelContainer,
   getContainerStatus,
   getContainerErrorDetail,
   publishContainer,
@@ -43,9 +44,15 @@ import {
   checkPublicImage,
   analyzeCaption,
   GraphError,
+  SONDEO,
   API_VERSION,
   GRAPH_HOST,
 } from '../lib/instagram/publish.mjs';
+import {
+  comprobarVideoPublico,
+  describirVideo,
+  REGLAS_INSTAGRAM_REEL,
+} from '../lib/social/video.mjs';
 import { requireSecret } from './instagram-env.mjs';
 import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
 import { exigirProduccion } from './entorno.mjs';
@@ -56,11 +63,8 @@ const DIARIO = join(REPO, '.instagram-publish-state.json');
 const CUENTA_ESPERADA = 'cymarq_obras';
 
 const USO =
-  'npm run instagram:publish -- --job=<ID> --metadata=<ruta> --image-url=<url> [--confirm]';
-
-/** Sondeo del estado del contenedor. Una imagen suele estar lista al instante. */
-const SONDEO_MAX_INTENTOS = 20;
-const SONDEO_ESPERA_MS = 3000;
+  'npm run instagram:publish -- --job=<ID> --metadata=<ruta> ' +
+  '(--image-url=<url> | --media-type=reels --video-url=<url>) [--confirm]';
 
 /* ------------------------------------------------------------------ */
 /* Diario                                                              */
@@ -115,11 +119,25 @@ async function main() {
   const trabajo = leerTrabajo({ varianteCaption: 'instagram', uso: USO });
   const JOB_ID = trabajo.jobId;
   const IMAGEN_URL = trabajo.imageUrl;
+
+  // Instagram no tiene "vídeo de feed" por API: todo vídeo entra como Reel. Se
+  // corta aquí en vez de traducirlo en silencio, porque quien pidió `video`
+  // esperaba otra cosa y conviene que lo sepa.
+  if (trabajo.mediaType === 'video') {
+    console.error('\n  --media-type=video no existe en Instagram: el vídeo se publica como Reel.');
+    console.error('  Usa --media-type=reels.\n');
+    process.exitCode = 1;
+    return;
+  }
+
+  const ES_REEL = trabajo.mediaType === 'reels';
+  const MEDIO_URL = ES_REEL ? trabajo.videoUrl : IMAGEN_URL;
   const token = await requireSecret('INSTAGRAM_PUBLISH_TOKEN');
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
   console.log('║  PASO 4 — PUBLICACIÓN REAL CONTROLADA                        ║');
   console.log(`║  Modo: ${(confirmar ? 'PUBLICAR DE VERDAD' : 'ensayo (sin --confirm)').padEnd(53)}║`);
+  console.log(`║  Tipo: ${(ES_REEL ? 'REEL (vídeo)' : 'imagen de feed').padEnd(53)}║`);
   console.log('╚══════════════════════════════════════════════════════════════╝');
 
   /* --- Diario: ¿ya se hizo esto? --------------------------------- */
@@ -153,7 +171,12 @@ async function main() {
   bloque('CONTENIDO A PUBLICAR');
   console.log(`  job         : ${JOB_ID}`);
   console.log(`  proyecto    : ${metadata.proyecto_nombre}`);
-  console.log(`  imagen      : ${IMAGEN_URL}`);
+  console.log(`  tipo        : ${ES_REEL ? 'REELS' : 'IMAGE'}`);
+  console.log(`  ${ES_REEL ? 'vídeo ' : 'imagen'}      : ${MEDIO_URL}`);
+  if (ES_REEL && trabajo.coverUrl) console.log(`  portada     : ${trabajo.coverUrl}`);
+  if (ES_REEL && Number.isFinite(trabajo.thumbOffset)) {
+    console.log(`  portada ms  : ${trabajo.thumbOffset}`);
+  }
   console.log(`  caption     : ${analisis.characters} caracteres, ${analisis.hashtags.length} hashtags`);
 
   if (!analisis.ok) {
@@ -182,14 +205,31 @@ async function main() {
     return;
   }
 
-  const imagen = await checkPublicImage(IMAGEN_URL);
-  console.log(`  imagen      : HTTP ${imagen.status}, ${imagen.contentType}, ` +
-    `${imagen.width}x${imagen.height}, ${Math.round(imagen.bytes / 1024)} KB`);
-  if (!imagen.ok) {
-    console.error('\n  ABORTADO: la imagen no cumple los requisitos de Meta.');
-    for (const p of imagen.problems) console.error(`    · ${p}`);
-    process.exitCode = 1;
-    return;
+  if (ES_REEL) {
+    // Se descarga el MP4 igual que lo hará Meta y se mide el archivo real. Un
+    // vídeo que no cumple aquí produciría un contenedor en ERROR minutos
+    // después, sin explicación aprovechable.
+    const video = await comprobarVideoPublico(MEDIO_URL, REGLAS_INSTAGRAM_REEL);
+    console.log(`  vídeo       : HTTP ${video.status}, ${video.contentType}`);
+    console.log(`  medidas     : ${describirVideo(video.info, video.bytes)}`);
+    console.log(`  rangos      : ${video.aceptaRangos ?? '(no anunciado)'}`);
+    for (const a of video.avisos) console.log(`  aviso       : ${a}`);
+    if (!video.ok) {
+      console.error('\n  ABORTADO: el vídeo no cumple los requisitos de Instagram Reels.');
+      for (const p of video.problemas) console.error(`    · ${p}`);
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    const imagen = await checkPublicImage(IMAGEN_URL);
+    console.log(`  imagen      : HTTP ${imagen.status}, ${imagen.contentType}, ` +
+      `${imagen.width}x${imagen.height}, ${Math.round(imagen.bytes / 1024)} KB`);
+    if (!imagen.ok) {
+      console.error('\n  ABORTADO: la imagen no cumple los requisitos de Meta.');
+      for (const p of imagen.problems) console.error(`    · ${p}`);
+      process.exitCode = 1;
+      return;
+    }
   }
   console.log('  [OK] Todo listo.');
 
@@ -210,12 +250,21 @@ async function main() {
     console.log('  Se REUTILIZA. No se crea uno nuevo.');
   } else {
     try {
-      const contenedor = await createMediaContainer({
-        igId,
-        token,
-        imageUrl: IMAGEN_URL,
-        caption,
-      });
+      const contenedor = ES_REEL
+        ? await createReelContainer({
+            igId,
+            token,
+            videoUrl: MEDIO_URL,
+            caption,
+            coverUrl: trabajo.coverUrl,
+            thumbOffset: trabajo.thumbOffset,
+          })
+        : await createMediaContainer({
+            igId,
+            token,
+            imageUrl: IMAGEN_URL,
+            caption,
+          });
       containerId = contenedor?.id ? String(contenedor.id) : null;
       if (!containerId) throw new GraphError('La respuesta no incluyó el id del contenedor.');
       // Se anota ANTES de cualquier otra cosa: si el proceso muere ahora, la
@@ -224,7 +273,8 @@ async function main() {
         job: JOB_ID,
         container_id: containerId,
         creado_en: new Date().toISOString(),
-        image_url: IMAGEN_URL,
+        media_type: ES_REEL ? 'REELS' : 'IMAGE',
+        ...(ES_REEL ? { video_url: MEDIO_URL } : { image_url: IMAGEN_URL }),
         caption_caracteres: analisis.characters,
         ig_user_id: igId,
         username: cuenta.username,
@@ -241,6 +291,15 @@ async function main() {
 
   /* --- 2. Estado -------------------------------------------------- */
   bloque(`2/4  ESTADO   GET ${GRAPH_HOST}/${API_VERSION}/${containerId}?fields=status_code`);
+
+  // Un Reel hay que descargarlo y transcodificarlo: el sondeo es mucho más
+  // largo que el de una imagen (5 min frente a 60 s).
+  const { intentos: SONDEO_MAX_INTENTOS, esperaMs: SONDEO_ESPERA_MS } =
+    ES_REEL ? SONDEO.reels : SONDEO.image;
+  console.log(
+    `  sondeo      : hasta ${SONDEO_MAX_INTENTOS} intentos cada ${SONDEO_ESPERA_MS / 1000} s ` +
+      `(máx. ${Math.round((SONDEO_MAX_INTENTOS * SONDEO_ESPERA_MS) / 60000)} min)`
+  );
 
   let estado = null;
   for (let intento = 1; intento <= SONDEO_MAX_INTENTOS; intento += 1) {
@@ -325,7 +384,8 @@ async function main() {
   console.log(`  CUENTA DESTINO : @${cuenta.username}`);
   console.log(`  IG USER_ID     : ${igId}`);
   console.log(`  PROYECTO       : ${metadata.proyecto_nombre}`);
-  console.log(`  IMAGEN         : ${IMAGEN_URL}`);
+  console.log(`  TIPO           : ${ES_REEL ? 'REELS' : 'IMAGE'}`);
+  console.log(`  ${ES_REEL ? 'VÍDEO         ' : 'IMAGEN        '} : ${MEDIO_URL}`);
   console.log(`  CONTAINER_ID   : ${containerId}`);
   console.log(`  ESTADO         : FINISHED`);
   console.log(`  MEDIA_ID       : ${mediaId}`);

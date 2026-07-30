@@ -505,32 +505,52 @@ def cmd_express(args: argparse.Namespace) -> int:
               + (f"  COLISIONES: {r['colisiones']}" if r["colisiones"] else ""))
         return 0
 
-    if not args.imagen:
-        print("  [!] Falta --imagen")
+    if not args.imagen and not args.video:
+        print("  [!] Falta --imagen o --video")
+        return 1
+    if args.imagen and args.video:
+        print("  [!] --imagen y --video son excluyentes")
         return 1
     try:
         ig = Path(args.texto_ig).read_text(encoding="utf-8") if args.texto_ig_archivo             else args.texto_ig
         fb = Path(args.texto_fb).read_text(encoding="utf-8") if args.texto_fb_archivo             else args.texto_fb
-        reg = express_mod.crear(
-            args.imagen, ig or "", fb or "", titulo=args.titulo,
-            proyecto=args.proyecto, cuando=args.cuando or None,
-        )
+        if args.video:
+            reg = express_mod.crear_video(
+                args.video, ig or "", fb or "", titulo=args.titulo,
+                proyecto=args.proyecto, cuando=args.cuando or None,
+                tipo_medio=args.tipo_medio,
+            )
+        else:
+            reg = express_mod.crear(
+                args.imagen, ig or "", fb or "", titulo=args.titulo,
+                proyecto=args.proyecto, cuando=args.cuando or None,
+            )
     except (express_mod.ErrorExpress, ValueError, OSError) as exc:
         print(f"  [!] {exc}")
         return 1
 
     d = reg.get("_derivado") or {}
+    es_video = bool(reg.get("tipo_medio") and reg["tipo_medio"] != "image")
     print(LINEA)
     print(f"  EXPRESS {reg['id']} creada")
     print(LINEA)
     print(f"  estado        : {reg['estado']}")
     print(f"  programada    : {programacion.formato_humano(reg.get('programado_para'))}")
-    print(f"  imagen        : {reg['archivo']}  (original intacto)")
+    print(f"  {'video' if es_video else 'imagen'}        : {reg['archivo']}  (original intacto)")
+    if es_video:
+        print(f"  tipo_medio    : {reg['tipo_medio']}")
+        v = reg.get("video") or {}
+        if v:
+            print(f"  medidas       : {v.get('ancho')}x{v.get('alto')} · "
+                  f"{v.get('duracion')} s · {v.get('fps')} fps · "
+                  f"{v.get('codec_video')}/{v.get('codec_audio')}")
     print(f"  id_archivo    : {reg['id_archivo']}")
     print(f"  derivado      : {d.get('accion')}  {d.get('nombre') or ''}")
     print(f"  URL publica   : {d.get('url') or '(no generada)'}")
     if d.get("detalle"):
         print(f"                  {d['detalle']}")
+    for aviso in d.get("avisos") or []:
+        print(f"  aviso         : {aviso}")
     print(f"  caption IG    : {len(reg['texto']['instagram'])} caracteres")
     print(f"  caption FB    : {len(reg['texto']['facebook'])} caracteres")
     r = express_mod.resumen_aislamiento()
@@ -997,6 +1017,9 @@ def construir_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("express", help="Publicacion puntual fuera del calendario")
     s.add_argument("--imagen", help="Ruta a la imagen")
+    s.add_argument("--video", help="Ruta al MP4 (excluyente con --imagen)")
+    s.add_argument("--tipo-medio", default="reels", choices=["reels", "video"],
+                   help="Solo con --video: 'reels' (9:16) o 'video' de feed en Facebook")
     s.add_argument("--texto-ig", default="", help="Caption de Instagram")
     s.add_argument("--texto-fb", default="", help="Caption de Facebook")
     s.add_argument("--texto-ig-archivo", action="store_true",

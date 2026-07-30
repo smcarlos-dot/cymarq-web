@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import catalogo_social, historial, programacion, rutas, seguridad
+from . import catalogo_social, catalogo_video, historial, programacion, rutas, seguridad
 
 VERSION_PAQUETE = 1
 
@@ -43,6 +43,7 @@ PROHIBIDO = (
     "historial_publicaciones.json",
     "inventario_contenido.json",
     "imagenes_publicas.json",
+    "videos_publicos.json",
     "perfiles_proyectos.json",
     "autorizaciones.json",
     "entorno.json",
@@ -53,6 +54,10 @@ PROHIBIDO = (
     "locks",
 )
 
+#: Carpetas de medio admitidas dentro de un paquete. Cualquier otra ruta se
+#: rechaza en `_nombre_seguro()`.
+PREFIJOS_MEDIO = ("imagen/", "video/")
+
 
 class ErrorTransferencia(RuntimeError):
     """El paquete no se puede crear o no se puede importar."""
@@ -60,6 +65,36 @@ class ErrorTransferencia(RuntimeError):
 
 def _sha256(datos: bytes) -> str:
     return hashlib.sha256(datos).hexdigest()
+
+
+def es_video(pub: dict[str, Any]) -> bool:
+    """¿Esta publicacion es de video?
+
+    Sin `tipo_medio` es una imagen. Ese valor por defecto es lo que hace que las
+    publicaciones creadas antes de existir el video sigan viajando igual.
+    """
+    return (pub.get("tipo_medio") or "image") != "image"
+
+
+def _perfil_medio(pub: dict[str, Any]) -> dict[str, Any]:
+    """Todo lo que cambia entre un paquete de imagen y uno de video."""
+    if es_video(pub):
+        return {
+            "prefijo": "video/",
+            "carpeta": "video",
+            "clave_publica": "video_publico",
+            "clave_origen": "video_origen",
+            "manifiesto": catalogo_video.ARCHIVO_MANIFIESTO,
+            "etiqueta": "video",
+        }
+    return {
+        "prefijo": "imagen/",
+        "carpeta": "imagen",
+        "clave_publica": "imagen_publica",
+        "clave_origen": "imagen_origen",
+        "manifiesto": catalogo_social.ARCHIVO_MANIFIESTO,
+        "etiqueta": "imagen",
+    }
 
 
 # --------------------------------------------------------------------- #
@@ -74,14 +109,19 @@ CAMPOS = (
     "hashtags_facebook", "llamada_a_la_accion", "variante_texto",
     "formato_imagen", "dimensiones", "notas", "rotacion",
     "programado_para", "zona_horaria",
+    # Video. Sin `tipo_medio` el paquete es de imagen, como siempre.
+    "tipo_medio", "video",
 )
 
 
 def exportar(job_id: str, destino: Path | str | None = None) -> Path:
     """Crea un paquete .zip con todo lo necesario para incorporar una publicacion.
 
-    Incluye la ficha, la entrada del manifiesto de la imagen publica y una copia
-    de la imagen. NO incluye ningun dato de estado operativo.
+    Incluye la ficha, la entrada del manifiesto del medio publico y una copia del
+    propio medio. NO incluye ningun dato de estado operativo.
+
+    Sirve para imagen y para video: el medio decide de que manifiesto sale la URL
+    y en que carpeta del zip viaja el archivo.
     """
     reg = historial.buscar(job_id)
     if reg is None:
@@ -91,41 +131,60 @@ def exportar(job_id: str, destino: Path | str | None = None) -> Path:
             f"{job_id} ya esta publicada: no tiene sentido enviarla a produccion."
         )
 
+    perfil = _perfil_medio(reg)
     id_archivo = reg.get("id_archivo") or ""
-    entrada = catalogo_social.cargar_manifiesto().get("imagenes", {}).get(id_archivo)
-    if not entrada:
-        raise ErrorTransferencia(
-            f"{job_id} no tiene imagen preparada en el catalogo publico. "
-            "Ejecuta 'catalogo' antes de exportar."
-        )
+
+    if es_video(reg):
+        entrada = catalogo_video.cargar_manifiesto().get("videos", {}).get(id_archivo)
+        if not entrada:
+            raise ErrorTransferencia(
+                f"{job_id} no tiene video preparado en el catalogo publico. "
+                "Preparalo antes de exportar."
+            )
+    else:
+        entrada = catalogo_social.cargar_manifiesto().get("imagenes", {}).get(id_archivo)
+        if not entrada:
+            raise ErrorTransferencia(
+                f"{job_id} no tiene imagen preparada en el catalogo publico. "
+                "Ejecuta 'catalogo' antes de exportar."
+            )
 
     copia = rutas.RAIZ / (reg.get("copia_local") or "")
     if not copia.is_file():
-        raise ErrorTransferencia(f"No se encuentra la copia de la imagen: {copia}")
+        raise ErrorTransferencia(
+            f"No se encuentra la copia del {perfil['etiqueta']}: {copia}"
+        )
 
     publicacion = {c: reg[c] for c in CAMPOS if c in reg}
     # El estado viaja siempre normalizado: quien decide el estado operativo es
     # la VM, no el paquete.
     publicacion["estado"] = "programada" if reg.get("programado_para") else "propuesta"
 
-    bytes_imagen = copia.read_bytes()
+    bytes_medio = copia.read_bytes()
+    publico = {
+        "id_archivo": id_archivo,
+        "nombre": entrada["nombre"],
+        "url": entrada["url"],
+        "ancho": entrada.get("ancho"),
+        "alto": entrada.get("alto"),
+        "peso": entrada.get("peso"),
+    }
+    if es_video(reg):
+        # Datos que solo tiene un video y que la VM necesita para su manifiesto.
+        for campo in ("duracion", "fps", "codec_video", "codec_audio", "sha256"):
+            if campo in entrada:
+                publico[campo] = entrada[campo]
+
     paquete = {
         "version": VERSION_PAQUETE,
         "creado_en": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
         "tipo": "EXPRESS" if reg.get("express") else "PROGRAMADA",
         "publicacion": publicacion,
-        "imagen_publica": {
-            "id_archivo": id_archivo,
-            "nombre": entrada["nombre"],
-            "url": entrada["url"],
-            "ancho": entrada.get("ancho"),
-            "alto": entrada.get("alto"),
-            "peso": entrada.get("peso"),
-        },
-        "imagen_origen": {
+        perfil["clave_publica"]: publico,
+        perfil["clave_origen"]: {
             "nombre": copia.name,
-            "sha256": _sha256(bytes_imagen),
-            "bytes": len(bytes_imagen),
+            "sha256": _sha256(bytes_medio),
+            "bytes": len(bytes_medio),
         },
     }
     paquete["checksum"] = _sha256(
@@ -141,7 +200,12 @@ def exportar(job_id: str, destino: Path | str | None = None) -> Path:
 
     with zipfile.ZipFile(destino, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("paquete.json", json.dumps(paquete, ensure_ascii=False, indent=2))
-        z.writestr(f"imagen/{copia.name}", bytes_imagen)
+        # Un MP4 ya viene comprimido: recomprimirlo solo gasta tiempo.
+        z.writestr(
+            f"{perfil['prefijo']}{copia.name}",
+            bytes_medio,
+            compress_type=zipfile.ZIP_STORED if es_video(reg) else zipfile.ZIP_DEFLATED,
+        )
 
     return destino
 
@@ -172,7 +236,7 @@ def _nombre_seguro(nombre: str) -> bool:
         return False
     if any(p.lower() in {x.lower() for x in PROHIBIDO} for p in partes):
         return False
-    return any(nombre == "paquete.json" or nombre.startswith("imagen/") for _ in (0,))
+    return nombre == "paquete.json" or nombre.startswith(PREFIJOS_MEDIO)
 
 
 def validar(ruta_zip: Path | str) -> Validacion:
@@ -198,8 +262,12 @@ def validar(ruta_zip: Path | str) -> Validacion:
                 return v
 
             datos = json.loads(z.read("paquete.json").decode("utf-8"))
-            imagenes = [n for n in nombres if n.startswith("imagen/")]
-            bytes_imagen = z.read(imagenes[0]) if imagenes else b""
+            medios = [n for n in nombres if n.startswith(PREFIJOS_MEDIO)]
+            if len(medios) > 1:
+                v.fallar(f"el paquete trae {len(medios)} medios; debe traer exactamente uno")
+                return v
+            bytes_medio = z.read(medios[0]) if medios else b""
+            carpeta_medio = medios[0].split("/", 1)[0] if medios else ""
     except (zipfile.BadZipFile, json.JSONDecodeError, KeyError) as exc:
         v.fallar(f"paquete ilegible: {exc}")
         return v
@@ -225,16 +293,25 @@ def validar(ruta_zip: Path | str) -> Validacion:
     if historial.buscar(job_id) is not None:
         v.fallar(f"{job_id} ya existe en el historial de esta maquina: no se sobrescribe")
 
-    # 2. Imagen valida.
-    origen = datos.get("imagen_origen") or {}
-    if not bytes_imagen:
-        v.fallar("el paquete no incluye la imagen")
-    elif _sha256(bytes_imagen) != origen.get("sha256"):
-        v.fallar("la imagen del paquete no coincide con su huella")
+    # 2. Medio valido. El tipo declarado y la carpeta del zip tienen que
+    #    coincidir: un paquete que dice ser de video pero trae la imagen en
+    #    `imagen/` esta mal formado y no se importa.
+    perfil = _perfil_medio(pub)
+    if carpeta_medio and carpeta_medio != perfil["carpeta"]:
+        v.fallar(
+            f"el paquete declara tipo_medio '{pub.get('tipo_medio') or 'image'}' "
+            f"pero el archivo viaja en '{carpeta_medio}/'"
+        )
 
-    publica = datos.get("imagen_publica") or {}
+    origen = datos.get(perfil["clave_origen"]) or {}
+    if not bytes_medio:
+        v.fallar(f"el paquete no incluye el {perfil['etiqueta']}")
+    elif _sha256(bytes_medio) != origen.get("sha256"):
+        v.fallar(f"el {perfil['etiqueta']} del paquete no coincide con su huella")
+
+    publica = datos.get(perfil["clave_publica"]) or {}
     if not publica.get("url") or not publica.get("nombre"):
-        v.fallar("el paquete no trae la imagen publica registrada")
+        v.fallar(f"el paquete no trae el {perfil['etiqueta']} publico registrado")
     if publica.get("id_archivo") != pub.get("id_archivo"):
         v.fallar("el id_archivo del manifiesto no coincide con el de la publicacion")
 
@@ -259,7 +336,7 @@ def validar(ruta_zip: Path | str) -> Validacion:
     }
     if pub.get("id_archivo") in ya_publicadas:
         v.avisos.append(
-            "la imagen de este paquete ya se publico en otra ocasion; "
+            f"el {perfil['etiqueta']} de este paquete ya se publico en otra ocasion; "
             "se importa igual, pero saldra contenido visualmente repetido"
         )
 
@@ -304,7 +381,8 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
         return imp
 
     pub = dict(v.paquete["publicacion"])
-    publica = v.paquete["imagen_publica"]
+    perfil = _perfil_medio(pub)
+    publica = v.paquete[perfil["clave_publica"]]
     imp.job_id = pub["id"]
     imp.tipo = v.paquete.get("tipo", "PROGRAMADA")
 
@@ -321,7 +399,8 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
     carpeta_resp = rutas.CONFIG / "respaldos-importacion" / f"{imp.job_id}-{sello}"
     carpeta_resp.mkdir(parents=True, exist_ok=True)
     respaldos: list[tuple[Path, Path]] = []
-    for original in (rutas.ARCHIVO_HISTORIAL, catalogo_social.ARCHIVO_MANIFIESTO):
+    # Se respalda el manifiesto del medio que se va a tocar, no los dos.
+    for original in (rutas.ARCHIVO_HISTORIAL, perfil["manifiesto"]):
         if original.is_file():
             copia = carpeta_resp / original.name
             shutil.copy2(original, copia)
@@ -340,15 +419,15 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
             carpeta_destino = base.with_name(f"{base.name}_{n}")
             n += 1
         seguridad.verificar_destino(carpeta_destino)
-        (carpeta_destino / "imagen").mkdir(parents=True, exist_ok=True)
+        (carpeta_destino / perfil["carpeta"]).mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(ruta_zip) as z:
-            nombre_img = next(n for n in z.namelist() if n.startswith("imagen/"))
+            nombre_medio = next(n for n in z.namelist() if n.startswith(perfil["prefijo"]))
             # Se reconstruye el nombre: nunca se usa la ruta del zip tal cual.
-            destino_img = carpeta_destino / "imagen" / Path(nombre_img).name
-            destino_img.write_bytes(z.read(nombre_img))
+            destino_medio = carpeta_destino / perfil["carpeta"] / Path(nombre_medio).name
+            destino_medio.write_bytes(z.read(nombre_medio))
 
-        pub["copia_local"] = rutas.ruta_relativa(destino_img)
+        pub["copia_local"] = rutas.ruta_relativa(destino_medio)
         pub["carpeta_pendiente"] = rutas.ruta_relativa(carpeta_destino)
         pub["importado_en"] = programacion.guardar_iso(programacion.ahora())
         pub["importado_desde"] = ruta_zip.name
@@ -365,9 +444,8 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
         datos["publicaciones"].append(pub)
         historial.guardar(datos)
 
-        # --- 3. Manifiesto de imagenes publicas ---
-        manifiesto = catalogo_social.cargar_manifiesto()
-        manifiesto["imagenes"][publica["id_archivo"]] = {
+        # --- 3. Manifiesto del medio publico ---
+        comun = {
             "nombre": publica["nombre"], "url": publica["url"],
             "id_publicacion": imp.job_id,
             "proyecto": pub.get("proyecto_nombre", ""),
@@ -377,7 +455,21 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
             "peso": publica.get("peso"),
             "importada": True,
         }
-        catalogo_social.guardar_manifiesto(manifiesto)
+        if es_video(pub):
+            manifiesto = catalogo_video.cargar_manifiesto()
+            manifiesto["videos"][publica["id_archivo"]] = {
+                **comun,
+                "duracion": publica.get("duracion"),
+                "fps": publica.get("fps"),
+                "codec_video": publica.get("codec_video"),
+                "codec_audio": publica.get("codec_audio"),
+                "sha256": publica.get("sha256"),
+            }
+            catalogo_video.guardar_manifiesto(manifiesto)
+        else:
+            manifiesto = catalogo_social.cargar_manifiesto()
+            manifiesto["imagenes"][publica["id_archivo"]] = comun
+            catalogo_social.guardar_manifiesto(manifiesto)
 
         # --- 4. Verificacion posterior ---
         comprobado = historial.buscar(imp.job_id)
@@ -387,10 +479,16 @@ def importar(ruta_zip: Path | str, simular: bool = False) -> Importacion:
         if despues != antes + 1:
             raise ErrorTransferencia(
                 f"el historial paso de {antes} a {despues} entradas: se esperaba una mas")
-        if catalogo_social.url_publica(publica["id_archivo"]) != publica["url"]:
-            raise ErrorTransferencia("la imagen no quedo registrada en el manifiesto")
+        registrada = (
+            catalogo_video.url_publica(publica["id_archivo"]) if es_video(pub)
+            else catalogo_social.url_publica(publica["id_archivo"])
+        )
+        if registrada != publica["url"]:
+            raise ErrorTransferencia(
+                f"el {perfil['etiqueta']} no quedo registrado en el manifiesto"
+            )
         if not (rutas.RAIZ / comprobado["copia_local"]).is_file():
-            raise ErrorTransferencia("la imagen no quedo en PENDIENTES")
+            raise ErrorTransferencia(f"el {perfil['etiqueta']} no quedo en PENDIENTES")
 
         imp.ok = True
         imp.mensaje = f"{imp.job_id} importada correctamente."

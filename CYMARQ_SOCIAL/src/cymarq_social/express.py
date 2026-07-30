@@ -34,7 +34,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from . import catalogo_social, config as cfg_mod, historial, programacion, rutas, seguridad
+from . import (catalogo_social, catalogo_video, config as cfg_mod, historial,
+               programacion, rutas, seguridad)
 
 PREFIJO = "EXP"
 
@@ -166,6 +167,137 @@ def crear(imagen: str | Path,
         registro = historial.buscar(id_pub) or registro
         registro["_derivado"] = {"accion": resultado.accion, "nombre": resultado.nombre,
                                  "url": resultado.url, "detalle": resultado.detalle}
+
+    return registro
+
+
+def crear_video(video: str | Path,
+                texto_instagram: str,
+                texto_facebook: str,
+                titulo: str = "",
+                proyecto: str = "",
+                hashtags: list[str] | None = None,
+                cuando: str | datetime | None = None,
+                plataformas: list[str] | None = None,
+                tipo_medio: str = "reels") -> dict[str, Any]:
+    """Registra una express de VIDEO y deja su derivado publico preparado.
+
+    Misma mecanica que `crear()` con dos diferencias:
+
+      - el MP4 se COPIA sin recodificar (ver `catalogo_video`);
+      - se valida ANTES de registrar nada. Un video que Meta va a rechazar no
+        llega a ocupar un identificador ni a ensuciar el historial.
+
+    `tipo_medio` es "reels" (lo normal para 9:16) o "video" para un video de
+    feed en Facebook. Instagram publica cualquier video como Reel: el motor lo
+    traduce solo.
+
+    Devuelve el registro. El derivado todavia hay que desplegarlo (commit+push)
+    antes de poder publicar: el preflight lo comprueba.
+    """
+    origen = Path(video).expanduser().resolve()
+    if not origen.is_file():
+        raise ErrorExpress(f"No existe el video: {origen}")
+    if origen.suffix.lower() not in catalogo_video.FORMATOS_ORIGEN:
+        raise ErrorExpress(
+            f"Formato no admitido: {origen.suffix}. "
+            f"Admitidos: {sorted(catalogo_video.FORMATOS_ORIGEN)}"
+        )
+    if not texto_instagram.strip() or not texto_facebook.strip():
+        raise ErrorExpress("Hacen falta los dos textos: Instagram y Facebook.")
+    if tipo_medio not in ("reels", "video"):
+        raise ErrorExpress(f"tipo_medio debe ser 'reels' o 'video', no '{tipo_medio}'.")
+
+    # Validacion PREVIA a cualquier escritura.
+    info = catalogo_video.leer_info(origen)
+    problemas, avisos = catalogo_video.validar(info, origen.stat().st_size)
+    if problemas:
+        raise ErrorExpress(
+            "El video no cumple los requisitos de publicacion:\n  - "
+            + "\n  - ".join(problemas)
+        )
+
+    rutas.asegurar_estructura()
+    plataformas = plataformas or list(
+        cfg_mod.cargar().get("plataformas", ["instagram", "facebook"]))
+
+    datos_hist = historial.cargar()
+    id_pub = siguiente_id(datos_hist)
+
+    carpeta = rutas.PENDIENTES / f"{programacion.ahora():%Y-%m-%d}_EXPRESS_{id_pub}"
+    n = 2
+    base = carpeta
+    while carpeta.exists():
+        carpeta = base.with_name(f"{base.name}_{n}")
+        n += 1
+    seguridad.verificar_destino(carpeta)
+    (carpeta / "video").mkdir(parents=True, exist_ok=True)
+
+    huella_antes = (origen.stat().st_size, origen.stat().st_mtime_ns)
+    copia = carpeta / "video" / origen.name
+    shutil.copy2(origen, copia)
+    if (origen.stat().st_size, origen.stat().st_mtime_ns) != huella_antes:
+        raise ErrorExpress(f"El archivo original cambio durante la copia: {origen}")
+
+    import hashlib
+    id_archivo = hashlib.sha256(copia.read_bytes()).hexdigest()[:12]
+
+    registro: dict[str, Any] = {
+        "id": id_pub,
+        "express": True,
+        "tipo_medio": tipo_medio,
+        "fecha_creacion": programacion.guardar_iso(programacion.ahora()),
+        "proyecto": proyecto or "_EXPRESS",
+        "proyecto_nombre": proyecto or "Publicación express",
+        "archivo": origen.name,
+        "ruta_original": str(origen),
+        "id_archivo": id_archivo,
+        "copia_local": rutas.ruta_relativa(copia),
+        "carpeta_pendiente": rutas.ruta_relativa(carpeta),
+        "plataforma": plataformas,
+        "titulo": titulo or "Publicación express",
+        "ambiente": "express",
+        "texto": {"instagram": texto_instagram, "facebook": texto_facebook},
+        "hashtags": hashtags or [],
+        "hashtags_facebook": hashtags or [],
+        "llamada_a_la_accion": "",
+        "estado": "propuesta",
+        "fecha_publicacion": None,
+        "url_publicacion": {"instagram": None, "facebook": None},
+        "id_publicacion_meta": {"instagram": None, "facebook": None},
+        "video": info.como_dict() if info else {},
+        "notas": "Publicacion express de video. No forma parte del banco ni del calendario.",
+        "publicado_por_sistema": False,
+    }
+
+    seguridad.escribir_json(carpeta / "metadata.json", registro)
+    historial.registrar(registro)
+
+    # Derivado publico. El registro ya esta en el historial, asi que pasa la
+    # puerta de `origenes_autorizados()`.
+    manifiesto = catalogo_video.cargar_manifiesto()
+    resultado = catalogo_video.preparar_video(registro, manifiesto, forzar=False, simular=False)
+    if resultado.accion == "generada":
+        manifiesto["videos"][id_archivo]["express"] = True
+        catalogo_video.guardar_manifiesto(manifiesto)
+
+    registro["_derivado"] = {
+        "accion": resultado.accion,
+        "nombre": resultado.nombre,
+        "url": resultado.url,
+        "detalle": resultado.detalle,
+        # La validacion corre dos veces (aqui y dentro del catalogo): se
+        # deduplican conservando el orden para no repetir el mismo aviso.
+        "avisos": list(dict.fromkeys(avisos + resultado.avisos)),
+        "medidas": f"{info.ancho}x{info.alto}" if info and info.ancho else None,
+    }
+
+    if cuando is not None:
+        historial.cambiar_estado(id_pub, "aprobada", "express de video aprobada al crearse")
+        programacion.programar(id_pub, cuando)
+        derivado = registro["_derivado"]
+        registro = historial.buscar(id_pub) or registro
+        registro["_derivado"] = derivado
 
     return registro
 

@@ -47,8 +47,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from . import (catalogo_social, config as cfg_mod, entorno as entorno_mod,
-               historial, programacion, rutas)
+from . import (catalogo_social, catalogo_video, config as cfg_mod,
+               entorno as entorno_mod, historial, programacion, rutas)
 
 PLATAFORMAS = ("instagram", "facebook")
 
@@ -470,12 +470,18 @@ class Validacion:
     ok: bool = True
     problemas: list[str] = field(default_factory=list)
     url_imagen: str | None = None
+    url_video: str | None = None
+    tipo_medio: str = "image"
     metadata: Path | None = None
 
     def fallar(self, motivo: str) -> "Validacion":
         self.ok = False
         self.problemas.append(motivo)
         return self
+
+
+#: Tipos de medio que el motor sabe publicar. `image` es el de siempre.
+TIPOS_MEDIO = ("image", "reels", "video")
 
 
 def validar(pub: dict[str, Any], plataforma: str | None = None) -> Validacion:
@@ -494,12 +500,33 @@ def validar(pub: dict[str, Any], plataforma: str | None = None) -> Validacion:
         if not textos.get(p):
             v.fallar(f"sin caption almacenado para {p}")
 
+    # El tipo de medio decide en que manifiesto se busca la URL. Sin campo, es
+    # una publicacion de imagen: asi las 54 entradas ya existentes siguen
+    # comportandose exactamente igual.
+    tipo = pub.get("tipo_medio") or "image"
+    if tipo not in TIPOS_MEDIO:
+        v.fallar(f"tipo_medio '{tipo}' desconocido")
+        tipo = "image"
+    v.tipo_medio = tipo
+
     id_archivo = pub.get("id_archivo") or ""
-    url = catalogo_social.url_publica(id_archivo) if id_archivo else None
-    if not url:
-        v.fallar("sin imagen publica en el manifiesto")
+
+    if tipo == "image":
+        url = catalogo_social.url_publica(id_archivo) if id_archivo else None
+        if not url:
+            v.fallar("sin imagen publica en el manifiesto")
+        else:
+            v.url_imagen = url
     else:
-        v.url_imagen = url
+        url = catalogo_video.url_publica(id_archivo) if id_archivo else None
+        if not url:
+            v.fallar("sin video publico en el manifiesto")
+        elif not catalogo_video.desplegado(id_archivo):
+            # El archivo tiene que existir en disco. Si falta, el commit y push
+            # no se han hecho y Meta recibiria un 404 a mitad de publicacion.
+            v.fallar("el derivado de video no esta en public/social/video/ (falta desplegar)")
+        else:
+            v.url_video = url
 
     carpeta = pub.get("carpeta_pendiente") or ""
     metadata = (rutas.RAIZ / carpeta / "metadata.json") if carpeta else None
@@ -527,14 +554,22 @@ def credenciales_presentes(plataforma: str) -> bool:
 ENVOLTORIO = "scripts/social-publish.mjs"
 
 
-def _invocar_node(plataforma: str, job_id: str, metadata: Path, url_imagen: str,
-                  tiempo_limite: int = 300) -> dict[str, Any]:
+def _invocar_node(plataforma: str, job_id: str, metadata: Path,
+                  url_imagen: str | None = None,
+                  tiempo_limite: int = 300,
+                  tipo_medio: str = "image",
+                  url_video: str | None = None) -> dict[str, Any]:
     """Lanza el envoltorio Node y devuelve su contrato JSON.
 
     ESTE ES EL GATE. Es el unico camino por el que una publicacion real puede
     salir del sistema, y esta cerrado mientras `publicacion_automatica` sea
     false. Sin esta comprobacion no hay ruta alternativa: el resto del modulo
     no sabe hablar con Meta.
+
+    Un video tarda mucho mas que una imagen: Meta lo descarga y lo transcodifica,
+    y el publicador sondea hasta cinco minutos. El tiempo limite se amplia para
+    que un Reel legitimo no muera por reloj — un timeout aqui deja el estado
+    indeterminado, que es el peor resultado posible.
     """
     permitido, motivo = puede_publicar(job_id)
     if not permitido:
@@ -546,14 +581,24 @@ def _invocar_node(plataforma: str, job_id: str, metadata: Path, url_imagen: str,
                 "status": "failed", "retry_safe": True,
                 "message": "No se encontro 'node' en el PATH."}
 
+    if tipo_medio != "image" and tiempo_limite < 600:
+        tiempo_limite = 600
+
     orden = [
         node, str(catalogo_social.repo_web() / ENVOLTORIO),
         f"--platform={plataforma}",
         f"--job={job_id}",
         f"--metadata={metadata}",
-        f"--image-url={url_imagen}",
-        "--confirm",
     ]
+    if tipo_medio == "image":
+        orden.append(f"--image-url={url_imagen}")
+    else:
+        # Instagram no tiene video de feed: cualquier video es un Reel. En
+        # Facebook se respeta lo que pida la propuesta.
+        efectivo = "reels" if plataforma == "instagram" else tipo_medio
+        orden.append(f"--media-type={efectivo}")
+        orden.append(f"--video-url={url_video}")
+    orden.append("--confirm")
 
     try:
         proceso = subprocess.run(
@@ -771,8 +816,12 @@ def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
                                 "message": "No hay .env.local con credenciales."}
                 else:
                     try:
-                        contrato = _invocar_node(p, job_id, validacion.metadata,
-                                                 validacion.url_imagen)
+                        contrato = _invocar_node(
+                            p, job_id, validacion.metadata,
+                            url_imagen=validacion.url_imagen,
+                            tipo_medio=validacion.tipo_medio,
+                            url_video=validacion.url_video,
+                        )
                     except PublicacionBloqueada as exc:
                         e.bloqueada_por_gate = True
                         e.acciones.append(f"{p}: BLOQUEADA POR CONFIGURACION — {exc}")

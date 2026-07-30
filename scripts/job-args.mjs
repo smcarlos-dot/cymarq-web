@@ -14,6 +14,20 @@
  *   --metadata=<ruta>     metadata.json de la propuesta
  *   --image-url=<url>     URL pública HTTPS del derivado JPEG
  *   --caption=<variante>  "instagram" o "facebook" (cada script tiene el suyo)
+ *
+ * VÍDEO
+ *
+ *   --media-type=<tipo>   "image" (por defecto), "reels" o "video"
+ *   --video-url=<url>     URL pública HTTPS del MP4. Obligatoria si el tipo no
+ *                         es "image"
+ *   --cover-url=<url>     portada opcional (solo Instagram Reels)
+ *   --thumb-offset=<ms>   milisegundo del que sacar la portada, alternativa a
+ *                         --cover-url
+ *
+ * `--media-type` es lo que decide el flujo, y su valor por defecto es `image`:
+ * una invocación antigua, sin la bandera, se comporta exactamente igual que
+ * antes de existir el vídeo. Eso es deliberado — el camino de las imágenes ya
+ * está probado con publicaciones reales y no se toca.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -39,15 +53,46 @@ function faltan(nombres, uso) {
  * plataforma tiene la suya (Instagram y Facebook llevan textos distintos en la
  * misma propuesta).
  */
+export const TIPOS_MEDIO = ['image', 'reels', 'video'];
+
+/** Valida una URL pública destinada a Meta. Aborta si no sirve. */
+function exigirUrlHttps(valor, bandera) {
+  let url;
+  try {
+    url = new URL(valor);
+  } catch {
+    console.error(`\n  ${bandera} no es una URL válida: ${valor}\n`);
+    process.exit(1);
+  }
+  if (url.protocol !== 'https:') {
+    console.error(`\n  ${bandera} debe ser HTTPS. Meta no descargará ${url.protocol}//\n`);
+    process.exit(1);
+  }
+  return valor;
+}
+
 export function leerTrabajo({ varianteCaption, uso }) {
   const jobId = argumento('job');
   const metadata = argumento('metadata');
   const imageUrl = argumento('image-url');
+  const videoUrl = argumento('video-url');
+
+  const mediaType = argumento('media-type') ?? 'image';
+  if (!TIPOS_MEDIO.includes(mediaType)) {
+    console.error(
+      `\n  --media-type debe ser ${TIPOS_MEDIO.join(', ')}; no "${mediaType}".\n`
+    );
+    process.exit(1);
+  }
+  const esVideo = mediaType !== 'image';
 
   const ausentes = [];
   if (!jobId) ausentes.push('--job');
   if (!metadata) ausentes.push('--metadata');
-  if (!imageUrl) ausentes.push('--image-url');
+  // El medio obligatorio depende del tipo. No se acepta uno por el otro: pasar
+  // un JPEG donde se espera un MP4 solo se descubriría dentro de Meta.
+  if (esVideo && !videoUrl) ausentes.push('--video-url');
+  if (!esVideo && !imageUrl) ausentes.push('--image-url');
   if (ausentes.length) faltan(ausentes, uso);
 
   const variante = argumento('caption') ?? varianteCaption;
@@ -56,22 +101,31 @@ export function leerTrabajo({ varianteCaption, uso }) {
     process.exit(1);
   }
 
-  let url;
-  try {
-    url = new URL(imageUrl);
-  } catch {
-    console.error(`\n  --image-url no es una URL válida: ${imageUrl}\n`);
-    process.exit(1);
-  }
-  if (url.protocol !== 'https:') {
-    console.error(`\n  --image-url debe ser HTTPS. Meta no descargará ${url.protocol}//\n`);
-    process.exit(1);
+  if (imageUrl) exigirUrlHttps(imageUrl, '--image-url');
+  if (videoUrl) exigirUrlHttps(videoUrl, '--video-url');
+
+  const coverUrl = argumento('cover-url');
+  if (coverUrl) exigirUrlHttps(coverUrl, '--cover-url');
+
+  const thumbOffsetCrudo = argumento('thumb-offset');
+  let thumbOffset;
+  if (thumbOffsetCrudo !== undefined) {
+    thumbOffset = Number(thumbOffsetCrudo);
+    if (!Number.isFinite(thumbOffset) || thumbOffset < 0) {
+      console.error(`\n  --thumb-offset debe ser un número de ms >= 0, no "${thumbOffsetCrudo}".\n`);
+      process.exit(1);
+    }
   }
 
   return {
     jobId,
     metadataPath: isAbsolute(metadata) ? metadata : resolve(process.cwd(), metadata),
     imageUrl,
+    videoUrl,
+    mediaType,
+    esVideo,
+    coverUrl,
+    thumbOffset,
     variante,
   };
 }
