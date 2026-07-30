@@ -1,1 +1,2 @@
-logs/
+# La carpeta logs/ SI se versiona (ver logs/.gitkeep), pero su contenido no.
+# La exclusion vive en logs/.gitignore para que git pueda descender a ella.

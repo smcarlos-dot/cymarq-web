@@ -1,0 +1,3 @@
+# Esta carpeta tiene que existir antes de que arranque el servicio: con
+# ProtectHome=read-only, systemd no puede crearla, y si no existe no se monta
+# como escribible y la unidad falla con 226/NAMESPACE.
