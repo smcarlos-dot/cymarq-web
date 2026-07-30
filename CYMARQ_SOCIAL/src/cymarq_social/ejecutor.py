@@ -157,6 +157,19 @@ def job_autorizado(job_id: str) -> bool:
     return job_id in jobs_autorizados()
 
 
+def es_express(job_id: str) -> bool:
+    """¿Es una publicacion express?
+
+    Se mira el registro, y como respaldo el prefijo del identificador: si por lo
+    que sea el historial no se puede leer, un EXP- se sigue tratando como
+    express. En una barrera de seguridad, la duda se resuelve del lado estricto.
+    """
+    if str(job_id).upper().startswith("EXP-"):
+        return True
+    reg = historial.buscar(job_id)
+    return bool(reg and reg.get("express"))
+
+
 def puede_publicar(job_id: str) -> tuple[bool, str]:
     """LA barrera. Unico sitio del sistema que decide si algo puede publicarse.
 
@@ -182,6 +195,17 @@ def puede_publicar(job_id: str) -> tuple[bool, str]:
 
     if job_autorizado(job_id):
         return True, "autorizacion puntual vigente"
+
+    # Una EXPRESS SIEMPRE exige autorizacion individual, este el gate abierto o
+    # cerrado. El gate automatiza el calendario, que es contenido revisado y con
+    # fecha acordada; una express nace de una decision puntual y no debe poder
+    # salir sola nunca.
+    if es_express(job_id):
+        return False, (
+            f"{job_id} es una EXPRESS: exige autorizacion individual explicita, "
+            "aunque publicacion_automatica este activada."
+        )
+
     if publicacion_real_habilitada():
         return True, "publicacion_automatica activada"
     vigentes = jobs_autorizados()

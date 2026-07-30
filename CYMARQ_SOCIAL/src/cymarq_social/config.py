@@ -49,9 +49,18 @@ CONFIG_POR_DEFECTO: dict[str, Any] = {
     "host_panel": "127.0.0.1",
 }
 
-# Claves que el sistema fuerza mientras estemos en fase de desarrollo.
-# La publicacion se lanza a mano por el puente; nada aqui la automatiza.
-_BLOQUEADAS_EN_FASE_1 = {"publicacion_automatica": False}
+# Claves que el sistema fuerza pase lo que pase en el fichero.
+#
+# `publicacion_automatica` estuvo aqui, forzada a false, durante todo el
+# desarrollo: era la garantia de que nada podia publicar mientras se construia
+# el sistema. Ya no: el interruptor pasa a mandarlo el fichero, porque la
+# produccion desatendida es justamente lo que se ha puesto en marcha.
+#
+# Lo que protege ahora contra una publicacion accidental no es este candado,
+# sino las barreras del motor: entorno de produccion, autorizacion individual
+# para las express, preflight, lock y antiduplicacion.
+_BLOQUEADAS: dict[str, Any] = {}
+_BLOQUEADAS_EN_FASE_1 = _BLOQUEADAS  # nombre antiguo, se conserva por compatibilidad
 
 
 def cargar() -> dict[str, Any]:
