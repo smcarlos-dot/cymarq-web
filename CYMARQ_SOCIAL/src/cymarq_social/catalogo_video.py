@@ -631,6 +631,20 @@ def preparar_catalogo(forzar: bool = False, simular: bool = False) -> list[Resul
 # --------------------------------------------------------------------- #
 
 
+def ruta_local(id_archivo: str) -> Path | None:
+    """Ruta en disco del derivado publico, o None si no esta.
+
+    La usa el publicador de Facebook para SUBIR los bytes en vez de pedirle a
+    Facebook que descargue la URL: su descargador obedece robots.txt y el
+    gestionado de Cloudflare bloquea su agente.
+    """
+    entrada = cargar_manifiesto().get("videos", {}).get(id_archivo)
+    if not entrada:
+        return None
+    ruta = carpeta_video() / entrada["nombre"]
+    return ruta if ruta.is_file() else None
+
+
 def desplegado(id_archivo: str) -> bool:
     """El derivado existe en disco. NO garantiza que este publicado en la web.
 

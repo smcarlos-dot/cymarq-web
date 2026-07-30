@@ -23,6 +23,11 @@
  *   --cover-url=<url>     portada opcional (solo Instagram Reels)
  *   --thumb-offset=<ms>   milisegundo del que sacar la portada, alternativa a
  *                         --cover-url
+ *   --video-file=<ruta>   copia local del MP4. Solo Facebook Reels: si viene, los
+ *                         bytes se SUBEN en vez de pedirle a Facebook que
+ *                         descargue la URL. Es la vía preferida, porque el
+ *                         descargador de Facebook obedece robots.txt y el
+ *                         gestionado de Cloudflare bloquea su agente.
  *
  * `--media-type` es lo que decide el flujo, y su valor por defecto es `image`:
  * una invocación antigua, sin la bandera, se comporta exactamente igual que
@@ -117,11 +122,21 @@ export function leerTrabajo({ varianteCaption, uso }) {
     }
   }
 
+  const videoFileCrudo = argumento('video-file');
+  const videoFile = videoFileCrudo
+    ? (isAbsolute(videoFileCrudo) ? videoFileCrudo : resolve(process.cwd(), videoFileCrudo))
+    : undefined;
+  if (videoFile && !esVideo) {
+    console.error('\n  --video-file solo tiene sentido con --media-type=reels o video.\n');
+    process.exit(1);
+  }
+
   return {
     jobId,
     metadataPath: isAbsolute(metadata) ? metadata : resolve(process.cwd(), metadata),
     imageUrl,
     videoUrl,
+    videoFile,
     mediaType,
     esVideo,
     coverUrl,

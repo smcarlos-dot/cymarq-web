@@ -160,6 +160,9 @@ async function main() {
   if (videoUrl) argumentos.push(`--video-url=${videoUrl}`);
   if (mediaType !== 'image') argumentos.push(`--media-type=${mediaType}`);
 
+  const videoFile = arg('video-file');
+  if (videoFile) argumentos.push(`--video-file=${videoFile}`);
+
   const coverUrl = arg('cover-url');
   if (coverUrl) argumentos.push(`--cover-url=${coverUrl}`);
   const thumbOffset = arg('thumb-offset');

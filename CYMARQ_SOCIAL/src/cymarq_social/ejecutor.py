@@ -471,6 +471,7 @@ class Validacion:
     problemas: list[str] = field(default_factory=list)
     url_imagen: str | None = None
     url_video: str | None = None
+    archivo_video: str | None = None
     tipo_medio: str = "image"
     metadata: Path | None = None
 
@@ -527,6 +528,10 @@ def validar(pub: dict[str, Any], plataforma: str | None = None) -> Validacion:
             v.fallar("el derivado de video no esta en public/social/video/ (falta desplegar)")
         else:
             v.url_video = url
+            # Ruta local del derivado. Facebook sube los bytes desde aqui.
+            local = catalogo_video.ruta_local(id_archivo)
+            if local is not None:
+                v.archivo_video = str(local)
 
     carpeta = pub.get("carpeta_pendiente") or ""
     metadata = (rutas.RAIZ / carpeta / "metadata.json") if carpeta else None
@@ -558,7 +563,8 @@ def _invocar_node(plataforma: str, job_id: str, metadata: Path,
                   url_imagen: str | None = None,
                   tiempo_limite: int = 300,
                   tipo_medio: str = "image",
-                  url_video: str | None = None) -> dict[str, Any]:
+                  url_video: str | None = None,
+                  archivo_video: str | None = None) -> dict[str, Any]:
     """Lanza el envoltorio Node y devuelve su contrato JSON.
 
     ESTE ES EL GATE. Es el unico camino por el que una publicacion real puede
@@ -598,6 +604,11 @@ def _invocar_node(plataforma: str, job_id: str, metadata: Path,
         efectivo = "reels" if plataforma == "instagram" else tipo_medio
         orden.append(f"--media-type={efectivo}")
         orden.append(f"--video-url={url_video}")
+        # Solo Facebook: sube los bytes en vez de hacer que Meta descargue la
+        # URL. Su descargador obedece robots.txt y el gestionado de Cloudflare
+        # bloquea `meta-externalagent`. Instagram no esta bloqueado y usa la URL.
+        if plataforma == "facebook" and efectivo == "reels" and archivo_video:
+            orden.append(f"--video-file={archivo_video}")
     orden.append("--confirm")
 
     try:
@@ -821,6 +832,7 @@ def ejecutar_publicacion(job_id: str, simular: dict[str, str] | None = None,
                             url_imagen=validacion.url_imagen,
                             tipo_medio=validacion.tipo_medio,
                             url_video=validacion.url_video,
+                            archivo_video=validacion.archivo_video,
                         )
                     except PublicacionBloqueada as exc:
                         e.bloqueada_por_gate = True

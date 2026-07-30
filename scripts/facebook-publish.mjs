@@ -38,7 +38,7 @@
  *   ... añadiendo --confirm para publicar de verdad.
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, stat } from 'node:fs/promises';
 
 import {
   getTokenIdentity,
@@ -47,6 +47,7 @@ import {
   publishVideo,
   startReelUpload,
   uploadReelFromUrl,
+  uploadReelBytes,
   finishReel,
   getReelStatus,
   getVideo,
@@ -126,6 +127,10 @@ async function main() {
   const token = await requirePageToken();
   const pageId = await readPageId();
 
+  // Solo los Reels suben bytes: /videos no tiene endpoint de subida por trozos
+  // en este flujo y sigue usando file_url.
+  const ARCHIVO_LOCAL = ES_REEL ? (trabajo.videoFile ?? null) : null;
+
   const ETIQUETA_TIPO = ES_REEL ? 'REEL (vídeo)' : ES_VIDEO ? 'vídeo de feed' : 'foto de feed';
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
@@ -200,6 +205,23 @@ async function main() {
     // feed: 9:16 obligatorio y 90 s de tope. Se valida contra las del tipo que
     // se va a publicar de verdad, no contra las genéricas.
     const reglas = ES_REEL ? REGLAS_FACEBOOK_REEL : REGLAS_FACEBOOK_VIDEO;
+
+    // Si se van a subir los bytes, el archivo local tiene que existir y coincidir
+    // en tamaño con lo que sirve la URL. Comprobarlo aquí evita descubrirlo a
+    // mitad del flujo, con una reserva ya hecha en Meta.
+    let bytesLocales = null;
+    if (ARCHIVO_LOCAL) {
+      try {
+        bytesLocales = (await stat(ARCHIVO_LOCAL)).size;
+        console.log(`  archivo   : ${ARCHIVO_LOCAL} (${bytesLocales} bytes)`);
+      } catch (error) {
+        console.error(`\n  ABORTADO: no se puede leer --video-file: ${ARCHIVO_LOCAL}`);
+        console.error(`    ${error?.message ?? 'error'}`);
+        process.exitCode = 1;
+        return;
+      }
+    }
+
     const video = await comprobarVideoPublico(MEDIO_URL, reglas);
     console.log(`  vídeo     : HTTP ${video.status}, ${video.contentType}`);
     console.log(`  medidas   : ${describirVideo(video.info, video.bytes)}`);
@@ -210,6 +232,13 @@ async function main() {
         `\n  ABORTADO: el vídeo no cumple los requisitos de Facebook ${ES_REEL ? 'Reels' : 'vídeo'}.`
       );
       for (const p of video.problemas) console.error(`    · ${p}`);
+      process.exitCode = 1;
+      return;
+    }
+    if (bytesLocales !== null && video.bytes !== null && bytesLocales !== video.bytes) {
+      console.error('\n  ABORTADO: el archivo local y el que sirve la URL no coinciden.');
+      console.error(`    local: ${bytesLocales} bytes · URL: ${video.bytes} bytes`);
+      console.error('    Se publicaría un vídeo distinto del revisado.');
       process.exitCode = 1;
       return;
     }
@@ -252,11 +281,26 @@ async function main() {
     /* ============ REEL: tres fases, solo la última publica ========== */
 
     // --- Fase 1: reservar. No publica nada, así que se puede reutilizar.
-    videoId = previo.video_id ?? null;
+    //
+    // Solo se reutiliza si la SUBIDA tambien se completo. Un video_id cuya
+    // subida fallo no tiene medio detras: llamar a `finish` sobre el publicaria
+    // un Reel vacio o daria un error opaco. En ese caso se reserva uno nuevo y
+    // el anterior se abandona — una reserva sin publicar caduca sola y no deja
+    // nada visible en la Pagina.
+    const subidaPrevia = Boolean(previo.reel_subida);
+    videoId = subidaPrevia ? (previo.video_id ?? null) : null;
+
+    if (previo.video_id && !subidaPrevia) {
+      bloque('1/4  DESCARTAR   reserva anterior sin subida completada');
+      console.log(`  video_id anterior : ${previo.video_id}`);
+      console.log('  Su subida no consta como completada, asi que NO se reutiliza:');
+      console.log('  publicar sobre esa reserva daria un Reel sin video.');
+      console.log('  Se reserva una nueva. La anterior caduca sola sin publicar nada.');
+    }
 
     if (videoId) {
       bloque('1/4  REUTILIZAR   video_id de un intento anterior');
-      console.log(`  Ya existía un video_id sin publicar: ${videoId}`);
+      console.log(`  Ya existía un video_id con la subida hecha: ${videoId}`);
       console.log('  Se REUTILIZA. No se reserva otro.');
     } else {
       bloque(`1/4  INICIAR   POST ${GRAPH_HOST}/${API_VERSION}/${pageId}/video_reels`);
@@ -273,11 +317,32 @@ async function main() {
         await anotar(JOB_ID, { ...comunes, video_id: videoId, reel_iniciado_en: new Date().toISOString() });
         console.log(`  VIDEO_ID  : ${videoId}`);
 
-        // --- Fase 2: Facebook descarga el MP4. Tampoco publica.
-        bloque('2/4  SUBIR   POST <upload_url>   (file_url, subida alojada)');
-        console.log('  Facebook descarga el MP4 desde la URL pública. NO publica.');
-        const subida = await uploadReelFromUrl({ uploadUrl, token, videoUrl: MEDIO_URL });
-        await anotar(JOB_ID, { reel_subida: subida?.success ?? true, reel_subido_en: new Date().toISOString() });
+        // --- Fase 2: se entrega el MP4. Tampoco publica.
+        //
+        // Por defecto se SUBEN LOS BYTES. La alternativa (`file_url`) hace que
+        // Facebook descargue el archivo de nuestro sitio, y su descargador
+        // obedece robots.txt: el robots.txt gestionado de Cloudflare bloquea
+        // `meta-externalagent` y la descarga falla con 403. Subir los bytes
+        // evita depender de eso.
+        let subida;
+        if (ARCHIVO_LOCAL) {
+          bloque('2/4  SUBIR   POST <upload_url>   (bytes desde disco)');
+          console.log(`  archivo   : ${ARCHIVO_LOCAL}`);
+          const bytes = await readFile(ARCHIVO_LOCAL);
+          console.log(`  tamaño    : ${bytes.byteLength} bytes`);
+          console.log('  Se envían los bytes. Facebook no descarga nada. NO publica.');
+          subida = await uploadReelBytes({ uploadUrl, token, bytes });
+        } else {
+          bloque('2/4  SUBIR   POST <upload_url>   (file_url, subida alojada)');
+          console.log('  Facebook descarga el MP4 desde la URL pública. NO publica.');
+          console.log('  AVISO: esta vía exige que robots.txt permita meta-externalagent.');
+          subida = await uploadReelFromUrl({ uploadUrl, token, videoUrl: MEDIO_URL });
+        }
+        await anotar(JOB_ID, {
+          reel_subida: true,
+          reel_subida_via: ARCHIVO_LOCAL ? 'bytes' : 'file_url',
+          reel_subido_en: new Date().toISOString(),
+        });
         console.log(`  respuesta : ${JSON.stringify(subida)}`);
       } catch (error) {
         console.error('\n  FALLO antes de publicar. NO se ha publicado nada.');
