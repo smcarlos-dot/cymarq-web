@@ -99,6 +99,22 @@ def guardar(datos: dict[str, Any]) -> None:
     seguridad.escribir_json(rutas.ARCHIVO_HISTORIAL, datos)
 
 
+#: Rango reservado a pruebas tecnicas: CYM-AAAA-9000 .. CYM-AAAA-9999.
+#: Los identificadores normales nunca entran aqui, y la numeracion corriente
+#: los ignora. Asi una prueba puntual no desplaza la serie de produccion, que
+#: es lo que paso con CYM-2026-9001: sin esta reserva, la siguiente propuesta
+#: real habria salido como CYM-2026-9002 en vez de CYM-2026-0053.
+RANGO_PRUEBAS = (9000, 9999)
+
+
+def es_id_de_prueba(id_publicacion: str) -> bool:
+    """¿Pertenece al rango reservado a pruebas tecnicas?"""
+    cola = str(id_publicacion).rsplit("-", 1)[-1]
+    if not cola.isdigit():
+        return False
+    return RANGO_PRUEBAS[0] <= int(cola) <= RANGO_PRUEBAS[1]
+
+
 def siguiente_id(datos: dict[str, Any] | None = None) -> str:
     datos = datos or cargar()
     # El ano sale del calendario de Colombia, no del reloj del sistema. En la VM
@@ -107,10 +123,13 @@ def siguiente_id(datos: dict[str, Any] | None = None) -> str:
     anio = _anio_colombia()
     prefijo = f"CYM-{anio}-"
     usados = [
-        int(p["id"].rsplit("-", 1)[-1])
+        numero
         for p in datos["publicaciones"]
         if str(p.get("id", "")).startswith(prefijo)
         and p["id"].rsplit("-", 1)[-1].isdigit()
+        # El rango de pruebas se salta: sus identificadores existen como
+        # registro historico, pero no cuentan para la numeracion normal.
+        and not RANGO_PRUEBAS[0] <= (numero := int(p["id"].rsplit("-", 1)[-1])) <= RANGO_PRUEBAS[1]
     ]
     return f"{prefijo}{(max(usados) + 1) if usados else 1:04d}"
 
