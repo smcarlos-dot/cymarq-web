@@ -28,6 +28,7 @@ except Exception:  # pragma: no cover
 from cymarq_social import (  # noqa: E402
     catalogo_social,
     config as cfg_mod,
+    despliegue as despliegue_mod,
     ejecutor,
     entorno as entorno_mod,
     express as express_mod,
@@ -40,6 +41,7 @@ from cymarq_social import (  # noqa: E402
     puente_node,
     rotacion,
     salud as salud_mod,
+    transferencia as transferencia_mod,
     rutas,
 )
 
@@ -307,6 +309,98 @@ def cmd_preflight(args: argparse.Namespace) -> int:
     print("  No se ha publicado nada ni se ha cambiado ningun estado.")
     print(LINEA)
     return 0 if inf.get("general") == salud_mod.OK else 1
+
+
+def cmd_exportar(args: argparse.Namespace) -> int:
+    """Crea un paquete de transferencia. No publica ni envia nada."""
+    try:
+        ruta = transferencia_mod.exportar(args.id, args.salida or None)
+    except transferencia_mod.ErrorTransferencia as exc:
+        print(f"  [!] {exc}")
+        return 1
+    print(f"  Paquete creado: {ruta}")
+    print(f"  Tamano        : {ruta.stat().st_size} bytes")
+    print("  Contiene la ficha, la imagen y su entrada del catalogo publico.")
+    print("  NO contiene historial, diarios, locks, autorizaciones ni credenciales.")
+    return 0
+
+
+def cmd_importar(args: argparse.Namespace) -> int:
+    """Incorpora un paquete al estado de ESTA maquina. Transaccional."""
+    antes = transferencia_mod.estado_operativo_intacto()
+    r = transferencia_mod.importar(args.paquete, simular=args.simular)
+    despues = transferencia_mod.estado_operativo_intacto()
+
+    print(LINEA)
+    print(f"  IMPORTAR {Path(args.paquete).name}")
+    print(LINEA)
+    for pr in r.problemas:
+        print(f"  [ERROR] {pr}")
+    for a in r.avisos:
+        print(f"  [AVISO] {a}")
+    if r.ok:
+        print(f"  [OK] {r.mensaje}")
+        for k, v in r.detalle.items():
+            print(f"       {k:<18} {v}")
+    else:
+        print(f"  {r.mensaje}")
+    if r.respaldo:
+        print(f"  respaldo: {r.respaldo}")
+
+    tocado = [k for k in antes if antes[k] != despues[k]]
+    print()
+    print(f"  estado operativo intacto: {not tocado}"
+          + (f"  CAMBIO: {tocado}" if tocado else
+             "  (diarios, locks, autorizaciones, config, entorno, credenciales)"))
+    print(LINEA)
+    return 0 if r.ok else 1
+
+
+def cmd_enviar_vm(args: argparse.Namespace) -> int:
+    """Exporta, transfiere e importa en la VM. NUNCA publica."""
+    print(LINEA)
+    print(f"  ENVIAR A PRODUCCION — {args.id}")
+    print(LINEA)
+    print("  Enviar NO es publicar: solo incorpora la propuesta al estado de la VM.")
+    print()
+    try:
+        envio = despliegue_mod.enviar_vm(args.id, simular=args.simular)
+    except despliegue_mod.ErrorDespliegue as exc:
+        print(f"  [!] {exc}")
+        return 1
+
+    for paso in envio.pasos:
+        print(f"  [{'OK   ' if paso.ok else 'FALLO'}] {paso.nombre:<14} {paso.detalle}")
+    if args.detalle and envio.salida_remota:
+        print()
+        print("  --- salida de la VM ---")
+        for linea in envio.salida_remota.strip().splitlines():
+            print(f"  {linea}")
+    print(LINEA)
+    print(f"  RESULTADO: {'ENVIADA' if envio.ok else 'NO ENVIADA'}")
+    if envio.ok and not args.simular:
+        print(f"  {args.id} ya existe en produccion. Sigue SIN publicar:")
+        print("    la publicacion exige entorno + gate + autorizacion + preflight.")
+    print(LINEA)
+    return 0 if envio.ok else 1
+
+
+def cmd_estado_vm(args: argparse.Namespace) -> int:
+    """Consulta el estado operativo de la VM. Solo lectura."""
+    d = despliegue_mod.estado_vm()
+    if "error" in d:
+        print(f"  [!] {d['error']}")
+        return 1
+    print(LINEA)
+    print("  ESTADO DE PRODUCCION (VM)")
+    print(LINEA)
+    print(f"  publicaciones : {d['publicaciones']}  {d['por_estado']}")
+    print(f"  franjas       : {d['franjas']}  "
+          f"{(d['primera'] or '')[:10]} -> {(d['ultima'] or '')[:10]}")
+    for k, v in (d.get("motor") or {}).items():
+        print(f"  {k:<32} {v}")
+    print(LINEA)
+    return 0
 
 
 def cmd_entorno(args: argparse.Namespace) -> int:
@@ -809,6 +903,25 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--sin-meta", action="store_true", help="No consulta credenciales")
     s.add_argument("--sin-red", action="store_true", help="No comprueba la URL de la imagen")
     s.set_defaults(func=cmd_preflight)
+
+    s = sub.add_parser("exportar", help="Crea un paquete de transferencia de una publicacion")
+    s.add_argument("id")
+    s.add_argument("--salida", default="")
+    s.set_defaults(func=cmd_exportar)
+
+    s = sub.add_parser("importar", help="Incorpora un paquete al estado de esta maquina")
+    s.add_argument("paquete")
+    s.add_argument("--simular", action="store_true", help="Valida sin escribir")
+    s.set_defaults(func=cmd_importar)
+
+    s = sub.add_parser("enviar-vm", help="Exporta, transfiere e importa en la VM. No publica.")
+    s.add_argument("id")
+    s.add_argument("--simular", action="store_true")
+    s.add_argument("--detalle", action="store_true", help="Muestra la salida de la VM")
+    s.set_defaults(func=cmd_enviar_vm)
+
+    s = sub.add_parser("estado-vm", help="Estado operativo de la VM (solo lectura)")
+    s.set_defaults(func=cmd_estado_vm)
 
     s = sub.add_parser("entorno", help="¿Puede esta maquina publicar de verdad?")
     s.add_argument("--marcar-produccion", action="store_true",
