@@ -31,7 +31,7 @@
   "dias_minimos_entre_publicaciones_mismo_proyecto": 14,
   "no_repetir_imagen": true,
   "modo_aprobacion": true,
-  "publicacion_automatica": false,
+  "publicacion_automatica": true,
   "puerto_panel": 8787,
   "host_panel": "127.0.0.1"
 }
