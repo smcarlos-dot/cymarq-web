@@ -19,6 +19,7 @@ Environment=PYTHONUNBUFFERED=1
 # Se ejecuta el ciclo completo: scheduler + motor. El motor comprueba por su
 # cuenta el entorno, el gate y las autorizaciones; esta unidad no decide nada
 # sobre si se publica o no.
+ExecStartPre=/bin/mkdir -p /home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/logs
 ExecStart=/home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/ciclo.sh
 
 # Una ejecucion no deberia pasar de unos minutos ni con reintentos de red.
@@ -35,12 +36,15 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/celassor/cymarq-web/CYMARQ_SOCIAL/CONFIG
-ReadWritePaths=/home/celassor/cymarq-web/CYMARQ_SOCIAL/PENDIENTES
-ReadWritePaths=/home/celassor/cymarq-web/CYMARQ_SOCIAL/PUBLICADOS
-ReadWritePaths=/home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/logs
-ReadWritePaths=/home/celassor/cymarq-web/.instagram-publish-state.json
-ReadWritePaths=/home/celassor/cymarq-web/.facebook-publish-state.json
+# El guion `-` hace la ruta opcional: sin el, systemd se niega a arrancar si
+# alguna todavia no existe, que es justo lo que pasa en una instalacion nueva
+# antes del primer ciclo (los diarios se crean al publicar).
+ReadWritePaths=-/home/celassor/cymarq-web/CYMARQ_SOCIAL/CONFIG
+ReadWritePaths=-/home/celassor/cymarq-web/CYMARQ_SOCIAL/PENDIENTES
+ReadWritePaths=-/home/celassor/cymarq-web/CYMARQ_SOCIAL/PUBLICADOS
+ReadWritePaths=-/home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/logs
+ReadWritePaths=-/home/celassor/cymarq-web/.instagram-publish-state.json
+ReadWritePaths=-/home/celassor/cymarq-web/.facebook-publish-state.json
 ProtectKernelTunables=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
