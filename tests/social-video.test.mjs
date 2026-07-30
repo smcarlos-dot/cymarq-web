@@ -28,6 +28,7 @@ import {
   REGLAS_FACEBOOK_REEL,
   REGLAS_FACEBOOK_VIDEO,
 } from '../lib/social/video.mjs';
+import { esProduccion } from '../scripts/entorno.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const REPO_WEB = resolve(AQUI, '..');
@@ -39,6 +40,10 @@ const COCINA = join(CARPETA_VIDEOS, 'Render Cocina.mp4');
 const PISCINA = join(CARPETA_VIDEOS, 'Render Piscina.mp4');
 
 const hayVideos = existsSync(COCINA) && existsSync(PISCINA);
+
+//: Estas pruebas corren en el PC y en la VM. La VM sí puede publicar, así que
+//: hay una que no debe ejecutarse allí. Ver más abajo.
+const ES_PRODUCCION = esProduccion();
 
 /* ------------------------------------------------------------------ */
 /* 1. Lector de MP4                                                    */
@@ -223,21 +228,31 @@ for (const script of ['scripts/instagram-publish.mjs', 'scripts/facebook-publish
 
   // La prueba que más importa: --confirm sigue bloqueado por la barrera de
   // entorno, y se corta ANTES de leer credenciales o tocar la red.
-  test(`${script}: --confirm sigue bloqueado en máquina de desarrollo`, () => {
-    const r = ejecutar(script, [
-      '--job=TEST-0001',
-      `--metadata=${METADATA_FALSA}`,
-      '--media-type=reels',
-      '--video-url=https://example.com/v.mp4',
-      '--confirm',
-    ]);
-    assert.equal(r.code, 1);
-    assert.ok(
-      r.salida.includes('BLOQUEADO POR ENTORNO'),
-      `se esperaba el bloqueo de entorno, se obtuvo: ${r.salida.slice(0, 400)}`
-    );
-    assert.ok(r.salida.includes('No se ha enviado nada a Meta'));
-  });
+  //
+  // SOLO se ejecuta en una máquina de desarrollo. En la VM de producción la
+  // barrera no bloquea —es su trabajo no bloquear— así que la aserción no
+  // aplica; y sobre todo: no se pasa `--confirm` a un publicador en una máquina
+  // que SÍ puede publicar. Un fallo de esta prueba no debe poder convertirse en
+  // una publicación real.
+  test(
+    `${script}: --confirm sigue bloqueado en máquina de desarrollo`,
+    { skip: ES_PRODUCCION ? 'máquina de producción: no se invoca --confirm' : false },
+    () => {
+      const r = ejecutar(script, [
+        '--job=TEST-0001',
+        `--metadata=${METADATA_FALSA}`,
+        '--media-type=reels',
+        '--video-url=https://example.com/v.mp4',
+        '--confirm',
+      ]);
+      assert.equal(r.code, 1);
+      assert.ok(
+        r.salida.includes('BLOQUEADO POR ENTORNO'),
+        `se esperaba el bloqueo de entorno, se obtuvo: ${r.salida.slice(0, 400)}`
+      );
+      assert.ok(r.salida.includes('No se ha enviado nada a Meta'));
+    }
+  );
 }
 
 test('instagram: --media-type=video se rechaza porque en IG el vídeo es Reel', () => {
