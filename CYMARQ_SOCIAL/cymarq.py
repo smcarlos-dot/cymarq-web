@@ -29,6 +29,8 @@ from cymarq_social import (  # noqa: E402
     catalogo_social,
     config as cfg_mod,
     ejecutor,
+    entorno as entorno_mod,
+    express as express_mod,
     generador,
     historial,
     inventario,
@@ -305,6 +307,89 @@ def cmd_preflight(args: argparse.Namespace) -> int:
     print("  No se ha publicado nada ni se ha cambiado ningun estado.")
     print(LINEA)
     return 0 if inf.get("general") == salud_mod.OK else 1
+
+
+def cmd_entorno(args: argparse.Namespace) -> int:
+    """Muestra si esta maquina puede publicar de verdad."""
+    if args.marcar_produccion:
+        try:
+            d = entorno_mod.marcar_produccion()
+        except RuntimeError as exc:
+            print(f"  [!] {exc}")
+            return 1
+        print(f"  Marcador creado: {entorno_mod.ARCHIVO_MARCADOR}")
+        print(f"    entorno    : {d['entorno']}")
+        print(f"    machine_id : {d['machine_id'][:8]}…")
+        print(f"    host       : {d['host']}")
+        print("  Solo vale en esta maquina. No se versiona.")
+        return 0
+
+    d = entorno_mod.detalle()
+    print(LINEA)
+    print(f"  ENTORNO: {d['entorno'].upper()}")
+    print(LINEA)
+    for k in ("motivo", "marcador", "marcador_presente", "machine_id_coincide",
+              "cymarq_env", "host", "sistema"):
+        print(f"  {k:<22} {d[k]}")
+    print(LINEA)
+    if d["entorno"] != entorno_mod.PRODUCCION:
+        print("  Esta maquina NO puede publicar. Es la barrera mas baja del sistema.")
+    return 0
+
+
+def cmd_express(args: argparse.Namespace) -> int:
+    """Crea una publicacion express. No publica."""
+    if args.listar:
+        for p in express_mod.listar():
+            print(f"  {p['id']}  {p['estado']:<20} {p.get('programado_para') or 'sin fecha'}"
+                  f"  {p['archivo']}")
+        r = express_mod.resumen_aislamiento()
+        print()
+        print(f"  express: {r['express']} | banco: {r['banco']} "
+              f"({r['banco_programadas']} programadas)")
+        print(f"  aislado del calendario: {r['aislado']}"
+              + (f"  COLISIONES: {r['colisiones']}" if r["colisiones"] else ""))
+        return 0
+
+    if not args.imagen:
+        print("  [!] Falta --imagen")
+        return 1
+    try:
+        ig = Path(args.texto_ig).read_text(encoding="utf-8") if args.texto_ig_archivo             else args.texto_ig
+        fb = Path(args.texto_fb).read_text(encoding="utf-8") if args.texto_fb_archivo             else args.texto_fb
+        reg = express_mod.crear(
+            args.imagen, ig or "", fb or "", titulo=args.titulo,
+            proyecto=args.proyecto, cuando=args.cuando or None,
+        )
+    except (express_mod.ErrorExpress, ValueError, OSError) as exc:
+        print(f"  [!] {exc}")
+        return 1
+
+    d = reg.get("_derivado") or {}
+    print(LINEA)
+    print(f"  EXPRESS {reg['id']} creada")
+    print(LINEA)
+    print(f"  estado        : {reg['estado']}")
+    print(f"  programada    : {programacion.formato_humano(reg.get('programado_para'))}")
+    print(f"  imagen        : {reg['archivo']}  (original intacto)")
+    print(f"  id_archivo    : {reg['id_archivo']}")
+    print(f"  derivado      : {d.get('accion')}  {d.get('nombre') or ''}")
+    print(f"  URL publica   : {d.get('url') or '(no generada)'}")
+    if d.get("detalle"):
+        print(f"                  {d['detalle']}")
+    print(f"  caption IG    : {len(reg['texto']['instagram'])} caracteres")
+    print(f"  caption FB    : {len(reg['texto']['facebook'])} caracteres")
+    r = express_mod.resumen_aislamiento()
+    print()
+    print(f"  calendario del banco intacto: {r['aislado']} "
+          f"({r['banco_programadas']} franjas, "
+          f"{r['banco_primera'][:10] if r['banco_primera'] else '-'}"
+          f" -> {r['banco_ultima'][:10] if r['banco_ultima'] else '-'})")
+    print(LINEA)
+    print("  Falta desplegar la imagen (commit+push) antes de poder publicar.")
+    print("  Comprueba con:  python cymarq.py preflight " + reg["id"])
+    print(LINEA)
+    return 0
 
 
 def cmd_autorizar(args: argparse.Namespace) -> int:
@@ -724,6 +809,25 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--sin-meta", action="store_true", help="No consulta credenciales")
     s.add_argument("--sin-red", action="store_true", help="No comprueba la URL de la imagen")
     s.set_defaults(func=cmd_preflight)
+
+    s = sub.add_parser("entorno", help="¿Puede esta maquina publicar de verdad?")
+    s.add_argument("--marcar-produccion", action="store_true",
+                   help="Crea el marcador de produccion PARA ESTA MAQUINA")
+    s.set_defaults(func=cmd_entorno)
+
+    s = sub.add_parser("express", help="Publicacion puntual fuera del calendario")
+    s.add_argument("--imagen", help="Ruta a la imagen")
+    s.add_argument("--texto-ig", default="", help="Caption de Instagram")
+    s.add_argument("--texto-fb", default="", help="Caption de Facebook")
+    s.add_argument("--texto-ig-archivo", action="store_true",
+                   help="--texto-ig es una ruta a un fichero")
+    s.add_argument("--texto-fb-archivo", action="store_true",
+                   help="--texto-fb es una ruta a un fichero")
+    s.add_argument("--titulo", default="")
+    s.add_argument("--proyecto", default="")
+    s.add_argument("--cuando", default="", help="Fecha y hora, p. ej. '2026-08-01 14:00'")
+    s.add_argument("--listar", action="store_true")
+    s.set_defaults(func=cmd_express)
 
     s = sub.add_parser("autorizar",
                        help="Autoriza la publicacion real de UNA propuesta concreta")

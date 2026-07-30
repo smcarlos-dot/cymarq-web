@@ -289,41 +289,89 @@ publicar aunque el archivo diga lo contrario.
 
 ## 6. Cómo se publica
 
-La publicación tiene **una sola ruta**, y no la ejecuta este proceso Python:
+Hay **dos máquinas** y cada una tiene un papel que no se solapa:
+
+| | |
+|---|---|
+| **PC** | desarrollo, generación de contenido, revisión y administración |
+| **VM en Google Cloud** | **único entorno que puede publicar**, 24/7 |
+| **GitHub** | fuente de verdad del código |
+| **VM** | fuente de verdad del estado operativo (historial, diarios, locks) |
 
 ```
-CYMARQ_SOCIAL (Python)        decide qué, cuándo y con qué texto
+systemd timer (cada 5 min)
         │
-        ├─ catalogo_social.py  prepara el derivado JPEG público
-        │
-        └─ puente_node.py      monta los argumentos y lanza…
+   produccion/ciclo.sh
+        ├─ salud            ¿credenciales y sistema en condiciones?
+        ├─ programadas      ¿venció alguna? -> lista_para_publicar
+        └─ ejecutar-programadas
                 │
+           ejecutor.py
+                │  (barrera de entorno · gate · autorización ·
+                │   preflight · lock · antiduplicación)
                 ▼
-   09 WEB/scripts/*.mjs        único código que habla con Meta
+        scripts/social-publish.mjs
                 │
+   instagram-publish.mjs / facebook-publish.mjs
                 ▼
-        Instagram / Facebook
+              Meta
 ```
 
-No existe un segundo cliente de Meta en Python, y no debe crearse: los
-publicadores Node ya están probados con publicaciones reales, llevan la
-protección antiduplicados y son los que guardan las credenciales fuera del
-alcance de este sistema.
+### Las seis barreras
 
-**Credenciales.** Viven únicamente en `09 WEB/.env.local`, que está en
-`.gitignore`. Python nunca las ve: hereda el entorno sin inyectar nada y es el
-script Node quien las lee.
+Para que salga una publicación real tienen que cumplirse **todas**:
 
-**Estado actual.** El puente funciona solo en modo ensayo: `puente_node` se
-niega por código a invocar los scripts de publicación. La publicación real se
-lanza a mano desde `09 WEB` con `--confirm`.
+1. **Entorno de producción.** `CONFIG/entorno.json` existe solo en la VM y
+   lleva dentro su `machine-id`. Si el marcador se copia a otra máquina, deja
+   de valer. `CYMARQ_ENV` puede degradar a desarrollo, nunca ascender.
+2. **Gate**: `publicacion_automatica` en `config.json`.
+3. **Autorización** puntual por propuesta, con caducidad, cuando corresponda.
+4. **Preflight**: estado, textos, imagen accesible, credenciales.
+5. **Lock** por propuesta: nunca dos procesos sobre el mismo trabajo.
+6. **Antiduplicación**: estado por plataforma + diarios de Node.
 
-**Comprobar la configuración sin tocar nada:**
+La barrera de entorno está además **dentro de los propios publicadores**, no
+solo en el orquestador: invocar un script suelto desde otra máquina tampoco
+publica.
+
+### Comandos
 
 ```
-python cymarq.py puente --solo-diagnostico
-python cymarq.py catalogo --listar
+python cymarq.py entorno                  ¿puede esta máquina publicar?
+python cymarq.py salud [--json]           credenciales y sistema
+python cymarq.py preflight <ID>           ¿está lista esta publicación?
+python cymarq.py programadas [--ahora]    scheduler: detecta lo vencido
+python cymarq.py ejecutar-programadas     motor
+python cymarq.py autorizar <ID>           autoriza UNA publicación real
+python cymarq.py express --imagen ...     publicación fuera del calendario
 ```
+
+### Servicio en la VM
+
+```
+produccion/cymarq-social.service   ejecuta un ciclo
+produccion/cymarq-social.timer     cada 5 min, Persistent=true
+produccion/ciclo.sh                salud -> scheduler -> motor
+produccion/logs/                   registro (rotación a los 5 MB)
+```
+
+`Persistent=true` hace que un disparo perdido por apagado se ejecute al
+arrancar. Encaja con el diseño: una programación vencida sigue lista, no se
+descarta.
+
+## 7. Publicaciones EXPRESS
+
+Una express es puntual y **no toca el calendario**: serie propia `EXP-AAAA-NNNN`,
+carpeta propia, y las mismas protecciones que el resto. No consume una
+programada, no mueve franjas y no altera la rotación.
+
+```
+python cymarq.py express --imagen foto.jpg     --texto-ig "..." --texto-fb "..." --cuando "2026-08-01 14:00"
+python cymarq.py express --listar
+```
+
+El derivado JPEG se prepara solo, pero **hay que desplegarlo** (commit y push)
+antes de publicar: el preflight lo comprueba.
 
 ## 7. Preguntas frecuentes
 

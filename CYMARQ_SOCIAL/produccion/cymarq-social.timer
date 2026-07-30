@@ -1,0 +1,27 @@
+[Unit]
+Description=CYMARQ SOCIAL — revision periodica de publicaciones programadas
+Documentation=file:///home/celassor/cymarq-web/CYMARQ_SOCIAL/README.md
+
+[Timer]
+Unit=cymarq-social.service
+
+# Cada cinco minutos. El calendario publica a las 18:30, asi que basta con
+# revisar a menudo y barato: el ciclo termina en segundos cuando no toca nada.
+# No hay proceso residente consumiendo CPU entre disparos.
+OnCalendar=*:0/5
+
+# Si la VM estuvo apagada a la hora prevista, se ejecuta al arrancar en vez de
+# saltarse el disparo. Encaja con el diseno del scheduler: una programacion
+# vencida sigue estando lista, no se descarta.
+Persistent=true
+
+# Un margen aleatorio evita que todos los disparos caigan en el segundo exacto.
+RandomizedDelaySec=30
+
+# Un poco de holgura tras el arranque, para no competir con el resto del inicio.
+OnBootSec=2min
+
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

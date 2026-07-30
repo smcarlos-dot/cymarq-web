@@ -27,7 +27,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
-from . import catalogo_social, config as cfg_mod, ejecutor, historial, programacion, rutas
+from . import (catalogo_social, config as cfg_mod, ejecutor, entorno as entorno_mod,
+               historial, programacion, rutas)
 
 OK = "OK"
 ADVERTENCIA = "ADVERTENCIA"
@@ -84,6 +85,14 @@ def salud_sistema() -> list[Chequeo]:
     """Todo lo que se puede comprobar sin salir de este equipo."""
     repo = catalogo_social.repo_web()
     checks: list[Chequeo] = []
+
+    d = entorno_mod.detalle()
+    checks.append(Chequeo(
+        nombre="entorno",
+        estado=OK,
+        mensaje=f"{d['entorno'].upper()} — {d['motivo']}",
+        detalle=d,
+    ))
 
     node = shutil.which("node")
     checks.append(_c("node", bool(node),

@@ -48,6 +48,7 @@ import {
 } from '../lib/instagram/publish.mjs';
 import { requireSecret } from './instagram-env.mjs';
 import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
+import { exigirProduccion } from './entorno.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIARIO = join(REPO, '.instagram-publish-state.json');
@@ -106,6 +107,11 @@ function mostrarError(error) {
 
 async function main() {
   const confirmar = process.argv.includes('--confirm');
+  // BARRERA DE ENTORNO. Es lo mas abajo que puede estar: dentro del propio
+  // publicador, antes del diario y antes de cualquier peticion. Invocar este
+  // script a mano desde otra maquina no la salta.
+  if (confirmar) exigirProduccion('instagram-publish');
+
   const trabajo = leerTrabajo({ varianteCaption: 'instagram', uso: USO });
   const JOB_ID = trabajo.jobId;
   const IMAGEN_URL = trabajo.imageUrl;

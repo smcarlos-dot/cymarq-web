@@ -86,3 +86,16 @@ desktop.ini
 
 # Autorizaciones puntuales de publicacion real. Runtime local.
 autorizaciones.json
+
+# Backups historicos inactivos de los diarios. La VM es la unica duena de los
+# diarios operativos; estos son solo evidencia y no debe usarlos ningun codigo.
+backup-historico-inactivo.*
+
+# Marcador de entorno de produccion. Solo existe en la VM y solo vale alli.
+entorno.json
+
+# Paquetes de migracion de datos a la VM. Contienen historial y material
+# privado: jamas deben entrar en un repositorio publico.
+CYMARQ_VM_DATOS*.zip
+cymarq_vm_import/
+backup_cymarq_vm/

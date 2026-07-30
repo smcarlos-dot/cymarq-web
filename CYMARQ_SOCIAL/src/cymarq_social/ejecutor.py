@@ -47,7 +47,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from . import catalogo_social, config as cfg_mod, historial, programacion, rutas
+from . import (catalogo_social, config as cfg_mod, entorno as entorno_mod,
+               historial, programacion, rutas)
 
 PLATAFORMAS = ("instagram", "facebook")
 
@@ -170,6 +171,15 @@ def puede_publicar(job_id: str) -> tuple[bool, str]:
 
     Sin ninguna de las dos, no hay ruta posible hacia Meta.
     """
+    # BARRERA DE ENTORNO, antes que cualquier otra llave. Una maquina de
+    # desarrollo no puede publicar ni con el gate abierto ni con autorizacion.
+    if not entorno_mod.es_produccion():
+        d = entorno_mod.detalle()
+        return False, (
+            f"entorno '{d['entorno']}': solo la VM de produccion puede publicar. "
+            f"{d['motivo']}"
+        )
+
     if job_autorizado(job_id):
         return True, "autorizacion puntual vigente"
     if publicacion_real_habilitada():
@@ -186,12 +196,17 @@ def estado_motor() -> dict[str, str]:
     """Lo que se muestra al usuario, sin ambiguedad."""
     habilitada = publicacion_real_habilitada()
     autorizados = jobs_autorizados()
+    ent = entorno_mod.entorno()
     return {
+        "entorno": ent.upper(),
         "publicacion_automatica": "ACTIVADA" if habilitada else "DESACTIVADA",
         "motor": "OPERATIVO",
         # El modo dice la verdad: si hay una autorizacion puntual vigente, esto
         # ya NO es simulacion, aunque el interruptor general siga cerrado.
-        "modo": ("PUBLICACION REAL" if habilitada
+        # En desarrollo el modo es siempre simulacion, diga lo que diga el gate.
+        "modo": ("SIMULACION (entorno de desarrollo)"
+                 if ent != entorno_mod.PRODUCCION
+                 else "PUBLICACION REAL" if habilitada
                  else "PUBLICACION REAL AUTORIZADA POR JOB" if autorizados
                  else "SIMULACION"),
         "publicaciones_reales_autorizadas": ", ".join(autorizados) if autorizados else "NINGUNA",
