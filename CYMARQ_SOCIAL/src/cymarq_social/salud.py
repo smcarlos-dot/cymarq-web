@@ -27,8 +27,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
-from . import (catalogo_social, config as cfg_mod, ejecutor, entorno as entorno_mod,
-               historial, programacion, rutas)
+from . import (catalogo_social, catalogo_video, config as cfg_mod, ejecutor,
+               entorno as entorno_mod, historial, programacion, rutas)
 
 OK = "OK"
 ADVERTENCIA = "ADVERTENCIA"
@@ -241,14 +241,20 @@ def apto_para_publicar() -> tuple[bool, str, dict[str, Any]]:
 # --------------------------------------------------------------------- #
 
 
-def _url_accesible(url: str, tiempo_limite: int = 30) -> Chequeo:
+def _url_accesible(url: str, tiempo_limite: int = 30, es_video: bool = False) -> Chequeo:
     """Comprueba la URL como la vera Meta: sin credenciales.
 
     Se usa un User-Agent de navegador porque Cloudflare responde 403 al agente
     por defecto de Python. Ese 403 no dice nada sobre si Meta podra descargarla
     (y de hecho puede), asi que confundirlo con un fallo real seria un falso
     positivo molesto justo antes de publicar.
+
+    Para video se exige ademas `Accept-Ranges`: el descargador de Meta pide el
+    MP4 por rangos, y sin soporte de rangos la descarga puede fallar dentro de
+    Meta, donde ya no hay forma de diagnosticarla.
     """
+    tipos_ok = ("video/mp4", "video/quicktime") if es_video else ("image/jpeg",)
+    etiqueta = "video" if es_video else "imagen"
     try:
         peticion = urllib.request.Request(
             url, method="HEAD",
@@ -257,16 +263,26 @@ def _url_accesible(url: str, tiempo_limite: int = 30) -> Chequeo:
         with urllib.request.urlopen(peticion, timeout=tiempo_limite) as r:
             tipo = (r.headers.get("Content-Type") or "").split(";")[0].strip()
             largo = r.headers.get("Content-Length")
-            bien = r.status == 200 and tipo == "image/jpeg"
+            rangos = (r.headers.get("Accept-Ranges") or "").strip().lower()
+            bien = r.status == 200 and tipo in tipos_ok
+            if es_video and bien and rangos in ("", "none"):
+                return _c("url_publica", False,
+                          "", f"HTTP {r.status}, {tipo}: sin Accept-Ranges, "
+                              "Meta descarga el MP4 por rangos",
+                          detalle={"url": url, "status": r.status,
+                                   "content_type": tipo, "accept_ranges": rangos})
+            sufijo = f", rangos: {rangos}" if es_video else ""
             return _c("url_publica", bien,
-                      f"HTTP {r.status}, {tipo}, {largo} bytes",
-                      f"HTTP {r.status}, {tipo}: no es un JPEG servido correctamente",
-                      detalle={"url": url, "status": r.status, "content_type": tipo})
+                      f"HTTP {r.status}, {tipo}, {largo} bytes{sufijo}",
+                      f"HTTP {r.status}, {tipo}: no es un "
+                      f"{'MP4' if es_video else 'JPEG'} servido correctamente",
+                      detalle={"url": url, "status": r.status, "content_type": tipo,
+                               "accept_ranges": rangos or None})
     except urllib.error.HTTPError as exc:
-        return _c("url_publica", False, "", f"HTTP {exc.code} al pedir la imagen",
+        return _c("url_publica", False, "", f"HTTP {exc.code} al pedir el {etiqueta}",
                   detalle={"url": url, "status": exc.code})
     except Exception as exc:
-        return _c("url_publica", False, "", f"no se pudo comprobar la imagen: {exc}",
+        return _c("url_publica", False, "", f"no se pudo comprobar el {etiqueta}: {exc}",
                   detalle={"url": url})
 
 
@@ -314,29 +330,63 @@ def preflight(job_id: str, con_meta: bool = True, con_red: bool = True) -> dict[
                          f"{len(t)} caracteres almacenados",
                          f"sin caption almacenado para {p}"))
 
+    # El medio decide en que manifiesto se busca y con que reglas se valida.
+    # Sin `tipo_medio` es una imagen, que es lo que eran todas las propuestas
+    # anteriores al soporte de video.
     id_archivo = pub.get("id_archivo") or ""
-    url = catalogo_social.url_publica(id_archivo) if id_archivo else None
-    checks.append(_c("imagen_en_manifiesto", bool(url),
-                     "imagen presente en el catalogo publico",
-                     f"la imagen {id_archivo or '(sin id)'} no esta en el manifiesto",
-                     detalle={"id_archivo": id_archivo, "url": url}))
+    tipo_medio = pub.get("tipo_medio") or "image"
+    es_video = tipo_medio != "image"
+    etiqueta = "video" if es_video else "imagen"
+
+    if es_video:
+        url = catalogo_video.url_publica(id_archivo) if id_archivo else None
+    else:
+        url = catalogo_social.url_publica(id_archivo) if id_archivo else None
+
+    checks.append(_c(f"{etiqueta}_en_manifiesto", bool(url),
+                     f"{etiqueta} presente en el catalogo publico",
+                     f"el {etiqueta} {id_archivo or '(sin id)'} no esta en el manifiesto",
+                     detalle={"id_archivo": id_archivo, "url": url,
+                              "tipo_medio": tipo_medio}))
+
+    if es_video:
+        # El derivado tiene que estar en disco. Si falta, no se ha hecho el
+        # commit y el push, y Meta recibiria un 404 a mitad de publicacion.
+        desplegado = catalogo_video.desplegado(id_archivo) if id_archivo else False
+        checks.append(_c("video_desplegado", desplegado,
+                         "el derivado esta en public/social/video/",
+                         "el derivado no esta en public/social/video/: falta commit y push",
+                         detalle={"id_archivo": id_archivo}))
 
     if url and con_red:
-        checks.append(_url_accesible(url))
+        checks.append(_url_accesible(url, es_video=es_video))
     elif url:
         checks.append(_c("url_publica", True, "no comprobada (--sin-red)", "", grave=False))
 
     # Formato: ya validado al entrar en el catalogo, se reporta lo registrado.
-    entrada = catalogo_social.cargar_manifiesto().get("imagenes", {}).get(id_archivo) or {}
+    if es_video:
+        entrada = catalogo_video.cargar_manifiesto().get("videos", {}).get(id_archivo) or {}
+    else:
+        entrada = catalogo_social.cargar_manifiesto().get("imagenes", {}).get(id_archivo) or {}
     ancho, alto = entrada.get("ancho"), entrada.get("alto")
     if ancho and alto:
         ratio = ancho / alto
-        bien = (catalogo_social.RATIO_MIN <= ratio <= catalogo_social.RATIO_MAX
-                and ancho <= catalogo_social.ANCHO_MAX)
-        checks.append(_c("formato_imagen", bien,
-                         f"{ancho}x{alto}, relacion {ratio:.4f}",
+        if es_video:
+            bien = (catalogo_video.RATIO_MIN <= ratio <= catalogo_video.RATIO_MAX
+                    and ancho <= catalogo_video.ANCHO_MAX
+                    and ancho >= catalogo_video.ANCHO_MIN
+                    and alto >= catalogo_video.ALTO_MIN)
+            extra = (f", {entrada.get('duracion')} s, {entrada.get('fps')} fps, "
+                     f"{entrada.get('codec_video')}/{entrada.get('codec_audio')}")
+        else:
+            bien = (catalogo_social.RATIO_MIN <= ratio <= catalogo_social.RATIO_MAX
+                    and ancho <= catalogo_social.ANCHO_MAX)
+            extra = ""
+        checks.append(_c(f"formato_{etiqueta}", bien,
+                         f"{ancho}x{alto}, relacion {ratio:.4f}{extra}",
                          f"{ancho}x{alto}, relacion {ratio:.4f}: fuera de lo admitido",
-                         detalle={"ancho": ancho, "alto": alto, "relacion": round(ratio, 4)}))
+                         detalle={"ancho": ancho, "alto": alto, "relacion": round(ratio, 4),
+                                  "tipo_medio": tipo_medio}))
 
     # --- Estado por plataforma y diarios de Node ---
     plataformas = ejecutor.estado_plataformas(pub)
