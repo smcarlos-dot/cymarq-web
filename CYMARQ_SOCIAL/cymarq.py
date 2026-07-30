@@ -35,6 +35,7 @@ from cymarq_social import (  # noqa: E402
     generador,
     historial,
     inventario,
+    limpieza as limpieza_mod,
     panel,
     perfiles,
     programacion,
@@ -309,6 +310,65 @@ def cmd_preflight(args: argparse.Namespace) -> int:
     print("  No se ha publicado nada ni se ha cambiado ningun estado.")
     print(LINEA)
     return 0 if inf.get("general") == salud_mod.OK else 1
+
+
+def _mb(n):
+    return f"{n / 1048576:.1f} MB"
+
+
+def cmd_limpiar_publicadas(args: argparse.Namespace) -> int:
+    """Borra el material pesado de las publicaciones ya confirmadas."""
+    if args.espacio:
+        e = limpieza_mod.espacio()
+        print(LINEA)
+        print("  ESPACIO")
+        print(LINEA)
+        print(f"  disco: {_mb(e['disco_usado'])} usados de {_mb(e['disco_total'])}"
+              f"  |  libres {_mb(e['disco_libre'])}")
+        print()
+        for k, v in sorted(e["componentes"].items(), key=lambda x: -x[1]):
+            print(f"    {k:<26} {_mb(v):>10}")
+        ret = limpieza_mod.evaluar_retencion()
+        if ret:
+            print()
+            print("  Fuera de su periodo de retencion:")
+            for r in ret:
+                print(f"    {r['ruta']}  ({r['dias']} dias, limite {r['limite']}) {_mb(r['bytes'])}")
+        print(LINEA)
+        return 0
+
+    if args.id:
+        c = limpieza_mod.limpiar_publicacion(args.id, simular=args.simular)
+        print(f"  {c.id}: {c.motivo}")
+        if c.bytes_liberables:
+            print(f"    material pesado: {_mb(c.bytes_liberables)} en {len(c.archivos)} archivos")
+        return 0
+
+    r = limpieza_mod.limpiar_publicadas(simular=args.simular)
+    print(LINEA)
+    print("  LIMPIEZA DE PUBLICACIONES CONFIRMADAS"
+          + ("  (SIMULACION)" if args.simular else ""))
+    print(LINEA)
+    print("  Solo se borra la copia de trabajo. El registro, los identificadores")
+    print("  de Meta, los permalinks, los diarios y la imagen publica se conservan.")
+    print()
+    for c in r["detalle"]:
+        print(f"  [{'SIMULA' if args.simular else 'LIMPIA'}] {c.id}  {c.proyecto[:30]:<30}"
+              f" {_mb(c.bytes_liberables):>10}  {c.motivo}")
+    if not r["detalle"]:
+        print("  No hay ninguna publicacion en condiciones de limpiarse.")
+    print()
+    if r["no_limpiables"]:
+        print(f"  NO se tocan ({len(r['no_limpiables'])}):")
+        for c in r["no_limpiables"][:6]:
+            print(f"    {c.id}  {c.motivo}")
+        if len(r["no_limpiables"]) > 6:
+            print(f"    ... y {len(r['no_limpiables']) - 6} mas")
+    print(LINEA)
+    print(f"  Revisadas {r['revisadas']} | limpiadas {len(r['detalle'])} | "
+          f"ya limpias {r['ya_limpias']} | liberado {_mb(r['bytes'])}")
+    print(LINEA)
+    return 0
 
 
 def cmd_exportar(args: argparse.Namespace) -> int:
@@ -903,6 +963,13 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--sin-meta", action="store_true", help="No consulta credenciales")
     s.add_argument("--sin-red", action="store_true", help="No comprueba la URL de la imagen")
     s.set_defaults(func=cmd_preflight)
+
+    s = sub.add_parser("limpiar-publicadas",
+                       help="Borra el material pesado de publicaciones ya confirmadas")
+    s.add_argument("id", nargs="?", default="", help="Limpiar solo esta")
+    s.add_argument("--simular", action="store_true", help="Muestra que borraria")
+    s.add_argument("--espacio", action="store_true", help="Solo informe de espacio")
+    s.set_defaults(func=cmd_limpiar_publicadas)
 
     s = sub.add_parser("exportar", help="Crea un paquete de transferencia de una publicacion")
     s.add_argument("id")
