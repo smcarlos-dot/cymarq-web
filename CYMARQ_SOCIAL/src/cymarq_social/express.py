@@ -46,7 +46,9 @@ class ErrorExpress(RuntimeError):
 def siguiente_id(datos: dict[str, Any] | None = None) -> str:
     """Serie propia EXP-AAAA-NNNN, separada de la serie CYM del banco."""
     datos = datos or historial.cargar()
-    prefijo = f"{PREFIJO}-{datetime.now().year}-"
+    # Igual que la serie CYM: el ano lo marca Colombia, no el reloj del
+    # sistema, que en la VM es UTC.
+    prefijo = f"{PREFIJO}-{programacion.ahora().year}-"
     usados = [
         int(p["id"].rsplit("-", 1)[-1])
         for p in datos["publicaciones"]

@@ -183,6 +183,10 @@ def programar(id_publicacion: str, cuando: datetime | str,
         "programado_para": guardar_iso(momento),
         "zona_horaria": NOMBRE_ZONA,
         "programado_en": guardar_iso(ahora()),
+        # Reprogramar borra la marca de "estuvo lista": si no, el registro
+        # conserva un `listo_desde` de la programacion anterior y da a entender
+        # que ya vencio cuando en realidad vuelve a estar esperando.
+        "listo_desde": None,
     }
     if previo:
         cambios["programacion_anterior"] = previo

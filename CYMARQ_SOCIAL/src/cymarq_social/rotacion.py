@@ -192,7 +192,11 @@ def proxima_fecha(cfg: dict[str, Any], desde: datetime | None = None) -> datetim
     except ValueError:
         hh, mm = 18, 30
 
-    base = desde or datetime.now()
+    # Sin zona, `datetime.now()` da la hora del sistema: en la VM, UTC. Entre
+    # las 19:00 y medianoche en Colombia eso ya es el dia siguiente, y la fecha
+    # sugerida saldria corrida un dia. Se ancla explicitamente a Colombia.
+    from . import programacion
+    base = desde or programacion.ahora()
     for salto in range(1, 15):
         cand = (base + timedelta(days=salto)).replace(
             hour=hh, minute=mm, second=0, microsecond=0

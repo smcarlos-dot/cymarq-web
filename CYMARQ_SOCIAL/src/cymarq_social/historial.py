@@ -14,6 +14,12 @@ from typing import Any
 
 from . import rutas, seguridad
 
+def _anio_colombia() -> int:
+    """Ano segun America/Bogota. Import diferido: programacion importa historial."""
+    from . import programacion
+    return programacion.ahora().year
+
+
 ESTADOS = (
     "propuesta",
     "aprobada",
@@ -95,7 +101,10 @@ def guardar(datos: dict[str, Any]) -> None:
 
 def siguiente_id(datos: dict[str, Any] | None = None) -> str:
     datos = datos or cargar()
-    anio = datetime.now().year
+    # El ano sale del calendario de Colombia, no del reloj del sistema. En la VM
+    # el reloj es UTC, asi que un 31 de diciembre por la tarde en Colombia ya es
+    # 1 de enero en UTC y la serie habria saltado de ano antes de tiempo.
+    anio = _anio_colombia()
     prefijo = f"CYM-{anio}-"
     usados = [
         int(p["id"].rsplit("-", 1)[-1])
