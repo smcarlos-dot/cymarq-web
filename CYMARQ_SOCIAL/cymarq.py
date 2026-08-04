@@ -31,6 +31,7 @@ from cymarq_social import (  # noqa: E402
     despliegue as despliegue_mod,
     ejecutor,
     entorno as entorno_mod,
+    estados as estados_mod,
     express as express_mod,
     generador,
     historial,
@@ -570,6 +571,69 @@ def cmd_express(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_estados(args: argparse.Namespace) -> int:
+    """Rotacion de historias de fin de semana. No publica."""
+    if args.resumen:
+        r = estados_mod.resumen_rotacion()
+        print(LINEA)
+        print("  ROTACION DE ESTADOS")
+        print(LINEA)
+        print(f"  publicaciones : {r['total']}")
+        for estado, n in sorted(r["por_estado"].items()):
+            print(f"    {estado:<22} {n}")
+        print(f"  proxima       : {programacion.formato_humano(r['proxima'])}")
+        print(f"  ultima        : {programacion.formato_humano(r['ultima'])}")
+        print(LINEA)
+        return 0
+
+    if args.plan:
+        try:
+            plan = estados_mod.construir_plan(Path(args.plan), ciclos=args.ciclos,
+                                              semilla=args.semilla)
+        except estados_mod.ErrorEstados as exc:
+            print(f"  [!] {exc}")
+            return 1
+        copiados = estados_mod.desplegar_piezas(Path(args.plan), plan)
+        estados_mod.guardar_plan(plan)
+        print(LINEA)
+        print(f"  PLAN DE ROTACION — {len(plan['piezas'])} piezas, "
+              f"{args.ciclos} ciclos, {len(plan['publicaciones'])} publicaciones")
+        print(LINEA)
+        print(f"  semilla        : {plan['semilla']}  (mismo numero = mismo orden)")
+        print(f"  primera        : {programacion.formato_humano(plan['publicaciones'][0]['programado_para'])}")
+        print(f"  ultima         : {programacion.formato_humano(plan['publicaciones'][-1]['programado_para'])}")
+        print(f"  copiadas a web : {len(copiados)}")
+        print(f"  plan guardado  : {estados_mod.ARCHIVO_PLAN}")
+        print(LINEA)
+        print("  Falta commit+push del video y del plan, y luego materializar en la VM.")
+        print("  NO se ha creado ninguna publicacion en esta maquina.")
+        print(LINEA)
+        return 0
+
+    if args.materializar:
+        try:
+            r = estados_mod.materializar(simular=args.simular)
+        except estados_mod.ErrorEstados as exc:
+            print(f"  [!] {exc}")
+            return 1
+        print(LINEA)
+        print("  MATERIALIZAR ROTACION" + ("  (SIMULACION)" if args.simular else ""))
+        print(LINEA)
+        print(f"  piezas registradas : {r['piezas_registradas']}"
+              f"  (ya estaban: {r['piezas_ya_estaban']})")
+        print(f"  publicaciones      : {len(r['creadas'])} nuevas"
+              f"  (ya existian: {r['ya_existian']})")
+        if r["creadas"]:
+            print(f"  rango              : {r['creadas'][0]} .. {r['creadas'][-1]}")
+        print(LINEA)
+        print("  No se ha publicado nada. Solo se han creado propuestas programadas.")
+        print(LINEA)
+        return 0
+
+    print("  Usa --plan <carpeta>, --materializar o --resumen")
+    return 1
+
+
 def cmd_autorizar(args: argparse.Namespace) -> int:
     """Autoriza o revoca la publicacion real de UNA propuesta concreta."""
     if args.limpiar:
@@ -1036,6 +1100,17 @@ def construir_parser() -> argparse.ArgumentParser:
     s.add_argument("--cuando", default="", help="Fecha y hora, p. ej. '2026-08-01 14:00'")
     s.add_argument("--listar", action="store_true")
     s.set_defaults(func=cmd_express)
+
+    s = sub.add_parser("estados",
+                       help="Rotacion de historias de fin de semana. No publica")
+    s.add_argument("--plan", help="Carpeta con los MP4 marcados: construye el plan")
+    s.add_argument("--ciclos", type=int, default=2, help="Vueltas completas al material")
+    s.add_argument("--semilla", type=int, help="Fija el azar del barajado")
+    s.add_argument("--materializar", action="store_true",
+                   help="Crea en ESTA maquina las publicaciones que falten del plan")
+    s.add_argument("--simular", action="store_true", help="Con --materializar: no escribe")
+    s.add_argument("--resumen", action="store_true", help="Como va la rotacion")
+    s.set_defaults(func=cmd_estados)
 
     s = sub.add_parser("autorizar",
                        help="Autoriza la publicacion real de UNA propuesta concreta")
