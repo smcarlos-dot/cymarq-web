@@ -6,11 +6,11 @@ export const site = {
   // Canal para asuntos de privacidad, datos personales y solicitudes de
   // eliminación (el que figura en las páginas legales y ante Meta).
   privacyEmail: 'carloslassor@hotmail.com',
-  instagramHandle: '@cymarq_obras',
+  instagramHandle: '@cymarq.obras',
   whatsapp: '+57 322 3656579',
   whatsappLink:
     'https://wa.me/573223656579?text=Hola%20CYMARQ%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20servicios.',
-  instagram: 'https://www.instagram.com/cymarq_obras/',
+  instagram: 'https://www.instagram.com/cymarq.obras/',
   facebook: 'https://www.facebook.com/cymarq.obras',
   location: 'Colombia',
   seo: {

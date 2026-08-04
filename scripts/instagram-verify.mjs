@@ -17,14 +17,15 @@ import {
   getPublishingLimit,
   describeToken,
   GraphError,
+  CUENTA_ESPERADA,
+  IG_USER_ID_ESPERADO,
   API_VERSION,
   GRAPH_HOST,
 } from '../lib/instagram/publish.mjs';
 import { requireSecret } from './instagram-env.mjs';
 
-const CUENTA_ESPERADA = 'cymarq_obras';
 /** Valor documentado en `.env.example`. Se contrasta con lo que diga la API. */
-const IG_ID_DOCUMENTADO = '17841466818245536';
+const IG_ID_DOCUMENTADO = IG_USER_ID_ESPERADO;
 
 function titulo(texto) {
   console.log(`\n${texto}`);

@@ -259,7 +259,7 @@ proyecto usarán tu versión.
 {
   "nombre_empresa": "CYMARQ",
   "sitio_web": "",                    // rellénalo cuando exista
-  "instagram": "https://www.instagram.com/cymarq_obras/",
+  "instagram": "https://www.instagram.com/cymarq.obras/",
   "facebook": "https://www.facebook.com/cymarq.obras",
   "whatsapp": "+57 322 3656579",
   "correo": "contacto@cymarq.com.co",

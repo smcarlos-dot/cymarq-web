@@ -28,7 +28,7 @@ import {
 import { requireSecret } from './instagram-env.mjs';
 import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
 
-const CUENTA_ESPERADA = 'cymarq_obras';
+import { CUENTA_ESPERADA } from '../lib/instagram/publish.mjs';
 
 const USO =
   'npm run instagram:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>';

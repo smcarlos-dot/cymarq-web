@@ -36,7 +36,7 @@ const AQUI = dirname(fileURLToPath(import.meta.url));
 const REPO_WEB = resolve(AQUI, '..');
 // Los MP4 de origen viven fuera del repositorio web, en la carpeta PUBLICAR del
 // proyecto. Si no están, las pruebas que los usan se saltan en vez de fallar.
-const CARPETA_VIDEOS = resolve(AQUI, '..', '..', 'PUBLICAR', 'JUL_29_0001');
+const CARPETA_VIDEOS = resolve(AQUI, '..', '..', 'PUBLICAR');
 
 const COCINA = join(CARPETA_VIDEOS, 'Render Cocina.mp4');
 const PISCINA = join(CARPETA_VIDEOS, 'Render Piscina.mp4');

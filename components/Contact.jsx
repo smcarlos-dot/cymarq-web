@@ -16,7 +16,7 @@ const channels = [
   },
   {
     label: 'Instagram',
-    value: '@cymarq_obras',
+    value: '@cymarq.obras',
     href: site.instagram,
   },
   {

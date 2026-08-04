@@ -21,7 +21,7 @@
  */
 
 import {
-  getAccount, getPublishingLimit,
+  getAccount, getPublishingLimit, comprobarIdentidad,
   GRAPH_HOST as IG_HOST, API_VERSION as IG_VER,
 } from '../lib/instagram/publish.mjs';
 import {
@@ -30,8 +30,6 @@ import {
 } from '../lib/facebook/publish.mjs';
 import { readSecret } from './instagram-env.mjs';
 import { PAGE_ID_ESPERADO, PAGINA_ESPERADA } from './facebook-job.mjs';
-
-const CUENTA_IG_ESPERADA = 'cymarq_obras';
 
 function arg(nombre) {
   const p = `--${nombre}=`;
@@ -84,12 +82,16 @@ async function saludInstagram() {
       + 'Instagram Login. Se comprueba que funciona, no cuanto le queda.',
   });
 
+  // La identidad la decide el user_id, no el nombre: un nombre de usuario se
+  // cambia desde la aplicacion y no significa que la cuenta sea otra.
   const usuario = cuenta.username ?? null;
-  r.cuenta = usuario === CUENTA_IG_ESPERADA
-    ? comp('OK', `cuenta correcta: @${usuario}`,
-           { username: usuario, user_id: cuenta.user_id ?? null })
-    : comp('ERROR', `el token es de @${usuario}, se esperaba @${CUENTA_IG_ESPERADA}`,
-           { username: usuario, user_id: cuenta.user_id ?? null });
+  const identidad = comprobarIdentidad(cuenta);
+  const detalleCuenta = { username: usuario, user_id: cuenta.user_id ?? null };
+  r.cuenta = identidad.ok
+    ? comp(identidad.aviso ? 'ADVERTENCIA' : 'OK',
+           identidad.aviso ?? `cuenta correcta: @${usuario}`,
+           detalleCuenta)
+    : comp('ERROR', identidad.motivo, detalleCuenta);
 
   // La cuota exige instagram_business_content_publish: si responde, el permiso
   // esta concedido. Es la comprobacion mas directa que existe.

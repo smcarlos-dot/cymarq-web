@@ -1,5 +1,5 @@
 /**
- * PASO 4 — Publicación real controlada en @cymarq_obras.
+ * PASO 4 — Publicación real controlada en @cymarq.obras.
  *
  * Flujo oficial (Instagram API with Instagram Login, graph.instagram.com):
  *
@@ -42,6 +42,7 @@ import {
   getContainerErrorDetail,
   publishContainer,
   getMedia,
+  comprobarIdentidad,
   checkPublicImage,
   analyzeCaption,
   GraphError,
@@ -63,8 +64,6 @@ import { exigirProduccion } from './entorno.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIARIO = join(REPO, '.instagram-publish-state.json');
-
-const CUENTA_ESPERADA = 'cymarq_obras';
 
 const USO =
   'npm run instagram:publish -- --job=<ID> --metadata=<ruta> ' +
@@ -213,13 +212,10 @@ async function main() {
   console.log(`  cuenta      : @${cuenta.username}`);
   console.log(`  user_id     : ${igId}`);
 
-  if (cuenta.username !== CUENTA_ESPERADA) {
-    console.error(`\n  ABORTADO: el token es de @${cuenta.username}, no de @${CUENTA_ESPERADA}.`);
-    process.exitCode = 1;
-    return;
-  }
-  if (!igId) {
-    console.error('\n  ABORTADO: la API no devolvió user_id.');
+  const identidad = comprobarIdentidad(cuenta);
+  if (identidad.aviso) console.log(`  aviso       : ${identidad.aviso}`);
+  if (!identidad.ok) {
+    console.error(`\n  ABORTADO: ${identidad.motivo}`);
     process.exitCode = 1;
     return;
   }
