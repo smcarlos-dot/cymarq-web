@@ -1,7 +1,7 @@
 /**
  * Publicación real controlada en la Página de Facebook "Cymarq".
  *
- * TRES FLUJOS, según `--media-type`:
+ * CUATRO FLUJOS, según `--media-type`:
  *
  * image (por defecto) — una sola llamada de escritura:
  *   POST /<PAGE_ID>/photos   (url + caption)  → { id, post_id }   IRREVERSIBLE
@@ -15,6 +15,12 @@
  *   2. POST <upload_url>            file_url: <mp4>     ← Facebook descarga
  *   3. POST /<PAGE_ID>/video_reels  upload_phase=finish → IRREVERSIBLE
  *   4. GET  /<VIDEO_ID>?fields=status                   ← esperar a `ready`
+ *
+ * stories — las mismas tres fases contra otro borde:
+ *   1. POST /<PAGE_ID>/video_stories  upload_phase=start  → { video_id, upload_url }
+ *   2. POST <upload_url>              bytes del MP4
+ *   3. POST /<PAGE_ID>/video_stories  upload_phase=finish → IRREVERSIBLE
+ *   Sin texto y sin `video_state`: una historia no admite ni pie ni borrador.
  *
  * Que las dos primeras fases NO publiquen es lo que permite reutilizarlas: si el
  * proceso muere después del `start`, la ejecución siguiente retoma ese
@@ -49,6 +55,8 @@ import {
   uploadReelFromUrl,
   uploadReelBytes,
   finishReel,
+  startStoryUpload,
+  finishStory,
   getReelStatus,
   getVideo,
   getPost,
@@ -64,6 +72,7 @@ import {
   describirVideo,
   REGLAS_FACEBOOK_REEL,
   REGLAS_FACEBOOK_VIDEO,
+  REGLAS_FACEBOOK_HISTORIA,
 } from '../lib/social/video.mjs';
 import {
   leerTrabajoFacebook,
@@ -78,7 +87,7 @@ import { exigirProduccion } from './entorno.mjs';
 
 const USO =
   'npm run facebook:publish -- --job=<ID> --metadata=<ruta> ' +
-  '(--image-url=<url> | --media-type=reels|video --video-url=<url>) [--confirm]';
+  '(--image-url=<url> | --media-type=reels|video|stories --video-url=<url>) [--confirm]';
 
 const bloque = (t) => {
   console.log(`\n${t}`);
@@ -122,16 +131,21 @@ async function main() {
   const trabajo = leerTrabajoFacebook(USO);
   const { jobId: JOB_ID, imageUrl: IMAGEN_URL, variante, mediaType: TIPO } = trabajo;
   const ES_REEL = TIPO === 'reels';
+  const ES_HISTORIA = TIPO === 'stories';
   const ES_VIDEO = TIPO === 'video';
-  const MEDIO_URL = ES_REEL || ES_VIDEO ? trabajo.videoUrl : IMAGEN_URL;
+  const HAY_VIDEO = ES_REEL || ES_VIDEO || ES_HISTORIA;
+  const MEDIO_URL = HAY_VIDEO ? trabajo.videoUrl : IMAGEN_URL;
   const token = await requirePageToken();
   const pageId = await readPageId();
 
-  // Solo los Reels suben bytes: /videos no tiene endpoint de subida por trozos
-  // en este flujo y sigue usando file_url.
-  const ARCHIVO_LOCAL = ES_REEL ? (trabajo.videoFile ?? null) : null;
+  // Reels e historias suben bytes: comparten el mismo host de subida. /videos no
+  // tiene endpoint de subida por trozos en este flujo y sigue usando file_url.
+  const ARCHIVO_LOCAL = ES_REEL || ES_HISTORIA ? (trabajo.videoFile ?? null) : null;
 
-  const ETIQUETA_TIPO = ES_REEL ? 'REEL (vídeo)' : ES_VIDEO ? 'vídeo de feed' : 'foto de feed';
+  const ETIQUETA_TIPO = ES_HISTORIA ? 'HISTORIA (vídeo, 24 h)'
+    : ES_REEL ? 'REEL (vídeo)'
+    : ES_VIDEO ? 'vídeo de feed'
+    : 'foto de feed';
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
   console.log('║  FACEBOOK — PUBLICACIÓN REAL CONTROLADA                      ║');
@@ -165,16 +179,23 @@ async function main() {
 
   /* --- Contenido --------------------------------------------------- */
   const { metadata, caption } = await cargarPropuesta(trabajo);
-  const analisis = analyzeMessage(caption);
+  // Una historia no lleva texto: la fase `finish` de /video_stories no admite
+  // `description`. No se analiza lo que no se va a enviar.
+  const analisis = ES_HISTORIA ? null : analyzeMessage(caption);
 
   bloque('CONTENIDO A PUBLICAR');
   console.log(`  job       : ${JOB_ID}`);
   console.log(`  proyecto  : ${metadata.proyecto_nombre}`);
   console.log(`  tipo      : ${TIPO}`);
-  console.log(`  ${ES_REEL || ES_VIDEO ? 'vídeo   ' : 'imagen  '}  : ${MEDIO_URL}`);
-  console.log(`  texto     : variante «${variante}», ${analisis.characters} caracteres`);
+  console.log(`  ${HAY_VIDEO ? 'vídeo   ' : 'imagen  '}  : ${MEDIO_URL}`);
+  if (ES_HISTORIA) {
+    console.log('  texto     : ninguno (una historia no lleva texto)');
+    console.log('  duración  : visible 24 h, después desaparece sola');
+  } else {
+    console.log(`  texto     : variante «${variante}», ${analisis.characters} caracteres`);
+  }
 
-  if (!analisis.ok) {
+  if (analisis && !analisis.ok) {
     console.error('\n  ABORTADO: el texto no cumple los límites.');
     for (const p of analisis.problems) console.error(`    · ${p}`);
     process.exitCode = 1;
@@ -200,11 +221,14 @@ async function main() {
     return;
   }
 
-  if (ES_REEL || ES_VIDEO) {
+  if (HAY_VIDEO) {
     // Las reglas de un Reel son bastante más estrictas que las de un vídeo de
-    // feed: 9:16 obligatorio y 90 s de tope. Se valida contra las del tipo que
-    // se va a publicar de verdad, no contra las genéricas.
-    const reglas = ES_REEL ? REGLAS_FACEBOOK_REEL : REGLAS_FACEBOOK_VIDEO;
+    // feed: 9:16 obligatorio y 90 s de tope. Una historia es aún más estricta:
+    // 60 s. Se valida contra las del tipo que se va a publicar de verdad, no
+    // contra las genéricas.
+    const reglas = ES_HISTORIA ? REGLAS_FACEBOOK_HISTORIA
+      : ES_REEL ? REGLAS_FACEBOOK_REEL
+      : REGLAS_FACEBOOK_VIDEO;
 
     // Si se van a subir los bytes, el archivo local tiene que existir y coincidir
     // en tamaño con lo que sirve la URL. Comprobarlo aquí evita descubrirlo a
@@ -228,9 +252,8 @@ async function main() {
     console.log(`  rangos    : ${video.aceptaRangos ?? '(no anunciado)'}`);
     for (const a of video.avisos) console.log(`  aviso     : ${a}`);
     if (!video.ok) {
-      console.error(
-        `\n  ABORTADO: el vídeo no cumple los requisitos de Facebook ${ES_REEL ? 'Reels' : 'vídeo'}.`
-      );
+      const que = ES_HISTORIA ? 'Historias' : ES_REEL ? 'Reels' : 'vídeo';
+      console.error(`\n  ABORTADO: el vídeo no cumple los requisitos de Facebook ${que}.`);
       for (const p of video.problemas) console.error(`    · ${p}`);
       process.exitCode = 1;
       return;
@@ -268,16 +291,115 @@ async function main() {
     page_id: String(pageId),
     page_name: pagina.name,
     media_type: TIPO,
-    ...(ES_REEL || ES_VIDEO ? { video_url: MEDIO_URL } : { image_url: IMAGEN_URL }),
+    ...(HAY_VIDEO ? { video_url: MEDIO_URL } : { image_url: IMAGEN_URL }),
     caption_variante: variante,
-    caption_caracteres: analisis.characters,
+    caption_caracteres: analisis ? analisis.characters : 0,
   };
 
   let photoId = null;
   let postId = null;
   let videoId = null;
 
-  if (ES_REEL) {
+  if (ES_HISTORIA) {
+    /* ============ HISTORIA: tres fases, solo la última publica ====== */
+    //
+    // Mismo protocolo que un Reel contra otro borde: /video_stories. La fase de
+    // subida es literalmente la misma llamada, así que se reutiliza.
+
+    const subidaPrevia = Boolean(previo.historia_subida);
+    videoId = subidaPrevia ? (previo.video_id ?? null) : null;
+
+    if (previo.video_id && !subidaPrevia) {
+      bloque('1/3  DESCARTAR   reserva anterior sin subida completada');
+      console.log(`  video_id anterior : ${previo.video_id}`);
+      console.log('  Su subida no consta completada: publicar sobre esa reserva');
+      console.log('  daría una historia sin vídeo. Se reserva una nueva; la');
+      console.log('  anterior caduca sola sin publicar nada.');
+    }
+
+    if (videoId) {
+      bloque('1/3  REUTILIZAR   video_id de un intento anterior');
+      console.log(`  Ya existía un video_id con la subida hecha: ${videoId}`);
+      console.log('  Se REUTILIZA. No se reserva otro.');
+    } else {
+      bloque(`1/3  INICIAR   POST ${GRAPH_HOST}/${API_VERSION}/${pageId}/video_stories`);
+      console.log('  Reserva el hueco. Todavía NO publica nada.');
+      try {
+        const inicio = await startStoryUpload({ pageId, token });
+        videoId = inicio?.video_id ? String(inicio.video_id) : null;
+        const uploadUrl = inicio?.upload_url ?? null;
+        if (!videoId || !uploadUrl) {
+          throw new GraphError('La respuesta no incluyó video_id y upload_url.');
+        }
+        await anotar(JOB_ID, {
+          ...comunes,
+          video_id: videoId,
+          historia_iniciada_en: new Date().toISOString(),
+        });
+        console.log(`  VIDEO_ID  : ${videoId}`);
+
+        // Fase 2. Se suben los bytes por la misma razón que en los Reels: el
+        // descargador de Facebook obedece robots.txt y Cloudflare bloquea su
+        // agente. Sin archivo local no hay historia.
+        if (!ARCHIVO_LOCAL) {
+          throw new GraphError(
+            'Una historia exige --video-file: Facebook no puede descargar la URL ' +
+              '(su agente está bloqueado por el robots.txt gestionado de Cloudflare).'
+          );
+        }
+        bloque('2/3  SUBIR   POST <upload_url>   (bytes desde disco)');
+        console.log(`  archivo   : ${ARCHIVO_LOCAL}`);
+        const bytes = await readFile(ARCHIVO_LOCAL);
+        console.log(`  tamaño    : ${bytes.byteLength} bytes`);
+        console.log('  Se envían los bytes. NO publica.');
+        const subida = await uploadReelBytes({ uploadUrl, token, bytes });
+        await anotar(JOB_ID, {
+          historia_subida: true,
+          historia_subida_en: new Date().toISOString(),
+        });
+        console.log(`  respuesta : ${JSON.stringify(subida)}`);
+      } catch (error) {
+        console.error('\n  FALLO antes de publicar. NO se ha publicado nada.');
+        mostrarError(error);
+        console.error('\n  Ninguna de estas dos fases publica: es seguro reintentar.');
+        process.exitCode = 1;
+        return;
+      }
+    }
+
+    // Fase 3: publicar. IRREVERSIBLE.
+    bloque(`3/3  PUBLICAR   POST ${GRAPH_HOST}/${API_VERSION}/${pageId}/video_stories  (finish)`);
+    console.log('  Esta llamada es IRREVERSIBLE.');
+
+    await anotar(JOB_ID, {
+      ...comunes,
+      video_id: videoId,
+      publish_attempted: true,
+      publish_intentado_en: new Date().toISOString(),
+    });
+
+    try {
+      const fin = await finishStory({ pageId, token, videoId });
+      if (fin?.success === false) {
+        throw new GraphError('Facebook devolvió success=false en la fase finish.');
+      }
+      // A diferencia de los Reels, /video_stories sí devuelve un post_id propio.
+      // Si faltara, el video_id sirve de identificador: lo que no puede pasar es
+      // quedarse sin ninguno, porque el envoltorio lo lee para saber si se publicó.
+      postId = fin?.post_id ? String(fin.post_id) : videoId;
+      await anotar(JOB_ID, { post_id: postId, publicado_en: new Date().toISOString() });
+      console.log(`  respuesta : ${JSON.stringify(fin)}`);
+      console.log(`  POST_ID   : ${postId}`);
+    } catch (error) {
+      console.error('\n  FALLO en la fase finish.');
+      mostrarError(error);
+      console.error('\n  El diario ha quedado marcado como intento sin confirmar.');
+      console.error('  Comprueba manualmente en la Página si la historia existe.');
+      console.error('  NO vuelvas a ejecutar el script sin comprobarlo antes.');
+      process.exitCode = 1;
+      return;
+    }
+  } else if (ES_REEL) {
     /* ============ REEL: tres fases, solo la última publica ========== */
 
     // --- Fase 1: reservar. No publica nada, así que se puede reutilizar.
@@ -481,14 +603,16 @@ async function main() {
   }
 
   /* --- Permalink ----------------------------------------------------- */
-  const idParaEnlace = postId ?? photoId ?? videoId;
+  // En una historia se consulta el objeto de vídeo, no el post: el post_id de
+  // una historia no expone los campos de una publicación de biografía.
+  const idParaEnlace = ES_HISTORIA ? videoId : (postId ?? photoId ?? videoId);
   bloque(`PERMALINK   GET ${GRAPH_HOST}/${API_VERSION}/${idParaEnlace}`);
 
   let post = null;
   try {
     // Un objeto de vídeo y un post no exponen los mismos campos: pedirle
     // `message` a un vídeo hace fallar la llamada entera.
-    post = ES_REEL || ES_VIDEO
+    post = HAY_VIDEO
       ? await getVideo(idParaEnlace, token)
       : await getPost(idParaEnlace, token);
     await anotar(JOB_ID, { permalink: post?.permalink_url ?? null, created_time: post?.created_time ?? null });
@@ -505,7 +629,7 @@ async function main() {
   console.log(`  PAGE_ID        : ${pageId}`);
   console.log(`  PROYECTO       : ${metadata.proyecto_nombre}`);
   console.log(`  TIPO           : ${TIPO}`);
-  console.log(`  ${ES_REEL || ES_VIDEO ? 'VÍDEO         ' : 'IMAGEN        '} : ${MEDIO_URL}`);
+  console.log(`  ${HAY_VIDEO ? 'VÍDEO         ' : 'IMAGEN        '} : ${MEDIO_URL}`);
   if (videoId) console.log(`  VIDEO_ID       : ${videoId}`);
   if (photoId) console.log(`  PHOTO_ID       : ${photoId}`);
   console.log(`  POST_ID        : ${postId ?? '(no devuelto)'}`);
@@ -513,6 +637,9 @@ async function main() {
   console.log(`  FECHA/HORA     : ${new Date().toISOString()}  (UTC)`);
   console.log(`                   ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}  (Bogotá)`);
   console.log(`\n  RESULTADO FINAL: PUBLICACIÓN REALIZADA CORRECTAMENTE.`);
+  if (ES_HISTORIA) {
+    console.log('  Es una HISTORIA: desaparecerá sola dentro de 24 horas.');
+  }
   console.log(`  Registrada en el diario de Facebook. No se repetirá.\n`);
 }
 

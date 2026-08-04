@@ -72,6 +72,11 @@ FORMATOS_ORIGEN = {".mp4", ".mov"}
 #: no meter en el catalogo algo que solo sirve en una de las dos redes.
 DURACION_MIN = 3.0
 DURACION_MAX = 90.0
+
+#: Tope propio de las historias, en las dos redes. Es mas bajo que el de los
+#: Reels, asi que no puede formar parte de `validar()`: un Reel legitimo de 80 s
+#: seguiria siendo valido. Lo comprueba quien crea una historia.
+DURACION_MAX_HISTORIA = 60.0
 RATIO_MIN = 0.5525   # 9:16 con tolerancia estrecha
 RATIO_MAX = 0.5725
 ANCHO_MIN = 540
@@ -428,7 +433,7 @@ def origenes_autorizados() -> list[dict[str, Any]]:
     for pub in historial.cargar().get("publicaciones", []):
         if pub.get("estado") not in historial.ESTADOS_QUE_OCUPAN:
             continue
-        if pub.get("tipo_medio") not in ("reels", "video"):
+        if pub.get("tipo_medio") not in ("reels", "video", "stories"):
             continue
         id_archivo = pub.get("id_archivo") or ""
         if not id_archivo or id_archivo in vistos:

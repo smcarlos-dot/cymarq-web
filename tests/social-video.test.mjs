@@ -27,6 +27,8 @@ import {
   REGLAS_INSTAGRAM_REEL,
   REGLAS_FACEBOOK_REEL,
   REGLAS_FACEBOOK_VIDEO,
+  REGLAS_INSTAGRAM_HISTORIA,
+  REGLAS_FACEBOOK_HISTORIA,
 } from '../lib/social/video.mjs';
 import { esProduccion } from '../scripts/entorno.mjs';
 
@@ -312,4 +314,99 @@ test('el ensayo de vídeo cumple con los MP4 reales y sale con 0', { skip: !hayV
   assert.equal(r.code, 0);
   assert.ok(r.salida.includes('Todo lo evaluado cumple'));
   assert.ok(r.salida.includes('Meta no ha sido llamado'));
+});
+
+/* ------------------------------------------------------------------ */
+/* 5. Historias                                                        */
+/* ------------------------------------------------------------------ */
+
+test('los MP4 reales valen como historia en las dos redes', { skip: !hayVideos }, async () => {
+  for (const ruta of [COCINA, PISCINA]) {
+    for (const reglas of [REGLAS_INSTAGRAM_HISTORIA, REGLAS_FACEBOOK_HISTORIA]) {
+      const r = await comprobarVideoLocal(ruta, reglas);
+      assert.equal(r.ok, true,
+        `${ruta} incumple ${reglas.plataforma}:historia: ${r.problemas.join(' | ')}`);
+    }
+  }
+});
+
+test('una historia se corta a los 60 s, donde un Reel todavía cabe', () => {
+  // 80 s: válido como Reel en las dos redes, inválido como historia en ambas.
+  const largo = { ...CONFORME, duracion: 80 };
+  assert.equal(validarInfo(largo, REGLAS_FACEBOOK_REEL, 1000).ok, true);
+  assert.equal(validarInfo(largo, REGLAS_INSTAGRAM_REEL, 1000).ok, true);
+
+  for (const reglas of [REGLAS_INSTAGRAM_HISTORIA, REGLAS_FACEBOOK_HISTORIA]) {
+    const v = validarInfo(largo, reglas, 1000);
+    assert.equal(v.ok, false, `${reglas.plataforma} debería rechazar 80 s`);
+    assert.ok(v.problemas.some((p) => p.includes('maximo')));
+  }
+});
+
+test('la historia de Facebook exige 9:16; la de Instagram sólo lo recomienda', () => {
+  const cuadrado = { ...CONFORME, ancho: 1080, alto: 1080, ratio: 1 };
+  assert.equal(validarInfo(cuadrado, REGLAS_FACEBOOK_HISTORIA, 1000).ok, false);
+
+  const ig = validarInfo(cuadrado, REGLAS_INSTAGRAM_HISTORIA, 1000);
+  assert.equal(ig.ok, true);
+  assert.ok(ig.avisos.some((a) => a.includes('9:16')));
+});
+
+test('una historia rechaza un archivo de más de 100 MB', () => {
+  for (const reglas of [REGLAS_INSTAGRAM_HISTORIA, REGLAS_FACEBOOK_HISTORIA]) {
+    const v = validarInfo(CONFORME, reglas, 200 * 1024 * 1024);
+    assert.equal(v.ok, false);
+    assert.ok(v.problemas.some((p) => p.includes('maximo')));
+  }
+});
+
+test('--media-type=stories exige --video-url en los dos publicadores', () => {
+  for (const script of ['scripts/instagram-publish.mjs', 'scripts/facebook-publish.mjs']) {
+    const r = ejecutar(script, [
+      '--job=TEST-0001',
+      `--metadata=${METADATA_FALSA}`,
+      '--media-type=stories',
+    ]);
+    assert.equal(r.code, 1);
+    assert.ok(r.salida.includes('--video-url'), `${script}: ${r.salida.slice(0, 200)}`);
+  }
+});
+
+test('una historia no admite portada: --cover-url se rechaza', () => {
+  const r = ejecutar('scripts/instagram-publish.mjs', [
+    '--job=TEST-0001',
+    `--metadata=${METADATA_FALSA}`,
+    '--media-type=stories',
+    '--video-url=https://www.cymarq.com.co/social/video/x.mp4',
+    '--cover-url=https://www.cymarq.com.co/social/x.jpg',
+  ]);
+  assert.equal(r.code, 1);
+  assert.ok(r.salida.includes('--cover-url'));
+});
+
+test('el envoltorio acepta stories y sigue exigiendo el vídeo', () => {
+  const r = ejecutar('scripts/social-publish.mjs', [
+    '--platform=instagram',
+    '--job=TEST-0001',
+    `--metadata=${METADATA_FALSA}`,
+    '--media-type=stories',
+  ]);
+  assert.equal(r.code, 1);
+  const contrato = JSON.parse(r.salida.trim().split('\n').find((l) => l.startsWith('{')));
+  assert.equal(contrato.status, 'failed');
+  // Falla por el vídeo que falta, NO por el tipo: `stories` ya es conocido.
+  assert.ok(contrato.message.includes('--video-url'));
+  assert.equal(contrato.message.includes('media-type debe ser'), false);
+});
+
+test('la barrera de entorno sigue cortando una historia con --confirm', { skip: ES_PRODUCCION }, () => {
+  const r = ejecutar('scripts/instagram-publish.mjs', [
+    '--job=TEST-0001',
+    `--metadata=${METADATA_FALSA}`,
+    '--media-type=stories',
+    '--video-url=https://www.cymarq.com.co/social/video/x.mp4',
+    '--confirm',
+  ]);
+  assert.equal(r.code, 1);
+  assert.ok(/PRODUCCION|producción|entorno/i.test(r.salida));
 });

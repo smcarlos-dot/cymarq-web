@@ -17,7 +17,7 @@
  *
  * VÍDEO
  *
- *   --media-type=<tipo>   "image" (por defecto), "reels" o "video"
+ *   --media-type=<tipo>   "image" (por defecto), "reels", "video" o "stories"
  *   --video-url=<url>     URL pública HTTPS del MP4. Obligatoria si el tipo no
  *                         es "image"
  *   --cover-url=<url>     portada opcional (solo Instagram Reels)
@@ -58,7 +58,14 @@ function faltan(nombres, uso) {
  * plataforma tiene la suya (Instagram y Facebook llevan textos distintos en la
  * misma propuesta).
  */
-export const TIPOS_MEDIO = ['image', 'reels', 'video'];
+export const TIPOS_MEDIO = ['image', 'reels', 'video', 'stories'];
+
+/**
+ * Tipos que NO llevan texto. Una historia no tiene pie: la API lo descarta.
+ * Quien publique uno de estos debe saltarse la validación del caption en vez de
+ * exigir un texto que nadie va a ver.
+ */
+export const TIPOS_SIN_TEXTO = ['stories'];
 
 /** Valida una URL pública destinada a Meta. Aborta si no sirve. */
 function exigirUrlHttps(valor, bandera) {
@@ -111,6 +118,13 @@ export function leerTrabajo({ varianteCaption, uso }) {
 
   const coverUrl = argumento('cover-url');
   if (coverUrl) exigirUrlHttps(coverUrl, '--cover-url');
+
+  // Una historia no tiene portada: se ve desde el primer fotograma. Aceptar la
+  // bandera y descartarla dejaría creer que se eligió una miniatura.
+  if (mediaType === 'stories' && (coverUrl || argumento('thumb-offset') !== undefined)) {
+    console.error('\n  --cover-url y --thumb-offset no existen en una historia.\n');
+    process.exit(1);
+  }
 
   const thumbOffsetCrudo = argumento('thumb-offset');
   let thumbOffset;

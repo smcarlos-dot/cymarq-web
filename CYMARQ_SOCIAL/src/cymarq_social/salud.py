@@ -323,18 +323,22 @@ def preflight(job_id: str, con_meta: bool = True, con_red: bool = True) -> dict[
                      f"plataformas inesperadas: {', '.join(previstas) or 'ninguna'}",
                      detalle={"plataformas": previstas}))
 
-    textos = pub.get("texto") or {}
-    for p in ("instagram", "facebook"):
-        t = textos.get(p) or ""
-        checks.append(_c(f"caption_{p}", bool(t),
-                         f"{len(t)} caracteres almacenados",
-                         f"sin caption almacenado para {p}"))
-
-    # El medio decide en que manifiesto se busca y con que reglas se valida.
-    # Sin `tipo_medio` es una imagen, que es lo que eran todas las propuestas
-    # anteriores al soporte de video.
+    # El medio decide en que manifiesto se busca, con que reglas se valida y si
+    # hace falta texto. Sin `tipo_medio` es una imagen, que es lo que eran todas
+    # las propuestas anteriores al soporte de video.
     id_archivo = pub.get("id_archivo") or ""
     tipo_medio = pub.get("tipo_medio") or "image"
+
+    # Una historia no lleva pie: Meta lo descarta. Reclamarlo aqui marcaria como
+    # no apta una publicacion perfectamente correcta.
+    if tipo_medio not in ejecutor.TIPOS_SIN_TEXTO:
+        textos = pub.get("texto") or {}
+        for p in ("instagram", "facebook"):
+            t = textos.get(p) or ""
+            checks.append(_c(f"caption_{p}", bool(t),
+                             f"{len(t)} caracteres almacenados",
+                             f"sin caption almacenado para {p}"))
+
     es_video = tipo_medio != "image"
     etiqueta = "video" if es_video else "imagen"
 

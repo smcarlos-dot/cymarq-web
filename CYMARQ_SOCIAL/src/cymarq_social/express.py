@@ -188,9 +188,14 @@ def crear_video(video: str | Path,
       - se valida ANTES de registrar nada. Un video que Meta va a rechazar no
         llega a ocupar un identificador ni a ensuciar el historial.
 
-    `tipo_medio` es "reels" (lo normal para 9:16) o "video" para un video de
-    feed en Facebook. Instagram publica cualquier video como Reel: el motor lo
-    traduce solo.
+    `tipo_medio` es "reels" (lo normal para 9:16), "video" para un video de feed
+    en Facebook, o "stories" para una historia. Instagram publica cualquier
+    video de feed como Reel: el motor lo traduce solo. Una historia es historia
+    en las dos redes y no se traduce.
+
+    UNA HISTORIA NO LLEVA TEXTO. Meta descarta el pie en las dos plataformas, de
+    modo que aqui los textos son opcionales cuando el tipo es "stories": exigir
+    una redaccion que nadie va a leer solo estorba.
 
     Devuelve el registro. El derivado todavia hay que desplegarlo (commit+push)
     antes de poder publicar: el preflight lo comprueba.
@@ -203,14 +208,24 @@ def crear_video(video: str | Path,
             f"Formato no admitido: {origen.suffix}. "
             f"Admitidos: {sorted(catalogo_video.FORMATOS_ORIGEN)}"
         )
-    if not texto_instagram.strip() or not texto_facebook.strip():
+    if tipo_medio not in ("reels", "video", "stories"):
+        raise ErrorExpress(
+            f"tipo_medio debe ser 'reels', 'video' o 'stories', no '{tipo_medio}'."
+        )
+    es_historia = tipo_medio == "stories"
+    if not es_historia and (not texto_instagram.strip() or not texto_facebook.strip()):
         raise ErrorExpress("Hacen falta los dos textos: Instagram y Facebook.")
-    if tipo_medio not in ("reels", "video"):
-        raise ErrorExpress(f"tipo_medio debe ser 'reels' o 'video', no '{tipo_medio}'.")
 
     # Validacion PREVIA a cualquier escritura.
     info = catalogo_video.leer_info(origen)
     problemas, avisos = catalogo_video.validar(info, origen.stat().st_size)
+    if es_historia and info and info.duracion is not None:
+        # El tope de una historia es mas bajo que el del catalogo general.
+        if info.duracion > catalogo_video.DURACION_MAX_HISTORIA:
+            problemas.append(
+                f"Dura {info.duracion:.2f} s, por encima del maximo de "
+                f"{catalogo_video.DURACION_MAX_HISTORIA:.0f} s de una historia."
+            )
     if problemas:
         raise ErrorExpress(
             "El video no cumple los requisitos de publicacion:\n  - "
@@ -266,7 +281,11 @@ def crear_video(video: str | Path,
         "url_publicacion": {"instagram": None, "facebook": None},
         "id_publicacion_meta": {"instagram": None, "facebook": None},
         "video": info.como_dict() if info else {},
-        "notas": "Publicacion express de video. No forma parte del banco ni del calendario.",
+        "notas": (
+            ("Historia express. Sin texto: Meta lo descarta. Visible 24 h."
+             if es_historia else "Publicacion express de video.")
+            + " No forma parte del banco ni del calendario."
+        ),
         "publicado_por_sistema": False,
     }
 

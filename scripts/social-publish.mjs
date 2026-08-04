@@ -110,9 +110,9 @@ async function main() {
   const mediaType = arg('media-type') ?? 'image';
   const videoUrl = arg('video-url');
 
-  if (!['image', 'reels', 'video'].includes(mediaType)) {
+  if (!['image', 'reels', 'video', 'stories'].includes(mediaType)) {
     emitir({ ...base, status: 'failed', retry_safe: true,
-             message: `--media-type debe ser image, reels o video, no "${mediaType}"` });
+             message: `--media-type debe ser image, reels, video o stories, no "${mediaType}"` });
     return;
   }
   // El medio obligatorio depende del tipo: un job de vídeo sin --video-url no

@@ -482,7 +482,11 @@ class Validacion:
 
 
 #: Tipos de medio que el motor sabe publicar. `image` es el de siempre.
-TIPOS_MEDIO = ("image", "reels", "video")
+TIPOS_MEDIO = ("image", "reels", "video", "stories")
+
+#: Tipos que no llevan texto. Una historia no tiene pie: Meta lo descarta, asi
+#: que exigirle un caption almacenado abortaria una publicacion correcta.
+TIPOS_SIN_TEXTO = ("stories",)
 
 
 def validar(pub: dict[str, Any], plataforma: str | None = None) -> Validacion:
@@ -496,19 +500,20 @@ def validar(pub: dict[str, Any], plataforma: str | None = None) -> Validacion:
     if plataforma and plataforma not in previstas:
         v.fallar(f"{plataforma} no esta entre las plataformas previstas")
 
-    textos = pub.get("texto") or {}
-    for p in ([plataforma] if plataforma else previstas):
-        if not textos.get(p):
-            v.fallar(f"sin caption almacenado para {p}")
-
-    # El tipo de medio decide en que manifiesto se busca la URL. Sin campo, es
-    # una publicacion de imagen: asi las 54 entradas ya existentes siguen
-    # comportandose exactamente igual.
+    # El tipo de medio decide en que manifiesto se busca la URL y si hace falta
+    # texto. Sin campo, es una publicacion de imagen: asi las 54 entradas ya
+    # existentes siguen comportandose exactamente igual.
     tipo = pub.get("tipo_medio") or "image"
     if tipo not in TIPOS_MEDIO:
         v.fallar(f"tipo_medio '{tipo}' desconocido")
         tipo = "image"
     v.tipo_medio = tipo
+
+    if tipo not in TIPOS_SIN_TEXTO:
+        textos = pub.get("texto") or {}
+        for p in ([plataforma] if plataforma else previstas):
+            if not textos.get(p):
+                v.fallar(f"sin caption almacenado para {p}")
 
     id_archivo = pub.get("id_archivo") or ""
 
@@ -599,15 +604,21 @@ def _invocar_node(plataforma: str, job_id: str, metadata: Path,
     if tipo_medio == "image":
         orden.append(f"--image-url={url_imagen}")
     else:
-        # Instagram no tiene video de feed: cualquier video es un Reel. En
-        # Facebook se respeta lo que pida la propuesta.
-        efectivo = "reels" if plataforma == "instagram" else tipo_medio
+        # Una historia es historia en las dos redes: no se traduce. Fuera de
+        # eso, Instagram no tiene video de feed y cualquier video suyo es un
+        # Reel; en Facebook se respeta lo que pida la propuesta.
+        if tipo_medio == "stories":
+            efectivo = "stories"
+        else:
+            efectivo = "reels" if plataforma == "instagram" else tipo_medio
         orden.append(f"--media-type={efectivo}")
         orden.append(f"--video-url={url_video}")
         # Solo Facebook: sube los bytes en vez de hacer que Meta descargue la
         # URL. Su descargador obedece robots.txt y el gestionado de Cloudflare
         # bloquea `meta-externalagent`. Instagram no esta bloqueado y usa la URL.
-        if plataforma == "facebook" and efectivo == "reels" and archivo_video:
+        if (plataforma == "facebook"
+                and efectivo in ("reels", "stories")
+                and archivo_video):
             orden.append(f"--video-file={archivo_video}")
     orden.append("--confirm")
 

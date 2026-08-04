@@ -551,8 +551,12 @@ def cmd_express(args: argparse.Namespace) -> int:
         print(f"                  {d['detalle']}")
     for aviso in d.get("avisos") or []:
         print(f"  aviso         : {aviso}")
-    print(f"  caption IG    : {len(reg['texto']['instagram'])} caracteres")
-    print(f"  caption FB    : {len(reg['texto']['facebook'])} caracteres")
+    if reg.get("tipo_medio") == "stories":
+        print("  texto         : ninguno (una historia no lleva pie)")
+        print("  visible       : 24 horas, despues desaparece sola")
+    else:
+        print(f"  caption IG    : {len(reg['texto']['instagram'])} caracteres")
+        print(f"  caption FB    : {len(reg['texto']['facebook'])} caracteres")
     r = express_mod.resumen_aislamiento()
     print()
     print(f"  calendario del banco intacto: {r['aislado']} "
@@ -1018,8 +1022,9 @@ def construir_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("express", help="Publicacion puntual fuera del calendario")
     s.add_argument("--imagen", help="Ruta a la imagen")
     s.add_argument("--video", help="Ruta al MP4 (excluyente con --imagen)")
-    s.add_argument("--tipo-medio", default="reels", choices=["reels", "video"],
-                   help="Solo con --video: 'reels' (9:16) o 'video' de feed en Facebook")
+    s.add_argument("--tipo-medio", default="reels", choices=["reels", "video", "stories"],
+                   help="Solo con --video: 'reels' (9:16), 'video' de feed en Facebook "
+                        "o 'stories' (historia de 24 h, sin texto)")
     s.add_argument("--texto-ig", default="", help="Caption de Instagram")
     s.add_argument("--texto-fb", default="", help="Caption de Facebook")
     s.add_argument("--texto-ig-archivo", action="store_true",

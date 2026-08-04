@@ -37,6 +37,7 @@ import {
   getAccount,
   createMediaContainer,
   createReelContainer,
+  createStoryContainer,
   getContainerStatus,
   getContainerErrorDetail,
   publishContainer,
@@ -45,6 +46,8 @@ import {
   analyzeCaption,
   GraphError,
   SONDEO,
+  CAMPOS_MEDIA,
+  CAMPOS_MEDIA_HISTORIA,
   API_VERSION,
   GRAPH_HOST,
 } from '../lib/instagram/publish.mjs';
@@ -52,6 +55,7 @@ import {
   comprobarVideoPublico,
   describirVideo,
   REGLAS_INSTAGRAM_REEL,
+  REGLAS_INSTAGRAM_HISTORIA,
 } from '../lib/social/video.mjs';
 import { requireSecret } from './instagram-env.mjs';
 import { leerTrabajo, cargarPropuesta } from './job-args.mjs';
@@ -64,7 +68,7 @@ const CUENTA_ESPERADA = 'cymarq_obras';
 
 const USO =
   'npm run instagram:publish -- --job=<ID> --metadata=<ruta> ' +
-  '(--image-url=<url> | --media-type=reels --video-url=<url>) [--confirm]';
+  '(--image-url=<url> | --media-type=reels|stories --video-url=<url>) [--confirm]';
 
 /* ------------------------------------------------------------------ */
 /* Diario                                                              */
@@ -130,14 +134,20 @@ async function main() {
     return;
   }
 
+  const ES_HISTORIA = trabajo.mediaType === 'stories';
   const ES_REEL = trabajo.mediaType === 'reels';
-  const MEDIO_URL = ES_REEL ? trabajo.videoUrl : IMAGEN_URL;
+  const ES_VIDEO = ES_REEL || ES_HISTORIA;
+  const MEDIO_URL = ES_VIDEO ? trabajo.videoUrl : IMAGEN_URL;
   const token = await requireSecret('INSTAGRAM_PUBLISH_TOKEN');
+
+  const ETIQUETA = ES_HISTORIA ? 'HISTORIA (vídeo, 24 h)'
+    : ES_REEL ? 'REEL (vídeo)'
+    : 'imagen de feed';
 
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
   console.log('║  PASO 4 — PUBLICACIÓN REAL CONTROLADA                        ║');
   console.log(`║  Modo: ${(confirmar ? 'PUBLICAR DE VERDAD' : 'ensayo (sin --confirm)').padEnd(53)}║`);
-  console.log(`║  Tipo: ${(ES_REEL ? 'REEL (vídeo)' : 'imagen de feed').padEnd(53)}║`);
+  console.log(`║  Tipo: ${ETIQUETA.padEnd(53)}║`);
   console.log('╚══════════════════════════════════════════════════════════════╝');
 
   /* --- Diario: ¿ya se hizo esto? --------------------------------- */
@@ -166,20 +176,29 @@ async function main() {
 
   /* --- Contenido -------------------------------------------------- */
   const { metadata, caption } = await cargarPropuesta(trabajo);
-  const analisis = analyzeCaption(caption);
+  // Una historia no lleva pie de texto. No se analiza lo que no se va a
+  // enviar: exigirle límites a un caption que la API descarta sólo serviría
+  // para abortar publicaciones perfectamente válidas.
+  const analisis = ES_HISTORIA ? null : analyzeCaption(caption);
+  const TIPO_META = ES_HISTORIA ? 'STORIES' : ES_REEL ? 'REELS' : 'IMAGE';
 
   bloque('CONTENIDO A PUBLICAR');
   console.log(`  job         : ${JOB_ID}`);
   console.log(`  proyecto    : ${metadata.proyecto_nombre}`);
-  console.log(`  tipo        : ${ES_REEL ? 'REELS' : 'IMAGE'}`);
-  console.log(`  ${ES_REEL ? 'vídeo ' : 'imagen'}      : ${MEDIO_URL}`);
+  console.log(`  tipo        : ${TIPO_META}`);
+  console.log(`  ${ES_VIDEO ? 'vídeo ' : 'imagen'}      : ${MEDIO_URL}`);
   if (ES_REEL && trabajo.coverUrl) console.log(`  portada     : ${trabajo.coverUrl}`);
   if (ES_REEL && Number.isFinite(trabajo.thumbOffset)) {
     console.log(`  portada ms  : ${trabajo.thumbOffset}`);
   }
-  console.log(`  caption     : ${analisis.characters} caracteres, ${analisis.hashtags.length} hashtags`);
+  if (ES_HISTORIA) {
+    console.log('  caption     : ninguno (una historia no lleva texto)');
+    console.log('  duración    : visible 24 h, después desaparece sola');
+  } else {
+    console.log(`  caption     : ${analisis.characters} caracteres, ${analisis.hashtags.length} hashtags`);
+  }
 
-  if (!analisis.ok) {
+  if (analisis && !analisis.ok) {
     console.error('\n  ABORTADO: el caption no cumple los límites.');
     for (const p of analisis.problems) console.error(`    · ${p}`);
     process.exitCode = 1;
@@ -205,17 +224,23 @@ async function main() {
     return;
   }
 
-  if (ES_REEL) {
+  if (ES_VIDEO) {
     // Se descarga el MP4 igual que lo hará Meta y se mide el archivo real. Un
     // vídeo que no cumple aquí produciría un contenedor en ERROR minutos
     // después, sin explicación aprovechable.
-    const video = await comprobarVideoPublico(MEDIO_URL, REGLAS_INSTAGRAM_REEL);
+    //
+    // Las reglas son las del tipo que se va a publicar de verdad: una historia
+    // tiene 60 s de tope donde un Reel tiene 900.
+    const reglas = ES_HISTORIA ? REGLAS_INSTAGRAM_HISTORIA : REGLAS_INSTAGRAM_REEL;
+    const video = await comprobarVideoPublico(MEDIO_URL, reglas);
     console.log(`  vídeo       : HTTP ${video.status}, ${video.contentType}`);
     console.log(`  medidas     : ${describirVideo(video.info, video.bytes)}`);
     console.log(`  rangos      : ${video.aceptaRangos ?? '(no anunciado)'}`);
     for (const a of video.avisos) console.log(`  aviso       : ${a}`);
     if (!video.ok) {
-      console.error('\n  ABORTADO: el vídeo no cumple los requisitos de Instagram Reels.');
+      console.error(
+        `\n  ABORTADO: el vídeo no cumple los requisitos de Instagram ${ES_HISTORIA ? 'Historias' : 'Reels'}.`
+      );
       for (const p of video.problemas) console.error(`    · ${p}`);
       process.exitCode = 1;
       return;
@@ -250,7 +275,9 @@ async function main() {
     console.log('  Se REUTILIZA. No se crea uno nuevo.');
   } else {
     try {
-      const contenedor = ES_REEL
+      const contenedor = ES_HISTORIA
+        ? await createStoryContainer({ igId, token, videoUrl: MEDIO_URL })
+        : ES_REEL
         ? await createReelContainer({
             igId,
             token,
@@ -273,9 +300,9 @@ async function main() {
         job: JOB_ID,
         container_id: containerId,
         creado_en: new Date().toISOString(),
-        media_type: ES_REEL ? 'REELS' : 'IMAGE',
-        ...(ES_REEL ? { video_url: MEDIO_URL } : { image_url: IMAGEN_URL }),
-        caption_caracteres: analisis.characters,
+        media_type: TIPO_META,
+        ...(ES_VIDEO ? { video_url: MEDIO_URL } : { image_url: IMAGEN_URL }),
+        caption_caracteres: analisis ? analisis.characters : 0,
         ig_user_id: igId,
         username: cuenta.username,
       });
@@ -295,7 +322,7 @@ async function main() {
   // Un Reel hay que descargarlo y transcodificarlo: el sondeo es mucho más
   // largo que el de una imagen (5 min frente a 60 s).
   const { intentos: SONDEO_MAX_INTENTOS, esperaMs: SONDEO_ESPERA_MS } =
-    ES_REEL ? SONDEO.reels : SONDEO.image;
+    ES_HISTORIA ? SONDEO.stories : ES_REEL ? SONDEO.reels : SONDEO.image;
   console.log(
     `  sondeo      : hasta ${SONDEO_MAX_INTENTOS} intentos cada ${SONDEO_ESPERA_MS / 1000} s ` +
       `(máx. ${Math.round((SONDEO_MAX_INTENTOS * SONDEO_ESPERA_MS) / 60000)} min)`
@@ -369,7 +396,7 @@ async function main() {
 
   let media = null;
   try {
-    media = await getMedia(mediaId, token);
+    media = await getMedia(mediaId, token, ES_HISTORIA ? CAMPOS_MEDIA_HISTORIA : CAMPOS_MEDIA);
     await anotar(JOB_ID, { permalink: media?.permalink ?? null, timestamp_meta: media?.timestamp ?? null });
     console.log(`  permalink : ${media?.permalink ?? '(no devuelto)'}`);
     console.log(`  tipo      : ${media?.media_type ?? '(no devuelto)'}`);
@@ -384,8 +411,8 @@ async function main() {
   console.log(`  CUENTA DESTINO : @${cuenta.username}`);
   console.log(`  IG USER_ID     : ${igId}`);
   console.log(`  PROYECTO       : ${metadata.proyecto_nombre}`);
-  console.log(`  TIPO           : ${ES_REEL ? 'REELS' : 'IMAGE'}`);
-  console.log(`  ${ES_REEL ? 'VÍDEO         ' : 'IMAGEN        '} : ${MEDIO_URL}`);
+  console.log(`  TIPO           : ${TIPO_META}`);
+  console.log(`  ${ES_VIDEO ? 'VÍDEO         ' : 'IMAGEN        '} : ${MEDIO_URL}`);
   console.log(`  CONTAINER_ID   : ${containerId}`);
   console.log(`  ESTADO         : FINISHED`);
   console.log(`  MEDIA_ID       : ${mediaId}`);
@@ -393,6 +420,9 @@ async function main() {
   console.log(`  FECHA/HORA     : ${new Date().toISOString()}  (UTC)`);
   console.log(`                   ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}  (Bogotá)`);
   console.log(`\n  RESULTADO FINAL: PUBLICACIÓN REALIZADA CORRECTAMENTE.`);
+  if (ES_HISTORIA) {
+    console.log('  Es una HISTORIA: desaparecerá sola dentro de 24 horas.');
+  }
   console.log(`  Registrada en el diario. Una segunda ejecución se negará a repetirla.\n`);
 }
 
