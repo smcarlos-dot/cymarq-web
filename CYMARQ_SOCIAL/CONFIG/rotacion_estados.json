@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "creado_en": "2026-08-04T16:10:20-05:00",
+  "creado_en": "2026-08-04T16:22:35-05:00",
   "semilla": 20260804,
   "ciclos": 2,
   "dias": "sabados y domingos",
@@ -8,10 +8,10 @@
   "nota": "Historias de marca. Sin texto, 24 h de vida. Se repiten al cerrar el ciclo: es deliberado.",
   "piezas": [
     {
-      "id_archivo": "e92483162687",
-      "sha256": "e9248316268707332fc62c03884cbcc84e22cc42682860e7423f2b0db42bdede",
-      "nombre": "estado-children-playing-in-courtyard-202607301606-e9248316.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-children-playing-in-courtyard-202607301606-e9248316.mp4",
+      "id_archivo": "5b9e32587dd9",
+      "sha256": "5b9e32587dd973ecb38c091a57e305ea3d1d423eaf82ded61f7486b2f4547ed0",
+      "nombre": "estado-children-playing-in-courtyard-202607301606-5b9e3258.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-children-playing-in-courtyard-202607301606-5b9e3258.mp4",
       "origen": "Children_playing_in_courtyard_202607301606.mp4",
       "titulo": "Children playing in courtyard 202607301606",
       "ancho": 1080,
@@ -20,13 +20,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 2718495
+      "peso": 2710961
     },
     {
-      "id_archivo": "9cdbe59191e7",
-      "sha256": "9cdbe59191e7072d2d5415ef4fce64fc4e74711dc6ea94653baf1d253aa7648b",
-      "nombre": "estado-cocina-9cdbe591.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-cocina-9cdbe591.mp4",
+      "id_archivo": "68c3134e1892",
+      "sha256": "68c3134e18929cf8ba7f67a404262cd1a39c523893e6a9f40f49475988293987",
+      "nombre": "estado-cocina-68c3134e.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-cocina-68c3134e.mp4",
       "origen": "COCINA.mp4",
       "titulo": "COCINA",
       "ancho": 1080,
@@ -35,13 +35,13 @@
       "fps": 30.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 738979
+      "peso": 736467
     },
     {
-      "id_archivo": "ea1168bdb3a6",
-      "sha256": "ea1168bdb3a6c8b51b1242bf3f8a425ea8f789c7bf07a6bb181186daa8e6b9c5",
-      "nombre": "estado-edificio-cyma-ea1168bd.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-edificio-cyma-ea1168bd.mp4",
+      "id_archivo": "8a97d7d82508",
+      "sha256": "8a97d7d82508fbab36555e9ff281e1250cbabe7e0cdfbe99a87c847f5ffd2aa9",
+      "nombre": "estado-edificio-cyma-8a97d7d8.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-edificio-cyma-8a97d7d8.mp4",
       "origen": "EDIFICIO CYMA.mp4",
       "titulo": "EDIFICIO CYMA",
       "ancho": 1080,
@@ -50,13 +50,13 @@
       "fps": 30.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 1070223
+      "peso": 1064388
     },
     {
-      "id_archivo": "3ccbc4470097",
-      "sha256": "3ccbc4470097464c1a3557d966daa4352e870e162dfc59ada37ad3e0f2e18b55",
-      "nombre": "estado-edificio-cymarq-3ccbc447.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-edificio-cymarq-3ccbc447.mp4",
+      "id_archivo": "660bb33bbd4d",
+      "sha256": "660bb33bbd4db79ac4399f1985f0fad5e4f7fd97d4a80ffc883d5aeb43482d4c",
+      "nombre": "estado-edificio-cymarq-660bb33b.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-edificio-cymarq-660bb33b.mp4",
       "origen": "edificio CYMARQ.mp4",
       "titulo": "edificio CYMARQ",
       "ancho": 1080,
@@ -65,13 +65,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3893425
+      "peso": 3875287
     },
     {
-      "id_archivo": "9698e4992a4b",
-      "sha256": "9698e4992a4b552fdd4a935209195c7677f0a02185222ad2327fa7dcbe05f418",
-      "nombre": "estado-edificio-espana-9698e499.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-edificio-espana-9698e499.mp4",
+      "id_archivo": "fc780bf8429a",
+      "sha256": "fc780bf8429a1622a290744e349e40de36c6796057841780eaeee5d92e93f4ff",
+      "nombre": "estado-edificio-espana-fc780bf8.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-edificio-espana-fc780bf8.mp4",
       "origen": "EDIFICIO ESPAÑA.mp4",
       "titulo": "EDIFICIO ESPAÑA",
       "ancho": 1080,
@@ -80,13 +80,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 958395
+      "peso": 958550
     },
     {
-      "id_archivo": "8ba5a1fd5f3f",
-      "sha256": "8ba5a1fd5f3fcb31899cc6eff24e3ee6a7fe522d321ff70b4895c8ab39bbf82e",
-      "nombre": "estado-escena-inicial-2026-07-30-202607301733-8ba5a1fd.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-escena-inicial-2026-07-30-202607301733-8ba5a1fd.mp4",
+      "id_archivo": "155775643c4c",
+      "sha256": "155775643c4cbf95fcd161d050320a73f123c71f1fb68904ab90c03f527d8e4f",
+      "nombre": "estado-escena-inicial-2026-07-30-202607301733-15577564.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-escena-inicial-2026-07-30-202607301733-15577564.mp4",
       "origen": "Escena_inicial_-_2026-07-30_202607301733.mp4",
       "titulo": "Escena inicial - 2026-07-30 202607301733",
       "ancho": 1080,
@@ -95,13 +95,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 9509162
+      "peso": 9501596
     },
     {
-      "id_archivo": "47ecab4053b4",
-      "sha256": "47ecab4053b447d530ccb14e62fe043a4f2eac5731b2898d12da75414f2d6402",
-      "nombre": "estado-fachada-jpeg-47ecab40.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-fachada-jpeg-47ecab40.mp4",
+      "id_archivo": "63eee5ee05f6",
+      "sha256": "63eee5ee05f65e82ffd0204364a50a1afc95e2777c06392f958299572e0e6319",
+      "nombre": "estado-fachada-jpeg-63eee5ee.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-fachada-jpeg-63eee5ee.mp4",
       "origen": "FACHADA-jpeg.mp4",
       "titulo": "FACHADA-jpeg",
       "ancho": 1080,
@@ -110,13 +110,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 685216
+      "peso": 685998
     },
     {
-      "id_archivo": "460f02ffc2b9",
-      "sha256": "460f02ffc2b9b2340ce9802bbfc4fdc57d5b7f5013744745c6c937245c61dcf3",
-      "nombre": "estado-fachada-webp-460f02ff.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-fachada-webp-460f02ff.mp4",
+      "id_archivo": "813bb301cd9d",
+      "sha256": "813bb301cd9d093d0d015229555c100dd12c1d33f2f533962134e134f41368f1",
+      "nombre": "estado-fachada-webp-813bb301.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-fachada-webp-813bb301.mp4",
       "origen": "FACHADA-webp.mp4",
       "titulo": "FACHADA-webp",
       "ancho": 1080,
@@ -125,13 +125,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 895917
+      "peso": 897633
     },
     {
-      "id_archivo": "03a35688dea0",
-      "sha256": "03a35688dea09b2d10ae2c1b48f6ca6fc7d2cd8e80f9e898ac36d5137e48aaac",
-      "nombre": "estado-habitacion-principal-03a35688.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-habitacion-principal-03a35688.mp4",
+      "id_archivo": "d22b276a7e95",
+      "sha256": "d22b276a7e9521877a2d7394e6dbc3a3843bd06b69c24ec602a466ca1bc9c34c",
+      "nombre": "estado-habitacion-principal-d22b276a.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-habitacion-principal-d22b276a.mp4",
       "origen": "HABITACION PRINCIPAL.mp4",
       "titulo": "HABITACION PRINCIPAL",
       "ancho": 1080,
@@ -140,13 +140,13 @@
       "fps": 24.83,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 936609
+      "peso": 936817
     },
     {
-      "id_archivo": "969b75d3f32a",
-      "sha256": "969b75d3f32ab0d6c31c8e34de0491adef11f069023c3ee4d6042f61048484be",
-      "nombre": "estado-living-v2-969b75d3.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-living-v2-969b75d3.mp4",
+      "id_archivo": "33187ba8b64c",
+      "sha256": "33187ba8b64cc67b96d6b9c5ef980b18da4e91f13ef9b948e2896f230408de6a",
+      "nombre": "estado-living-v2-33187ba8.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-living-v2-33187ba8.mp4",
       "origen": "LIVING V2.mp4",
       "titulo": "LIVING V2",
       "ancho": 1080,
@@ -155,13 +155,13 @@
       "fps": 24.83,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 648918
+      "peso": 650547
     },
     {
-      "id_archivo": "466e8a4489c4",
-      "sha256": "466e8a4489c47616f6a3e0c7292b88acc9d58a78ba88b066b576ea53a5dd62b6",
-      "nombre": "estado-living-466e8a44.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-living-466e8a44.mp4",
+      "id_archivo": "fabb59dd642c",
+      "sha256": "fabb59dd642c1e5ab4c2d611e848632ebecdd47159eb48de0cb8276a76d0c4f7",
+      "nombre": "estado-living-fabb59dd.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-living-fabb59dd.mp4",
       "origen": "LIVING.mp4",
       "titulo": "LIVING",
       "ancho": 1080,
@@ -170,13 +170,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 973617
+      "peso": 973957
     },
     {
-      "id_archivo": "22ca54a42fd8",
-      "sha256": "22ca54a42fd82ce1c59833f6120cee881e85731c1950d4048b0af3a5490ef036",
-      "nombre": "estado-patio-interior-3-22ca54a4.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-patio-interior-3-22ca54a4.mp4",
+      "id_archivo": "29734b2c92a7",
+      "sha256": "29734b2c92a7fe44d1a7ff9a4de226449a3fe206ee8e1a06abd8ec0f283be3e9",
+      "nombre": "estado-patio-interior-3-29734b2c.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-patio-interior-3-29734b2c.mp4",
       "origen": "PATIO INTERIOR 3.mp4",
       "titulo": "PATIO INTERIOR 3",
       "ancho": 1080,
@@ -185,13 +185,13 @@
       "fps": 24.83,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 752723
+      "peso": 753956
     },
     {
-      "id_archivo": "8a2dbf5279f1",
-      "sha256": "8a2dbf5279f18200300ffbd7f59d6a0a3c482839a8a89e95f9147cd4526d8ece",
-      "nombre": "estado-pen-house-8a2dbf52.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-pen-house-8a2dbf52.mp4",
+      "id_archivo": "9ceab3318bfa",
+      "sha256": "9ceab3318bfa23639b9ccfa76e0048e75a92fb83259fee575094b3f13b160ff6",
+      "nombre": "estado-pen-house-9ceab331.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-pen-house-9ceab331.mp4",
       "origen": "PEN HOUSE.mp4",
       "titulo": "PEN HOUSE",
       "ancho": 1080,
@@ -200,13 +200,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 859507
+      "peso": 857787
     },
     {
-      "id_archivo": "683b806e8930",
-      "sha256": "683b806e8930ba69bcddc92ffa41eb4b7180c0f0ba09457357c72a233df42f79",
-      "nombre": "estado-piscina-683b806e.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-piscina-683b806e.mp4",
+      "id_archivo": "e041746daf85",
+      "sha256": "e041746daf8565ad17735c2f7c326fe4a308d8b08740ea139ad2ff0ddc87c017",
+      "nombre": "estado-piscina-e041746d.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-piscina-e041746d.mp4",
       "origen": "PISCINA.mp4",
       "titulo": "PISCINA",
       "ancho": 1080,
@@ -215,13 +215,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 801334
+      "peso": 831422
     },
     {
-      "id_archivo": "2f293f2273f3",
-      "sha256": "2f293f2273f3cdeef4cde069bac1b7c1614a2534815d475d08a3c0703adb4a38",
-      "nombre": "estado-proceso-constructivo-edificio-cyma-2f293f22.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-proceso-constructivo-edificio-cyma-2f293f22.mp4",
+      "id_archivo": "dea7d2093342",
+      "sha256": "dea7d2093342482a134470aa28bf8757c09fa03ff10c405d40c87e591773f649",
+      "nombre": "estado-proceso-constructivo-edificio-cyma-dea7d209.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-proceso-constructivo-edificio-cyma-dea7d209.mp4",
       "origen": "PROCESO CONSTRUCTIVO EDIFICIO CYMA.mp4",
       "titulo": "PROCESO CONSTRUCTIVO EDIFICIO CYMA",
       "ancho": 1080,
@@ -230,13 +230,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 9235543
+      "peso": 9263453
     },
     {
-      "id_archivo": "86e61b89a8d4",
-      "sha256": "86e61b89a8d4961d452ede52f1ef7a31b19f6660291d6c35f2f9359466c1fdf5",
-      "nombre": "estado-remodelacion-86e61b89.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-remodelacion-86e61b89.mp4",
+      "id_archivo": "7bca59a492b3",
+      "sha256": "7bca59a492b38e642c34bc19fec351246cfb9b06d5a389252c92543f5931e912",
+      "nombre": "estado-remodelacion-7bca59a4.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-remodelacion-7bca59a4.mp4",
       "origen": "REMODELACIÓN.mp4",
       "titulo": "REMODELACIÓN",
       "ancho": 1080,
@@ -245,13 +245,13 @@
       "fps": 24.83,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 476580
+      "peso": 477790
     },
     {
-      "id_archivo": "937960e15827",
-      "sha256": "937960e15827bbd401a2f9791648b44ea120ebe29177852ece3fe84cbc37c1c3",
-      "nombre": "estado-render-cocina-937960e1.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-render-cocina-937960e1.mp4",
+      "id_archivo": "f7884e2d7b63",
+      "sha256": "f7884e2d7b639ab83ace378f0d2c3a5c3d738a5670d26cf0e18da08a30fc234b",
+      "nombre": "estado-render-cocina-f7884e2d.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-render-cocina-f7884e2d.mp4",
       "origen": "Render Cocina.mp4",
       "titulo": "Render Cocina",
       "ancho": 1080,
@@ -260,13 +260,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 1957390
+      "peso": 1954141
     },
     {
-      "id_archivo": "d8ba051394a8",
-      "sha256": "d8ba051394a8082d6a3ee4054099850424046bf0ecaa4faa9e6f374179c85200",
-      "nombre": "estado-render-piscina-d8ba0513.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-render-piscina-d8ba0513.mp4",
+      "id_archivo": "2fad7582ddbd",
+      "sha256": "2fad7582ddbdf657ad5a1191e0b773cd480320656beb0f5c95bd9c353f30055c",
+      "nombre": "estado-render-piscina-2fad7582.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-render-piscina-2fad7582.mp4",
       "origen": "Render Piscina.mp4",
       "titulo": "Render Piscina",
       "ancho": 1080,
@@ -275,13 +275,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3963284
+      "peso": 3972787
     },
     {
-      "id_archivo": "a8d35bf83df3",
-      "sha256": "a8d35bf83df3b3e340e99e9e9090b61a6af712e2d957571283b87518e8c29f71",
-      "nombre": "estado-sala-comedor-a8d35bf8.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-sala-comedor-a8d35bf8.mp4",
+      "id_archivo": "0d361b3e5ceb",
+      "sha256": "0d361b3e5ceb47971ac891984c945d06e1db49886b28dce29a048653f9e4d256",
+      "nombre": "estado-sala-comedor-0d361b3e.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-sala-comedor-0d361b3e.mp4",
       "origen": "SALA COMEDOR.mp4",
       "titulo": "SALA COMEDOR",
       "ancho": 1080,
@@ -290,13 +290,13 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 498795
+      "peso": 499501
     },
     {
-      "id_archivo": "38239f2ed13d",
-      "sha256": "38239f2ed13d4d58c6c629223196a1f52fb8cb9abec9462ec5b13d9c82981c12",
-      "nombre": "estado-sala-de-estar-38239f2e.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-sala-de-estar-38239f2e.mp4",
+      "id_archivo": "e8670c4f8dd3",
+      "sha256": "e8670c4f8dd3782f3841a6cde2c028d59c171c21d934680d9e19a394f7a897d2",
+      "nombre": "estado-sala-de-estar-e8670c4f.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-sala-de-estar-e8670c4f.mp4",
       "origen": "SALA DE ESTAR.mp4",
       "titulo": "SALA DE ESTAR",
       "ancho": 1080,
@@ -305,13 +305,13 @@
       "fps": 24.83,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 493303
+      "peso": 494049
     },
     {
-      "id_archivo": "b4d68fd3100b",
-      "sha256": "b4d68fd3100b43e095ae913ebb6ebfba4aa91f5f681c6260b00a73502f38e213",
-      "nombre": "estado-timelapse-edificio-cyma-b4d68fd3.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-timelapse-edificio-cyma-b4d68fd3.mp4",
+      "id_archivo": "9215838d82fc",
+      "sha256": "9215838d82fcdd8e9c8b7ff5ef5b7749e56f28a864fbc60a440e7f531686199e",
+      "nombre": "estado-timelapse-edificio-cyma-9215838d.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-timelapse-edificio-cyma-9215838d.mp4",
       "origen": "TIMELAPSE EDIFICIO CYMA.mp4",
       "titulo": "TIMELAPSE EDIFICIO CYMA",
       "ancho": 1080,
@@ -320,13 +320,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 2780129
+      "peso": 2800318
     },
     {
-      "id_archivo": "4e80a1f3c0fa",
-      "sha256": "4e80a1f3c0fac6987bc97fa0ee53055e616ba96c02b23d7ac628307984f59b14",
-      "nombre": "estado-video-logo-cymarq-9x16-4e80a1f3.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-video-logo-cymarq-9x16-4e80a1f3.mp4",
+      "id_archivo": "4cf13494c374",
+      "sha256": "4cf13494c37462019cccd40a49afea9b7e49f06f7f2c1c8c0f0f4feedb0b096d",
+      "nombre": "estado-video-logo-cymarq-9x16-4cf13494.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-video-logo-cymarq-9x16-4cf13494.mp4",
       "origen": "VIDEO LOGO CYMARQ 9x16.mp4",
       "titulo": "VIDEO LOGO CYMARQ 9x16",
       "ancho": 1080,
@@ -335,13 +335,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 1258614
+      "peso": 1246154
     },
     {
-      "id_archivo": "b76adb6c915f",
-      "sha256": "b76adb6c915ff29cf23b1f3477ebf4a32fe591f882b74dfe389203131db90341",
-      "nombre": "estado-visualizacion-habitacion-b76adb6c.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-habitacion-b76adb6c.mp4",
+      "id_archivo": "856087f68417",
+      "sha256": "856087f684171ac1151709405edf132a497d59f0acef58ddc07878096a72ca42",
+      "nombre": "estado-visualizacion-habitacion-856087f6.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-habitacion-856087f6.mp4",
       "origen": "VISUALIZACION HABITACION.mp4",
       "titulo": "VISUALIZACION HABITACION",
       "ancho": 1080,
@@ -350,13 +350,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 1662768
+      "peso": 1659567
     },
     {
-      "id_archivo": "e86107f4a35d",
-      "sha256": "e86107f4a35da346d70d9cdc07b4251c501d96673868020dbf4c7d6befc16a2f",
-      "nombre": "estado-visualizacion-piscina-e86107f4.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-piscina-e86107f4.mp4",
+      "id_archivo": "57e7711ae70c",
+      "sha256": "57e7711ae70c2703a72d3688f135d95d5fdc274c030e29bc5a3afe8f15411833",
+      "nombre": "estado-visualizacion-piscina-57e7711a.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-piscina-57e7711a.mp4",
       "origen": "VISUALIZACION PISCINA.mp4",
       "titulo": "VISUALIZACION PISCINA",
       "ancho": 1080,
@@ -365,13 +365,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3958996
+      "peso": 3996764
     },
     {
-      "id_archivo": "8e89562beca1",
-      "sha256": "8e89562beca12e573d450b53c6877be89de2e1a06dc79e2d71eea0613cd37182",
-      "nombre": "estado-visualizacion-vivienda-interior-8e89562b.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-vivienda-interior-8e89562b.mp4",
+      "id_archivo": "fd2f7bb2f589",
+      "sha256": "fd2f7bb2f5898f3be516f376388462bbd16a010a0511e605d5a859ddb4a47295",
+      "nombre": "estado-visualizacion-vivienda-interior-fd2f7bb2.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-visualizacion-vivienda-interior-fd2f7bb2.mp4",
       "origen": "VISUALIZACION VIVIENDA INTERIOR.mp4",
       "titulo": "VISUALIZACION VIVIENDA INTERIOR",
       "ancho": 1080,
@@ -380,13 +380,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3722856
+      "peso": 3720446
     },
     {
-      "id_archivo": "1e8751eb8259",
-      "sha256": "1e8751eb82592201a9d38499645bf48797b19f5f07223c15bccf8e4716c364c0",
-      "nombre": "estado-woman-preparing-breakfast-in-kit-202607301635-1e8751eb.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-breakfast-in-kit-202607301635-1e8751eb.mp4",
+      "id_archivo": "e3780394515f",
+      "sha256": "e3780394515f6fd02680cd02c3b168d07d414dc730b7f1fae8a5b47293468c17",
+      "nombre": "estado-woman-preparing-breakfast-in-kit-202607301635-e3780394.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-breakfast-in-kit-202607301635-e3780394.mp4",
       "origen": "Woman_preparing_breakfast_in_kit…_202607301635.mp4",
       "titulo": "Woman preparing breakfast in kit… 202607301635",
       "ancho": 1080,
@@ -395,13 +395,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 2498066
+      "peso": 2485080
     },
     {
-      "id_archivo": "01c103f601d2",
-      "sha256": "01c103f601d22a7cad529aab5e631d7aba5797030c039c5e9addcd91c9a33133",
-      "nombre": "estado-woman-preparing-breakfast-in-kit-202607301640-01c103f6.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-breakfast-in-kit-202607301640-01c103f6.mp4",
+      "id_archivo": "1a5e9d08f36b",
+      "sha256": "1a5e9d08f36b1f7d5a96d6ec4aa6f2c44c4f01f96e9215a3699ebd63b311090c",
+      "nombre": "estado-woman-preparing-breakfast-in-kit-202607301640-1a5e9d08.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-breakfast-in-kit-202607301640-1a5e9d08.mp4",
       "origen": "Woman_preparing_breakfast_in_kit…_202607301640.mp4",
       "titulo": "Woman preparing breakfast in kit… 202607301640",
       "ancho": 1080,
@@ -410,13 +410,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3163194
+      "peso": 3160294
     },
     {
-      "id_archivo": "d2bd5cdc20cf",
-      "sha256": "d2bd5cdc20cf8fb18753e531812378484a8d7bd68a95254a7519889f373fb8c8",
-      "nombre": "estado-woman-preparing-meal-in-kitchen-202607301553-d2bd5cdc.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-meal-in-kitchen-202607301553-d2bd5cdc.mp4",
+      "id_archivo": "49fb0a1c2e26",
+      "sha256": "49fb0a1c2e26910883e5eb45e631c5b3124e96ebf94ebce7ec74a17b1935782a",
+      "nombre": "estado-woman-preparing-meal-in-kitchen-202607301553-49fb0a1c.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-woman-preparing-meal-in-kitchen-202607301553-49fb0a1c.mp4",
       "origen": "Woman_preparing_meal_in_kitchen_202607301553.mp4",
       "titulo": "Woman preparing meal in kitchen 202607301553",
       "ancho": 1080,
@@ -425,13 +425,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 2702217
+      "peso": 2695293
     },
     {
-      "id_archivo": "88a0740f6673",
-      "sha256": "88a0740f667394a617035350999b2cbe36aa8ad3ab2f52d7cec563614a0cfc80",
-      "nombre": "estado-woman-swimming-in-pool-202607301628-88a0740f.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-woman-swimming-in-pool-202607301628-88a0740f.mp4",
+      "id_archivo": "4ca2482b20cb",
+      "sha256": "4ca2482b20cb19f702d62116e96812f8310bbfa2cecc4d65cbc4bc01baf66416",
+      "nombre": "estado-woman-swimming-in-pool-202607301628-4ca2482b.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-woman-swimming-in-pool-202607301628-4ca2482b.mp4",
       "origen": "Woman_swimming_in_pool_202607301628.mp4",
       "titulo": "Woman swimming in pool 202607301628",
       "ancho": 1080,
@@ -440,13 +440,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 1993315
+      "peso": 2000128
     },
     {
-      "id_archivo": "ec1ba653d615",
-      "sha256": "ec1ba653d615a70ffee7c8cdebbde905082e95e9e4291f956c516898d71a97a7",
-      "nombre": "estado-woman-walks-along-shoreline-202607301546-ec1ba653.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-woman-walks-along-shoreline-202607301546-ec1ba653.mp4",
+      "id_archivo": "f1a810769a79",
+      "sha256": "f1a810769a79f719702fa9dfe9af74b7e2518eff8e5ddba75fe2086e192d2dce",
+      "nombre": "estado-woman-walks-along-shoreline-202607301546-f1a81076.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-woman-walks-along-shoreline-202607301546-f1a81076.mp4",
       "origen": "Woman_walks_along_shoreline_202607301546.mp4",
       "titulo": "Woman walks along shoreline 202607301546",
       "ancho": 1080,
@@ -455,13 +455,13 @@
       "fps": 24.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 3576777
+      "peso": 3574203
     },
     {
-      "id_archivo": "f4e71926685c",
-      "sha256": "f4e71926685c793462d9ac3d3fd68792bea161c514f9406fbaa78b00e5309a4f",
-      "nombre": "estado-zona-social-f4e71926.mp4",
-      "url": "https://www.cymarq.com.co/social/video/estado-zona-social-f4e71926.mp4",
+      "id_archivo": "8f99e91e4d73",
+      "sha256": "8f99e91e4d7343708d48d38337a3d38b2074bdf9d8636409bf3f697487504f31",
+      "nombre": "estado-zona-social-8f99e91e.mp4",
+      "url": "https://www.cymarq.com.co/social/video/estado-zona-social-8f99e91e.mp4",
       "origen": "ZONA SOCIAL.mp4",
       "titulo": "ZONA SOCIAL",
       "ancho": 1080,
@@ -470,440 +470,440 @@
       "fps": 25.0,
       "codec_video": "avc1",
       "codec_audio": "mp4a",
-      "peso": 871988
+      "peso": 871366
     }
   ],
   "publicaciones": [
     {
       "id": "EST-2026-0001",
-      "id_archivo": "d8ba051394a8",
+      "id_archivo": "2fad7582ddbd",
       "titulo": "Render Piscina",
       "programado_para": "2026-08-08T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0002",
-      "id_archivo": "8ba5a1fd5f3f",
+      "id_archivo": "155775643c4c",
       "titulo": "Escena inicial - 2026-07-30 202607301733",
       "programado_para": "2026-08-09T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0003",
-      "id_archivo": "1e8751eb8259",
+      "id_archivo": "e3780394515f",
       "titulo": "Woman preparing breakfast in kit… 202607301635",
       "programado_para": "2026-08-15T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0004",
-      "id_archivo": "01c103f601d2",
+      "id_archivo": "1a5e9d08f36b",
       "titulo": "Woman preparing breakfast in kit… 202607301640",
       "programado_para": "2026-08-16T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0005",
-      "id_archivo": "03a35688dea0",
+      "id_archivo": "d22b276a7e95",
       "titulo": "HABITACION PRINCIPAL",
       "programado_para": "2026-08-22T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0006",
-      "id_archivo": "b4d68fd3100b",
+      "id_archivo": "9215838d82fc",
       "titulo": "TIMELAPSE EDIFICIO CYMA",
       "programado_para": "2026-08-23T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0007",
-      "id_archivo": "969b75d3f32a",
+      "id_archivo": "33187ba8b64c",
       "titulo": "LIVING V2",
       "programado_para": "2026-08-29T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0008",
-      "id_archivo": "d2bd5cdc20cf",
+      "id_archivo": "49fb0a1c2e26",
       "titulo": "Woman preparing meal in kitchen 202607301553",
       "programado_para": "2026-08-30T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0009",
-      "id_archivo": "937960e15827",
+      "id_archivo": "f7884e2d7b63",
       "titulo": "Render Cocina",
       "programado_para": "2026-09-05T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0010",
-      "id_archivo": "86e61b89a8d4",
+      "id_archivo": "7bca59a492b3",
       "titulo": "REMODELACIÓN",
       "programado_para": "2026-09-06T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0011",
-      "id_archivo": "47ecab4053b4",
+      "id_archivo": "63eee5ee05f6",
       "titulo": "FACHADA-jpeg",
       "programado_para": "2026-09-12T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0012",
-      "id_archivo": "9cdbe59191e7",
+      "id_archivo": "68c3134e1892",
       "titulo": "COCINA",
       "programado_para": "2026-09-13T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0013",
-      "id_archivo": "683b806e8930",
+      "id_archivo": "e041746daf85",
       "titulo": "PISCINA",
       "programado_para": "2026-09-19T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0014",
-      "id_archivo": "8e89562beca1",
+      "id_archivo": "fd2f7bb2f589",
       "titulo": "VISUALIZACION VIVIENDA INTERIOR",
       "programado_para": "2026-09-20T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0015",
-      "id_archivo": "2f293f2273f3",
+      "id_archivo": "dea7d2093342",
       "titulo": "PROCESO CONSTRUCTIVO EDIFICIO CYMA",
       "programado_para": "2026-09-26T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0016",
-      "id_archivo": "f4e71926685c",
+      "id_archivo": "8f99e91e4d73",
       "titulo": "ZONA SOCIAL",
       "programado_para": "2026-09-27T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0017",
-      "id_archivo": "8a2dbf5279f1",
+      "id_archivo": "9ceab3318bfa",
       "titulo": "PEN HOUSE",
       "programado_para": "2026-10-03T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0018",
-      "id_archivo": "ea1168bdb3a6",
+      "id_archivo": "8a97d7d82508",
       "titulo": "EDIFICIO CYMA",
       "programado_para": "2026-10-04T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0019",
-      "id_archivo": "38239f2ed13d",
+      "id_archivo": "e8670c4f8dd3",
       "titulo": "SALA DE ESTAR",
       "programado_para": "2026-10-10T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0020",
-      "id_archivo": "b76adb6c915f",
+      "id_archivo": "856087f68417",
       "titulo": "VISUALIZACION HABITACION",
       "programado_para": "2026-10-11T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0021",
-      "id_archivo": "ec1ba653d615",
+      "id_archivo": "f1a810769a79",
       "titulo": "Woman walks along shoreline 202607301546",
       "programado_para": "2026-10-17T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0022",
-      "id_archivo": "466e8a4489c4",
+      "id_archivo": "fabb59dd642c",
       "titulo": "LIVING",
       "programado_para": "2026-10-18T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0023",
-      "id_archivo": "e86107f4a35d",
+      "id_archivo": "57e7711ae70c",
       "titulo": "VISUALIZACION PISCINA",
       "programado_para": "2026-10-24T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0024",
-      "id_archivo": "3ccbc4470097",
+      "id_archivo": "660bb33bbd4d",
       "titulo": "edificio CYMARQ",
       "programado_para": "2026-10-25T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0025",
-      "id_archivo": "e92483162687",
+      "id_archivo": "5b9e32587dd9",
       "titulo": "Children playing in courtyard 202607301606",
       "programado_para": "2026-10-31T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0026",
-      "id_archivo": "22ca54a42fd8",
+      "id_archivo": "29734b2c92a7",
       "titulo": "PATIO INTERIOR 3",
       "programado_para": "2026-11-01T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0027",
-      "id_archivo": "a8d35bf83df3",
+      "id_archivo": "0d361b3e5ceb",
       "titulo": "SALA COMEDOR",
       "programado_para": "2026-11-07T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0028",
-      "id_archivo": "88a0740f6673",
+      "id_archivo": "4ca2482b20cb",
       "titulo": "Woman swimming in pool 202607301628",
       "programado_para": "2026-11-08T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0029",
-      "id_archivo": "4e80a1f3c0fa",
+      "id_archivo": "4cf13494c374",
       "titulo": "VIDEO LOGO CYMARQ 9x16",
       "programado_para": "2026-11-14T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0030",
-      "id_archivo": "9698e4992a4b",
+      "id_archivo": "fc780bf8429a",
       "titulo": "EDIFICIO ESPAÑA",
       "programado_para": "2026-11-15T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0031",
-      "id_archivo": "460f02ffc2b9",
+      "id_archivo": "813bb301cd9d",
       "titulo": "FACHADA-webp",
       "programado_para": "2026-11-21T18:30:00-05:00",
       "ciclo": 1
     },
     {
       "id": "EST-2026-0032",
-      "id_archivo": "8a2dbf5279f1",
+      "id_archivo": "9ceab3318bfa",
       "titulo": "PEN HOUSE",
       "programado_para": "2026-11-22T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0033",
-      "id_archivo": "466e8a4489c4",
+      "id_archivo": "fabb59dd642c",
       "titulo": "LIVING",
       "programado_para": "2026-11-28T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0034",
-      "id_archivo": "ea1168bdb3a6",
+      "id_archivo": "8a97d7d82508",
       "titulo": "EDIFICIO CYMA",
       "programado_para": "2026-11-29T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0035",
-      "id_archivo": "22ca54a42fd8",
+      "id_archivo": "29734b2c92a7",
       "titulo": "PATIO INTERIOR 3",
       "programado_para": "2026-12-05T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0036",
-      "id_archivo": "86e61b89a8d4",
+      "id_archivo": "7bca59a492b3",
       "titulo": "REMODELACIÓN",
       "programado_para": "2026-12-06T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0037",
-      "id_archivo": "01c103f601d2",
+      "id_archivo": "1a5e9d08f36b",
       "titulo": "Woman preparing breakfast in kit… 202607301640",
       "programado_para": "2026-12-12T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0038",
-      "id_archivo": "683b806e8930",
+      "id_archivo": "e041746daf85",
       "titulo": "PISCINA",
       "programado_para": "2026-12-13T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0039",
-      "id_archivo": "3ccbc4470097",
+      "id_archivo": "660bb33bbd4d",
       "titulo": "edificio CYMARQ",
       "programado_para": "2026-12-19T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0040",
-      "id_archivo": "460f02ffc2b9",
+      "id_archivo": "813bb301cd9d",
       "titulo": "FACHADA-webp",
       "programado_para": "2026-12-20T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0041",
-      "id_archivo": "9698e4992a4b",
+      "id_archivo": "fc780bf8429a",
       "titulo": "EDIFICIO ESPAÑA",
       "programado_para": "2026-12-26T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0042",
-      "id_archivo": "937960e15827",
+      "id_archivo": "f7884e2d7b63",
       "titulo": "Render Cocina",
       "programado_para": "2026-12-27T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0043",
-      "id_archivo": "47ecab4053b4",
+      "id_archivo": "63eee5ee05f6",
       "titulo": "FACHADA-jpeg",
       "programado_para": "2027-01-02T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0044",
-      "id_archivo": "b76adb6c915f",
+      "id_archivo": "856087f68417",
       "titulo": "VISUALIZACION HABITACION",
       "programado_para": "2027-01-03T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0045",
-      "id_archivo": "e86107f4a35d",
+      "id_archivo": "57e7711ae70c",
       "titulo": "VISUALIZACION PISCINA",
       "programado_para": "2027-01-09T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0046",
-      "id_archivo": "1e8751eb8259",
+      "id_archivo": "e3780394515f",
       "titulo": "Woman preparing breakfast in kit… 202607301635",
       "programado_para": "2027-01-10T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0047",
-      "id_archivo": "d8ba051394a8",
+      "id_archivo": "2fad7582ddbd",
       "titulo": "Render Piscina",
       "programado_para": "2027-01-16T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0048",
-      "id_archivo": "9cdbe59191e7",
+      "id_archivo": "68c3134e1892",
       "titulo": "COCINA",
       "programado_para": "2027-01-17T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0049",
-      "id_archivo": "f4e71926685c",
+      "id_archivo": "8f99e91e4d73",
       "titulo": "ZONA SOCIAL",
       "programado_para": "2027-01-23T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0050",
-      "id_archivo": "e92483162687",
+      "id_archivo": "5b9e32587dd9",
       "titulo": "Children playing in courtyard 202607301606",
       "programado_para": "2027-01-24T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0051",
-      "id_archivo": "4e80a1f3c0fa",
+      "id_archivo": "4cf13494c374",
       "titulo": "VIDEO LOGO CYMARQ 9x16",
       "programado_para": "2027-01-30T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0052",
-      "id_archivo": "ec1ba653d615",
+      "id_archivo": "f1a810769a79",
       "titulo": "Woman walks along shoreline 202607301546",
       "programado_para": "2027-01-31T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0053",
-      "id_archivo": "d2bd5cdc20cf",
+      "id_archivo": "49fb0a1c2e26",
       "titulo": "Woman preparing meal in kitchen 202607301553",
       "programado_para": "2027-02-06T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0054",
-      "id_archivo": "03a35688dea0",
+      "id_archivo": "d22b276a7e95",
       "titulo": "HABITACION PRINCIPAL",
       "programado_para": "2027-02-07T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0055",
-      "id_archivo": "2f293f2273f3",
+      "id_archivo": "dea7d2093342",
       "titulo": "PROCESO CONSTRUCTIVO EDIFICIO CYMA",
       "programado_para": "2027-02-13T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0056",
-      "id_archivo": "969b75d3f32a",
+      "id_archivo": "33187ba8b64c",
       "titulo": "LIVING V2",
       "programado_para": "2027-02-14T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0057",
-      "id_archivo": "a8d35bf83df3",
+      "id_archivo": "0d361b3e5ceb",
       "titulo": "SALA COMEDOR",
       "programado_para": "2027-02-20T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0058",
-      "id_archivo": "88a0740f6673",
+      "id_archivo": "4ca2482b20cb",
       "titulo": "Woman swimming in pool 202607301628",
       "programado_para": "2027-02-21T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0059",
-      "id_archivo": "8ba5a1fd5f3f",
+      "id_archivo": "155775643c4c",
       "titulo": "Escena inicial - 2026-07-30 202607301733",
       "programado_para": "2027-02-27T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0060",
-      "id_archivo": "b4d68fd3100b",
+      "id_archivo": "9215838d82fc",
       "titulo": "TIMELAPSE EDIFICIO CYMA",
       "programado_para": "2027-02-28T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0061",
-      "id_archivo": "8e89562beca1",
+      "id_archivo": "fd2f7bb2f589",
       "titulo": "VISUALIZACION VIVIENDA INTERIOR",
       "programado_para": "2027-03-06T18:30:00-05:00",
       "ciclo": 2
     },
     {
       "id": "EST-2026-0062",
-      "id_archivo": "38239f2ed13d",
+      "id_archivo": "e8670c4f8dd3",
       "titulo": "SALA DE ESTAR",
       "programado_para": "2027-03-07T18:30:00-05:00",
       "ciclo": 2

@@ -206,6 +206,36 @@ ALTO_LOGO = 158        # el usuario lo queria algo mas grande que los 132 inicia
 MARGEN_X = 84
 BASE_Y = 1580
 
+#: Los dos logos disponibles, por nombre de archivo.
+CANDIDATOS_LOGO = ("Logo blanco.png", "logo negro.png")
+
+
+def luminancia_trazo(ruta: Path) -> float:
+    """Luminosidad media de lo que se VE de un logo (ignora lo transparente)."""
+    with Image.open(ruta) as im:
+        pixeles = [p for p in im.convert("RGBA").getdata() if p[3] > 40]
+    if not pixeles:
+        raise ErrorMarca(f"{ruta.name} no tiene pixeles visibles")
+    return sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in pixeles) / len(pixeles)
+
+
+def logo_para(sobre_oscuro: bool) -> Path:
+    """Devuelve el logo que contrasta, MIDIENDO su trazo.
+
+    NO se mira el nombre del archivo, y no es una manía: en `01 LOGO/` los
+    nombres significan justo lo contrario de lo que parecen. «Logo blanco.png»
+    es el logo PARA fondo blanco, asi que su trazo es OSCURO (luminancia 90);
+    «logo negro.png» es el de fondo negro y su trazo es CLARO (188).
+
+    Fiarse del nombre puso el logo oscuro encima de los fondos oscuros y al
+    reves, y hubo que rehacer las 31 piezas. Midiendo, el nombre da igual.
+    """
+    medidos = sorted(((luminancia_trazo(LOGOS / n), LOGOS / n) for n in CANDIDATOS_LOGO),
+                     key=lambda par: par[0])
+    oscuro, claro = medidos[0][1], medidos[-1][1]
+    # Fondo oscuro pide trazo claro, y al reves.
+    return claro if sobre_oscuro else oscuro
+
 
 def capa_marca(sobre_oscuro: bool, destino: Path) -> None:
     """Dibuja el PNG transparente con el velo, el logo y la llamada a seguir.
@@ -244,8 +274,7 @@ def capa_marca(sobre_oscuro: bool, destino: Path) -> None:
 
     d = ImageDraw.Draw(capa)
 
-    archivo_logo = "Logo blanco.png" if sobre_oscuro else "logo negro.png"
-    logo = Image.open(LOGOS / archivo_logo).convert("RGBA")
+    logo = Image.open(logo_para(sobre_oscuro)).convert("RGBA")
     ancho_logo = round(logo.width * ALTO_LOGO / logo.height)
     logo = logo.resize((ancho_logo, ALTO_LOGO), Image.LANCZOS)
     capa.paste(logo, (MARGEN_X, BASE_Y - ALTO_LOGO), logo)
@@ -332,7 +361,9 @@ def preparar(ruta: Path, carpeta_salida: Path, temp: Path,
         "encaje": "pantalla completa" if o.vertical else "fondo desenfocado",
         "tipo": "video" if o.es_video else "imagen",
         "luz": round(luz, 1),
-        "logo": "blanco" if sobre_oscuro else "negro",
+        # Se describe el TRAZO, no el nombre del archivo: los nombres de
+        # `01 LOGO/` significan lo contrario de lo que parecen.
+        "logo": "trazo claro" if sobre_oscuro else "trazo oscuro",
         "peso": destino.stat().st_size,
         "duracion": round(o.duracion, 1),
     }
