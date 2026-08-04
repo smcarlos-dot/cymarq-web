@@ -76,6 +76,11 @@ def es_video(pub: dict[str, Any]) -> bool:
     return (pub.get("tipo_medio") or "image") != "image"
 
 
+def es_historia(pub: dict[str, Any]) -> bool:
+    """¿Es una historia? Viaja como cualquier video, pero sin texto."""
+    return (pub.get("tipo_medio") or "image") == "stories"
+
+
 def _perfil_medio(pub: dict[str, Any]) -> dict[str, Any]:
     """Todo lo que cambia entre un paquete de imagen y uno de video."""
     if es_video(pub):
@@ -340,10 +345,13 @@ def validar(ruta_zip: Path | str) -> Validacion:
             "se importa igual, pero saldra contenido visualmente repetido"
         )
 
-    if not (pub.get("texto") or {}).get("instagram"):
-        v.fallar("sin caption de Instagram")
-    if not (pub.get("texto") or {}).get("facebook"):
-        v.fallar("sin caption de Facebook")
+    # Una historia no lleva pie: Meta lo descarta en las dos redes. Exigirlo
+    # aqui rechazaria un paquete correcto.
+    if not es_historia(pub):
+        if not (pub.get("texto") or {}).get("instagram"):
+            v.fallar("sin caption de Instagram")
+        if not (pub.get("texto") or {}).get("facebook"):
+            v.fallar("sin caption de Facebook")
 
     return v
 
