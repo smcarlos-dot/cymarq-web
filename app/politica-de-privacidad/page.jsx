@@ -51,8 +51,8 @@ export default function PoliticaDePrivacidadPage() {
       <LegalSection id="responsable" title="1. Responsable del tratamiento">
         <p>
           <strong className="text-ink">CYMARQ</strong> es un estudio de arquitectura, diseño y
-          construcción con actividad en Colombia y responsable del tratamiento de los datos
-          personales descritos en este documento.
+          construcción con sede en Cúcuta (Norte de Santander, Colombia) y responsable del
+          tratamiento de los datos personales descritos en este documento.
         </p>
         <LegalList>
           <li>
@@ -70,7 +70,7 @@ export default function PoliticaDePrivacidadPage() {
           <li>
             Cuenta profesional de Instagram: <strong className="text-ink">{site.instagramHandle}</strong>
           </li>
-          <li>País de operación: {site.location}</li>
+          <li>Sede y área de operación: {site.location}</li>
         </LegalList>
       </LegalSection>
 

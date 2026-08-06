@@ -48,8 +48,8 @@ export default function Contact() {
             Transformemos tu idea en un <em className="text-gold">espacio con propósito.</em>
           </h2>
           <p className="mt-6 max-w-xl text-white/70">
-            Prestamos nuestros servicios en todo el territorio colombiano. Escríbenos y
-            conversemos sobre tu proyecto.
+            Estamos en Cúcuta y prestamos nuestros servicios en la ciudad, su área
+            metropolitana y Norte de Santander. Escríbenos y conversemos sobre tu proyecto.
           </p>
         </Reveal>
 

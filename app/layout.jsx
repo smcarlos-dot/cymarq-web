@@ -66,7 +66,14 @@ const jsonLd = {
   url: `${site.url}/`,
   email: site.email,
   telephone: site.whatsapp,
-  areaServed: 'Colombia',
+  areaServed: {
+    '@type': 'City',
+    name: 'Cúcuta',
+    containedInPlace: {
+      '@type': 'AdministrativeArea',
+      name: 'Norte de Santander, Colombia',
+    },
+  },
   sameAs: [site.instagram, site.facebook],
   knowsAbout: site.seo.keywords,
 };

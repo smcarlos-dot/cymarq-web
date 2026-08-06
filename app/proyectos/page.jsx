@@ -4,7 +4,7 @@ import Reveal from '@/components/Reveal';
 
 const title = 'Portafolio de proyectos';
 const description =
-  'Portafolio de CYMARQ: proyectos residenciales, comerciales, de espacio público e infraestructura diseñados y desarrollados en Colombia.';
+  'Portafolio de CYMARQ: proyectos residenciales, comerciales, de espacio público e infraestructura diseñados y desarrollados en Cúcuta y Norte de Santander.';
 
 export const metadata = {
   title,

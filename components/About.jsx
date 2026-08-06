@@ -49,9 +49,9 @@ export default function About() {
               transition={{ delay: 0.5, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
               className="absolute -bottom-8 -left-4 bg-ink p-8 text-white md:-left-10"
             >
-              <p className="font-display text-4xl text-gold">100%</p>
+              <p className="font-display text-4xl text-gold">Cúcuta</p>
               <p className="mt-1 text-xs uppercase tracking-widest2 text-white/70">
-                Cobertura nacional
+                Norte de Santander
               </p>
             </motion.div>
           </Reveal>

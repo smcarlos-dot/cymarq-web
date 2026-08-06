@@ -12,11 +12,11 @@ export const site = {
     'https://wa.me/573223656579?text=Hola%20CYMARQ%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20servicios.',
   instagram: 'https://www.instagram.com/cymarq.obras/',
   facebook: 'https://www.facebook.com/cymarq.obras',
-  location: 'Colombia',
+  location: 'Cúcuta, Norte de Santander, Colombia',
   seo: {
-    title: 'CYMARQ | Arquitectura, Diseño y Construcción en Colombia',
+    title: 'CYMARQ | Arquitectura, Diseño y Construcción en Cúcuta',
     description:
-      'Estudio de arquitectura especializado en diseño arquitectónico, construcción y desarrollo de proyectos residenciales, comerciales y urbanos en Colombia.',
+      'Estudio de arquitectura en Cúcuta especializado en diseño arquitectónico, construcción y desarrollo de proyectos residenciales, comerciales y urbanos en Cúcuta y Norte de Santander.',
     keywords: [
       'Diseño arquitectónico',
       'Construcción',
@@ -30,7 +30,10 @@ export const site = {
       'Presupuestos',
       'Consultoría',
       'Supervisión de obra',
-      'Arquitectura Colombia',
+      'Arquitectura Cúcuta',
+      'Arquitectos en Cúcuta',
+      'Construcción en Cúcuta',
+      'Diseño arquitectónico Norte de Santander',
       'CYMARQ',
     ],
   },
@@ -102,8 +105,8 @@ export const about = {
       text: 'Integramos el diseño arquitectónico con el conocimiento técnico y normativo (POT, PBOT y reglamentos urbanísticos) para que cada diseño sea viable y avance hacia su construcción con seguridad.',
     },
     {
-      title: 'Cobertura nacional',
-      text: 'Prestamos nuestros servicios en todo el territorio colombiano, con herramientas digitales de diseño, modelado y coordinación técnica para trabajar en cualquier región del país.',
+      title: 'Cúcuta y Norte de Santander',
+      text: 'Trabajamos desde Cúcuta para la ciudad, su área metropolitana y el resto de Norte de Santander, con conocimiento directo del territorio, de la normativa local y de las condiciones reales de obra en la región.',
     },
   ],
   values: [
