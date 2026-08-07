@@ -222,7 +222,7 @@ export const finalCta = {
   title: '¿Ya tienes un lote y quieres comenzar a construir?',
   text: 'Agenda una asesoría con nuestro equipo y descubre cómo podemos ayudarte a diseñar un hogar pensado para tu familia antes de iniciar la construcción.',
   button: 'Hablar por WhatsApp',
-  note: 'Te respondemos personalmente. Sin compromiso y sin costo la primera conversación.',
+  note: 'Te respondemos personalmente. Sin compromiso y sin costo.',
 };
 
 export const renderVideos = [
