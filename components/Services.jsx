@@ -1,7 +1,7 @@
 'use client';
 
 import Reveal from '@/components/Reveal';
-import { services, site } from '@/data/site';
+import { services, whatsappMessages, whatsappUrl } from '@/data/site';
 
 export default function Services() {
   return (
@@ -10,8 +10,12 @@ export default function Services() {
         <Reveal>
           <span className="section-label">Servicios</span>
           <h2 className="h-display max-w-3xl">
-            Todo el ciclo del proyecto, <em className="text-gold">de la idea a la obra.</em>
+            Todo lo que tu proyecto necesita, <em className="text-gold">en un solo equipo.</em>
           </h2>
+          <p className="mt-6 max-w-xl text-white/70">
+            No tienes que buscar por separado a quien diseña, a quien tramita la licencia y a
+            quien construye. Aquí está todo el camino.
+          </p>
         </Reveal>
 
         <div className="mt-16 grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
@@ -31,16 +35,21 @@ export default function Services() {
           {/* Tarjeta CTA */}
           <Reveal delay={0.2} className="bg-ink">
             <a
-              href={site.whatsappLink}
+              href={whatsappUrl(whatsappMessages.servicios)}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex h-full flex-col justify-between bg-gold p-8 text-ink transition-colors duration-500 hover:bg-white"
             >
               <span className="font-display text-sm opacity-60">12</span>
               <div>
-                <h3 className="font-display text-2xl">¿Tienes un proyecto en mente?</h3>
-                <p className="mt-3 text-sm font-medium uppercase tracking-widest2">
-                  Hablemos →
+                <h3 className="font-display text-2xl leading-snug">
+                  ¿No sabes cuál de estos necesitas?
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed opacity-80">
+                  Cuéntanos qué tienes y te decimos por dónde empezar.
+                </p>
+                <p className="mt-4 text-sm font-medium uppercase tracking-widest2">
+                  Escríbenos por WhatsApp →
                 </p>
               </div>
             </a>

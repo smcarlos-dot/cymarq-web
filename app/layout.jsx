@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import DevViewportToggle from '@/components/DevViewportToggle';
 import Script from 'next/script';
 import { site } from '@/data/site';
 
@@ -109,6 +110,8 @@ export default function RootLayout({ children }) {
         <main>{children}</main>
         <Footer />
         <WhatsAppButton />
+        {/* Sólo se pinta en localhost y en modo desarrollo. */}
+        <DevViewportToggle />
       </body>
     </html>
   );

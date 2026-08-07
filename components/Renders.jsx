@@ -108,10 +108,15 @@ export default function Renders() {
     <section id="renders" className="scroll-mt-20 bg-paper py-24 md:py-32">
       <div className="container-x">
         <Reveal>
-          <span className="section-label">Renders</span>
+          <span className="section-label">Visualiza antes de construir</span>
           <h2 className="h-display max-w-3xl">
-            El proyecto en movimiento, <em className="text-gold">antes de construirse.</em>
+            Así vas a ver tu casa <em className="text-gold">antes de que exista.</em>
           </h2>
+          <p className="mt-6 max-w-xl text-stone">
+            Esto es lo que entregamos a cada familia: su proyecto en 3D, para recorrerlo,
+            discutirlo en la mesa del comedor y cambiar lo que haga falta mientras cambiarlo
+            todavía es gratis.
+          </p>
         </Reveal>
 
         {/* Videos — verticales en su formato original */}

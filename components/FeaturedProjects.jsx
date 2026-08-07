@@ -51,11 +51,29 @@ function FeaturedItem({ project, index }) {
           </p>
           <h3 className="mt-3 font-display text-3xl md:text-4xl">{project.name}</h3>
           <p className="mt-4 leading-relaxed text-stone">{project.short}</p>
+
+          {project.story && (
+            <dl className="mt-8 space-y-5 border-t border-mist pt-8">
+              <div>
+                <dt className="text-[11px] uppercase tracking-widest2 text-gold">El problema</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-stone">
+                  {project.story.problema}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[11px] uppercase tracking-widest2 text-gold">La solución</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-stone">
+                  {project.story.solucion}
+                </dd>
+              </div>
+            </dl>
+          )}
+
           <Link
             href={`/proyectos/${project.slug}/`}
             className="link-underline mt-8 inline-block text-xs uppercase tracking-widest2 text-ink"
           >
-            Ver proyecto →
+            Ver la historia completa →
           </Link>
         </Reveal>
       </div>
@@ -70,8 +88,12 @@ export default function FeaturedProjects() {
         <Reveal>
           <span className="section-label">Proyectos destacados</span>
           <h2 className="h-display max-w-3xl">
-            Arquitectura pensada para ser <em className="text-gold">construida y habitada.</em>
+            Cada proyecto empezó con <em className="text-gold">una conversación.</em>
           </h2>
+          <p className="mt-6 max-w-xl text-stone">
+            Un problema real, un lote concreto y una familia que quería vivir de una forma
+            determinada. Así se resolvieron.
+          </p>
         </Reveal>
 
         <div className="mt-20 space-y-24 md:space-y-32">

@@ -44,17 +44,19 @@ export default function Footer() {
         </div>
 
         <nav className="flex flex-wrap items-center justify-center gap-6 text-xs uppercase tracking-widest2 text-white/50">
+          <Link href="/#proceso" className="hover:text-white">Proceso</Link>
+          <Link href="/#renders" className="hover:text-white">Visualiza tu casa</Link>
+          <Link href="/proyectos/" className="hover:text-white">Proyectos</Link>
           <Link href="/#nosotros" className="hover:text-white">Nosotros</Link>
           <Link href="/#servicios" className="hover:text-white">Servicios</Link>
-          <Link href="/proyectos/" className="hover:text-white">Portafolio</Link>
-          <Link href="/#renders" className="hover:text-white">Renders</Link>
-          <Link href="/#contacto" className="hover:text-white">Contacto</Link>
         </nav>
 
-        <nav className="flex flex-wrap items-center justify-center gap-6 text-xs uppercase tracking-widest2 text-white/50">
-          <Link href="/politica-de-privacidad/" className="hover:text-white">Privacidad</Link>
-          <Link href="/terminos-y-condiciones/" className="hover:text-white">Términos</Link>
-          <Link href="/eliminacion-de-datos/" className="hover:text-white">Eliminación de datos</Link>
+        {/* Enlaces secundarios y legales: presentes pero discretos. */}
+        <nav className="-mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10px] uppercase tracking-wider text-white/35">
+          <Link href="/#contacto" className="hover:text-white/70">Contacto</Link>
+          <Link href="/politica-de-privacidad/" className="hover:text-white/70">Privacidad</Link>
+          <Link href="/terminos-y-condiciones/" className="hover:text-white/70">Términos</Link>
+          <Link href="/eliminacion-de-datos/" className="hover:text-white/70">Eliminación de datos</Link>
         </nav>
 
         <div className="h-px w-24 bg-gold/60" />

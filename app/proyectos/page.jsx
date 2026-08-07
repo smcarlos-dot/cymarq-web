@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import PortfolioGrid from '@/components/PortfolioGrid';
 import Reveal from '@/components/Reveal';
+import { whatsappMessages, whatsappUrl } from '@/data/site';
 
 const title = 'Portafolio de proyectos';
 const description =
@@ -45,13 +46,13 @@ export default function ProyectosPage() {
           <Reveal>
             <span className="section-label">Portafolio</span>
             <h1 className="h-display max-w-4xl">
-              Proyectos con identidad, funcionalidad y{' '}
-              <em className="text-gold">carácter.</em>
+              Cada proyecto nace de{' '}
+              <em className="text-gold">una historia diferente.</em>
             </h1>
             <p className="mt-6 max-w-xl text-white/70">
-              Residencial, comercial, espacio público e infraestructura. Cada proyecto
-              nace del análisis del lugar, el estilo de vida del cliente y las
-              condiciones técnicas del terreno.
+              Un lote concreto, una familia o un negocio con una necesidad real y una
+              solución pensada solo para ellos. Filtra por el tipo de proyecto que se
+              parece al tuyo.
             </p>
           </Reveal>
         </div>
@@ -59,12 +60,32 @@ export default function ProyectosPage() {
 
       <PortfolioGrid />
 
-      <section className="bg-paper py-20 text-center">
+      <section className="bg-paper py-24 text-center">
         <Reveal>
-          <p className="font-display text-2xl">¿Quieres ver más?</p>
-          <Link href="/#renders" className="btn-line mt-8 text-ink">
-            Ver renders <span aria-hidden="true">→</span>
-          </Link>
+          <p className="mx-auto max-w-2xl font-display text-3xl leading-snug">
+            El siguiente proyecto de esta lista puede ser tu casa.
+          </p>
+          <p className="mx-auto mt-5 max-w-xl text-stone">
+            Cuéntanos dónde está tu lote y cómo quieres vivir. La primera conversación no
+            cuesta nada.
+          </p>
+          <div className="mt-10 flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <a
+              href={whatsappUrl(whatsappMessages.lote)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-[#25D366] px-8 py-4 font-sans text-xs font-medium uppercase tracking-widest2 text-white transition-transform duration-500 ease-cinema hover:scale-[1.03]"
+            >
+              Hablar por WhatsApp
+              <span aria-hidden="true">→</span>
+            </a>
+            <Link
+              href="/#renders"
+              className="link-underline text-xs uppercase tracking-widest2 text-ink"
+            >
+              Ver cómo visualizarás tu casa →
+            </Link>
+          </div>
         </Reveal>
       </section>
     </>

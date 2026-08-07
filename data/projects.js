@@ -15,6 +15,17 @@ export const projects = [
       'El patio cubierto responde a la necesidad de contar con un espacio exterior protegido y seguro, que permita disfrutar de las actividades familiares con mayor privacidad y confort. El lenguaje arquitectónico se caracteriza por líneas limpias y una composición contemporánea que transmite elegancia, calidez y equilibrio.',
     ],
     concept: ['Funcionalidad de los espacios', 'Aprovechamiento de la iluminación natural', 'Integración entre áreas privadas y sociales'],
+    categories: ['Vivienda unifamiliar'],
+    story: {
+      contexto:
+        'Una familia en Tibú con un lote de 128 m² y una edificación ya iniciada en obra negra.',
+      problema:
+        'Querían una casa contemporánea con espacios sociales amplios, oficina para trabajar desde casa y sala de televisión, pero no se podía empezar de cero: había que partir de lo ya construido.',
+      solucion:
+        'Adaptamos el diseño a la estructura preexistente sin sacrificar la distribución, y organizamos la casa alrededor de un patio cubierto que le da a la familia un exterior protegido y privado.',
+      resultado:
+        '220 m² construidos, de líneas limpias, con luz natural en las áreas sociales y un patio que funciona como corazón de la vida familiar.',
+    },
     sensations: ['Calidez', 'Elegancia', 'Confort', 'Iluminación natural', 'Amplitud visual'],
     cover: '/projects/casa-moderna-con-patio-cubierto/fachada.webp',
     gallery: [
@@ -51,6 +62,17 @@ export const projects = [
       'El jardín interior se convierte en el punto articulador de la vivienda, aportando luz, vegetación y una sensación permanente de conexión entre interior y exterior.',
     ],
     concept: ['Aprovechamiento de la iluminación natural', 'Integración visual entre los espacios', 'Flexibilidad y funcionalidad para la vida familiar'],
+    categories: ['Vivienda unifamiliar'],
+    story: {
+      contexto:
+        'Un lote de 118 m² en Cúcuta para una familia que necesitaba dos niveles.',
+      problema:
+        'En un lote estrecho es difícil que todas las habitaciones tengan luz y ventilación sin quitarle espacio a las áreas sociales.',
+      solucion:
+        'Un jardín interior articula toda la vivienda: lleva luz y ventilación cruzada al centro de la casa y conecta visualmente los dos niveles.',
+      resultado:
+        '190 m² con estudio, sala de televisión, áreas sociales integradas, patio posterior y balcones, todos con relación directa con la luz natural.',
+    },
     sensations: ['Elegancia', 'Calidez', 'Iluminación natural', 'Confort', 'Amplitud visual', 'Conexión con la naturaleza'],
     cover: '/projects/vivienda-unifamiliar/1.webp',
     gallery: [
@@ -77,6 +99,17 @@ export const projects = [
       'El patio interior no solo funciona como elemento estético, sino como un regulador ambiental que mejora el confort térmico y genera una experiencia espacial única.',
     ],
     concept: ['Arquitectura bioclimática', 'Integración entre naturaleza y espacio construido', 'Iluminación y ventilación natural', 'Espacios de encuentro alrededor del patio central'],
+    categories: ['Vivienda unifamiliar'],
+    story: {
+      contexto:
+        'Campo Dos, Tibú: clima cálido y una familia que necesitaba tres niveles, cuatro habitaciones y espacio para reunirse.',
+      problema:
+        'En clima tropical, una casa grande se vuelve calurosa y oscura en su centro si la ventilación no se resuelve desde el diseño.',
+      solucion:
+        'Un patio interior de doble altura organiza toda la distribución y actúa como regulador ambiental: por ahí entran la luz, el aire y la vegetación.',
+      resultado:
+        'Tres niveles con áreas sociales amplias, cuatro habitaciones y una terraza multifuncional con zona BBQ y gimnasio, con mejor confort térmico y una experiencia espacial propia.',
+    },
     sensations: ['Calidez', 'Tranquilidad', 'Conexión con la naturaleza', 'Amplitud espacial', 'Elegancia contemporánea', 'Bienestar ambiental'],
     cover: '/projects/casa-con-patio-interior-en-tibu/patio-interior.webp',
     gallery: [
@@ -109,6 +142,17 @@ export const projects = [
       'La cubierta se transforma en una terraza habitable con áreas de descanso, zona verde y jacuzzi. La volumetría contemporánea se caracteriza por líneas limpias, grandes superficies acristaladas y un juego de volúmenes con identidad propia.',
     ],
     concept: ['Integración entre vivienda y actividad comercial', 'Flexibilidad funcional', 'Aprovechamiento de la iluminación natural', 'Espacios de bienestar y esparcimiento'],
+    categories: ['Uso mixto', 'Comercial'],
+    story: {
+      contexto:
+        'Un lote urbano de 9,00 × 22,50 m de un propietario que quería vivir y generar ingresos en el mismo predio.',
+      problema:
+        'Combinar comercio y vivienda sin que la actividad económica le quitara comodidad ni privacidad al hogar.',
+      solucion:
+        'Primer nivel para dos locales independientes, oficina y garaje; segundo nivel para la vivienda con jardín interior; y la cubierta convertida en terraza habitable con zona verde y jacuzzi.',
+      resultado:
+        '198,89 m² construidos que rentan y se habitan a la vez, con las dos vidas claramente separadas.',
+    },
     sensations: ['Modernidad', 'Flexibilidad', 'Bienestar', 'Amplitud', 'Identidad urbana'],
     cover: '/projects/edificacion-de-uso-mixto/fachada.webp',
     gallery: [
@@ -138,6 +182,17 @@ export const projects = [
       'Una gran franja superior en color verde corporativo alberga el nombre de la empresa y su logotipo con letras corpóreas iluminadas, convirtiéndose en un elemento icónico y de alta visibilidad dentro del entorno urbano de Tibú.',
     ],
     concept: ['Fortalecimiento de la identidad de marca', 'Modernización de la imagen comercial', 'Visibilidad desde el espacio público', 'Arquitectura y estrategia empresarial'],
+    categories: ['Remodelación', 'Comercial', 'En ejecución'],
+    story: {
+      contexto:
+        'Una agro-ferretería en Tibú cuya fachada no comunicaba lo que la empresa era.',
+      problema:
+        'El negocio pasaba desapercibido en su entorno urbano y los espacios de atención al público estaban mal organizados.',
+      solucion:
+        'Renovación integral de fachada con nuevos materiales, acabados e iluminación LED, reorganización de la atención al público y una gran franja superior en verde corporativo con letras corpóreas iluminadas.',
+      resultado:
+        'Un frente comercial reconocible desde la calle y coherente con la marca. Actualmente en ejecución.',
+    },
     sensations: ['Identidad', 'Modernidad', 'Visibilidad', 'Funcionalidad'],
     cover: '/projects/ferreagro-el-trigal/render-fachada-1.webp',
     gallery: [
@@ -164,6 +219,17 @@ export const projects = [
       'El diseño técnico contempla pozos de monitoreo, sistemas de contención de derrames, trampa de grasas, redes de aguas lluvias y el sistema estructural para el canopy metálico.',
     ],
     concept: ['Seguridad operacional', 'Fluidez en la circulación vehicular', 'Separación de áreas administrativas y operativas', 'Integración paisajística y mejoramiento urbano'],
+    categories: ['Comercial', 'Infraestructura'],
+    story: {
+      contexto:
+        'Un lote de 3.259,46 m² en el barrio Santander de Tibú, para atender la demanda de combustible del municipio.',
+      problema:
+        'Una estación de servicio exige resolver a la vez seguridad, circulación vehicular e infraestructura técnica enterrada, sin margen de error normativo.',
+      solucion:
+        'Diseño integral: islas de abastecimiento, tanques subterráneos de 10.353 galones, canopy metálico de 166,28 m², pozos de monitoreo, contención de derrames, trampa de grasas y redes de aguas lluvias.',
+      resultado:
+        'Áreas administrativas y operativas separadas, circulación fluida y toda la infraestructura técnica resuelta en planos y detalles estructurales.',
+    },
     sensations: ['Eficiencia', 'Seguridad', 'Orden', 'Modernidad'],
     cover: '/projects/estacion-de-servicio/1.webp',
     gallery: [
@@ -191,6 +257,17 @@ export const projects = [
       'La composición espacial se desarrolla alrededor de una plazoleta central con banca circular y vegetación nativa, articulando las zonas recreativas mediante senderos curvos que funcionan también como pista recreativa y de patinaje.',
     ],
     concept: ['Accesibilidad universal', 'Integración social y convivencia', 'Fomento de la actividad física', 'Identidad urbana y sentido de pertenencia'],
+    categories: ['Espacio público'],
+    story: {
+      contexto:
+        'El corregimiento de La Gabarra, en Tibú, y 701,44 m² de espacio público por intervenir.',
+      problema:
+        'La comunidad no tenía un lugar de encuentro que pudieran usar por igual niños, adultos y personas con movilidad reducida.',
+      solucion:
+        'Diseño con accesibilidad universal alrededor de una plazoleta central con banca circular y vegetación nativa, conectada por senderos curvos que sirven también de pista recreativa y de patinaje.',
+      resultado:
+        'Juegos infantiles, zonas biosaludables, plazoletas de descanso y accesos para movilidad reducida integrados en un mismo recorrido.',
+    },
     sensations: ['Inclusión', 'Comunidad', 'Recreación', 'Bienestar'],
     cover: '/projects/parque-recreativo-e-inclusivo/1.webp',
     gallery: [
@@ -219,6 +296,17 @@ export const projects = [
       'Tres plazoletas de integración conectadas por senderos semicirculares articulan zonas de juegos, áreas verdes, una zona comercial de 107,20 m² y la integración con la iglesia y el polideportivo existentes.',
     ],
     concept: ['Identidad petrolera como narrativa espacial', 'Integración social y comunitaria', 'Recorrido temático entre plazoletas', 'Impulso al desarrollo económico local'],
+    categories: ['Espacio público'],
+    story: {
+      contexto:
+        'La vereda Petrolea, en Tibú: un predio de 2.658,81 m² donde ya existían la iglesia y el polideportivo.',
+      problema:
+        'Había que mejorar un parque deteriorado y, al mismo tiempo, darle una identidad que la comunidad reconociera como propia.',
+      solucion:
+        'El mobiliario urbano y los senderos toman la forma de balancines y tuberías metálicas: la historia petrolera de la zona se convierte en el propio espacio público.',
+      resultado:
+        '956 m² de parque con tres plazoletas conectadas por senderos semicirculares, zona comercial de 107,20 m² e integración con la iglesia y el polideportivo existentes.',
+    },
     sensations: ['Identidad', 'Encuentro', 'Recreación', 'Pertenencia'],
     cover: '/projects/parque-petrolea/1.webp',
     gallery: [
@@ -247,6 +335,17 @@ export const projects = [
       'La materialidad combina concreto aparente, vidrio templado, aluminio anodizado, acabados en madera, iluminación arquitectónica integrada y jardines verticales. La fachada se compone de líneas horizontales y volúmenes limpios que aportan ligereza visual.',
     ],
     concept: ['Flexibilidad funcional', 'Optimización del área construida', 'Aprovechamiento de la iluminación natural', 'Eficiencia espacial y confort'],
+    categories: ['Uso mixto', 'Comercial'],
+    story: {
+      contexto:
+        'Un lote de 216 m² para un proyecto que debía combinar comercio abajo y vivienda arriba.',
+      problema:
+        'Sacar el máximo de un lote pequeño sin que los apartamentos perdieran luz, ventilación ni relación con la calle.',
+      solucion:
+        'Cuatro niveles con 864 m² construidos: local comercial en planta baja y seis apartamentos arriba, con fachadas acristaladas, balcones corridos y ventilación cruzada.',
+      resultado:
+        'Concreto aparente, vidrio templado, aluminio, madera y jardines verticales en un lenguaje sobrio que no envejece con las modas.',
+    },
     sensations: ['Sobriedad', 'Elegancia', 'Ligereza', 'Atemporalidad'],
     cover: '/photos/edificio-cyma.webp',
     gallery: [
@@ -274,6 +373,17 @@ export const projects = [
       'La materialidad incluye madera natural, piedra, estructura metálica, concreto arquitectónico, ladrillo aparente e iluminación decorativa cálida, con una distribución funcional orientada a la operación gastronómica y la experiencia del usuario.',
     ],
     concept: ['Identidad de marca', 'Experiencia del usuario', 'Confort ambiental', 'Funcionalidad operativa'],
+    categories: ['Comercial'],
+    story: {
+      contexto:
+        'Un restaurante temático que necesitaba que su arquitectura contara la marca, no solo la decorara.',
+      problema:
+        'El concepto del oeste americano corría el riesgo de quedarse en ambientación superficial en lugar de convertirse en experiencia.',
+      solucion:
+        'Reinterpretamos la arquitectura de los ranchos texanos con madera natural, piedra, estructura metálica, ladrillo aparente e iluminación cálida, integrando salón, terraza y cocina industrial.',
+      resultado:
+        'Un local donde la distribución responde a la operación gastronómica y la materialidad sostiene la identidad de la marca.',
+    },
     sensations: ['Tradición', 'Confort', 'Autenticidad', 'Calidez'],
     cover: '/projects/restaurante-rancho-texas/r-1-photo.webp',
     gallery: [
@@ -292,6 +402,25 @@ export const projects = [
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
+
+/**
+ * Categorías visibles del portafolio, en el orden en que se muestran.
+ * "Vivienda unifamiliar" va primero: es lo que busca quien acaba de
+ * comprar un lote para su casa. Sólo se listan las que tienen proyectos.
+ */
+const CATEGORY_ORDER = [
+  'Vivienda unifamiliar',
+  'Uso mixto',
+  'Comercial',
+  'Remodelación',
+  'Espacio público',
+  'Infraestructura',
+  'En ejecución',
+];
+
+export const projectCategories = CATEGORY_ORDER.filter((c) =>
+  projects.some((p) => p.categories?.includes(c)),
+);
 
 export function getProject(slug) {
   return projects.find((p) => p.slug === slug);

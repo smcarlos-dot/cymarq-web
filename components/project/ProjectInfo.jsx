@@ -1,6 +1,14 @@
 'use client';
 
 import Reveal from '@/components/Reveal';
+import { whatsappMessages, whatsappUrl } from '@/data/site';
+
+const STORY_BLOCKS = [
+  { key: 'contexto', label: 'El contexto' },
+  { key: 'problema', label: 'El problema' },
+  { key: 'solucion', label: 'La solución' },
+  { key: 'resultado', label: 'El resultado' },
+];
 
 export default function ProjectInfo({ project }) {
   const facts = [
@@ -67,7 +75,24 @@ export default function ProjectInfo({ project }) {
               {project.short}
             </h2>
           </Reveal>
-          <div className="mt-8 space-y-6">
+          {project.story && (
+            <div className="mt-10 grid gap-px bg-mist sm:grid-cols-2">
+              {STORY_BLOCKS.map(({ key, label }, i) =>
+                project.story[key] ? (
+                  <Reveal key={key} delay={i * 0.08} className="bg-paper">
+                    <div className="h-full bg-paper p-6 md:p-7">
+                      <p className="text-[11px] uppercase tracking-widest2 text-gold">{label}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-stone">
+                        {project.story[key]}
+                      </p>
+                    </div>
+                  </Reveal>
+                ) : null,
+              )}
+            </div>
+          )}
+
+          <div className="mt-10 space-y-6">
             {project.description.map((p, i) => (
               <Reveal key={i} delay={0.1 + i * 0.08}>
                 <p className="leading-relaxed text-stone">{p}</p>
@@ -102,6 +127,27 @@ export default function ProjectInfo({ project }) {
               </div>
             </Reveal>
           )}
+
+          <Reveal delay={0.3}>
+            <div className="mt-16 border-l-2 border-gold bg-mist/60 p-8 md:p-10">
+              <h3 className="font-display text-2xl leading-snug">
+                ¿Quieres algo así en tu lote?
+              </h3>
+              <p className="mt-3 max-w-lg leading-relaxed text-stone">
+                Cuéntanos dónde está tu terreno y cómo vive tu familia. Te decimos qué se
+                puede hacer allí antes de que inviertas un peso en obra.
+              </p>
+              <a
+                href={whatsappUrl(whatsappMessages.proyecto(project.name))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-line mt-8 text-ink"
+              >
+                Hablar por WhatsApp
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>
