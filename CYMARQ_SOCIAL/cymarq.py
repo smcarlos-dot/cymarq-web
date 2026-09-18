@@ -574,9 +574,9 @@ def cmd_express(args: argparse.Namespace) -> int:
 def cmd_estados(args: argparse.Namespace) -> int:
     """Rotacion de historias de fin de semana. No publica."""
     if args.resumen:
-        r = estados_mod.resumen_rotacion()
+        r = estados_mod.resumen_rotacion(args.serie)
         print(LINEA)
-        print("  ROTACION DE ESTADOS")
+        print(f"  SERIE {args.serie}")
         print(LINEA)
         print(f"  publicaciones : {r['total']}")
         for estado, n in sorted(r["por_estado"].items()):
@@ -612,7 +612,8 @@ def cmd_estados(args: argparse.Namespace) -> int:
 
     if args.materializar:
         try:
-            r = estados_mod.materializar(simular=args.simular)
+            r = estados_mod.materializar(simular=args.simular,
+                                         ruta_plan=args.plan_archivo)
         except estados_mod.ErrorEstados as exc:
             print(f"  [!] {exc}")
             return 1
@@ -1110,6 +1111,9 @@ def construir_parser() -> argparse.ArgumentParser:
                    help="Crea en ESTA maquina las publicaciones que falten del plan")
     s.add_argument("--simular", action="store_true", help="Con --materializar: no escribe")
     s.add_argument("--resumen", action="store_true", help="Como va la rotacion")
+    s.add_argument("--plan-archivo",
+                   help="Materializa OTRO plan (p. ej. una campana) en vez de la rotacion")
+    s.add_argument("--serie", default="EST", help="Serie a resumir con --resumen")
     s.set_defaults(func=cmd_estados)
 
     s = sub.add_parser("autorizar",

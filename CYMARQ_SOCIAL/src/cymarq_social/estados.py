@@ -69,10 +69,11 @@ class ErrorEstados(RuntimeError):
 # --------------------------------------------------------------------- #
 
 
-def siguiente_numero(datos: dict[str, Any] | None = None) -> int:
-    """Primer numero libre de la serie EST del ano en curso."""
+def siguiente_numero(datos: dict[str, Any] | None = None,
+                     serie: str = PREFIJO) -> int:
+    """Primer numero libre de la serie indicada, en el ano en curso."""
     datos = datos or historial.cargar()
-    prefijo = f"{PREFIJO}-{programacion.ahora().year}-"
+    prefijo = f"{serie}-{programacion.ahora().year}-"
     usados = [
         int(p["id"].rsplit("-", 1)[-1])
         for p in datos["publicaciones"]
@@ -216,10 +217,11 @@ def guardar_plan(plan: dict[str, Any]) -> Path:
     return ARCHIVO_PLAN
 
 
-def cargar_plan() -> dict[str, Any]:
-    plan = seguridad.leer_json(ARCHIVO_PLAN, por_defecto=None)
+def cargar_plan(ruta: Path | None = None) -> dict[str, Any]:
+    ruta = Path(ruta) if ruta else ARCHIVO_PLAN
+    plan = seguridad.leer_json(ruta, por_defecto=None)
     if not plan or "publicaciones" not in plan:
-        raise ErrorEstados(f"No hay plan de rotacion en {ARCHIVO_PLAN}")
+        raise ErrorEstados(f"No hay plan en {ruta}")
     return plan
 
 
@@ -228,7 +230,8 @@ def cargar_plan() -> dict[str, Any]:
 # --------------------------------------------------------------------- #
 
 
-def materializar(simular: bool = False) -> dict[str, Any]:
+def materializar(simular: bool = False,
+                 ruta_plan: Path | None = None) -> dict[str, Any]:
     """Lleva el plan al historial y al manifiesto de esta maquina.
 
     SOLO ANADE. Si un identificador ya existe, se deja EXACTAMENTE como esta:
@@ -236,7 +239,13 @@ def materializar(simular: bool = False) -> dict[str, Any]:
     unica prueba de que algo salio. Tampoco toca diarios, locks, autorizaciones
     ni credenciales.
     """
-    plan = cargar_plan()
+    plan = cargar_plan(ruta_plan)
+    # El plan trae su propia identidad. Sin ella es la rotacion de siempre, y
+    # por eso los valores por defecto son los de la rotacion: un plan antiguo
+    # se materializa exactamente igual que antes.
+    serie = plan.get("serie", PREFIJO)
+    subcarpeta = plan.get("carpeta", "ESTADOS")
+    proyecto = plan.get("proyecto", "Estados CYMARQ")
     manifiesto = catalogo_video.cargar_manifiesto()
     datos = historial.cargar()
     existentes = {p.get("id") for p in datos["publicaciones"]}
@@ -279,15 +288,15 @@ def materializar(simular: bool = False) -> dict[str, Any]:
             resumen["ya_existian"] += 1
             continue
         pieza = por_archivo[pub["id_archivo"]]
-        carpeta_pend = rutas.PENDIENTES / f"ESTADOS/{pub['id']}"
+        carpeta_pend = rutas.PENDIENTES / f"{subcarpeta}/{pub['id']}"
         registro = {
             "id": pub["id"],
             "express": False,
             "estado_rotacion": True,
             "tipo_medio": "stories",
             "fecha_creacion": plan["creado_en"],
-            "proyecto": "_ESTADOS",
-            "proyecto_nombre": "Estados CYMARQ",
+            "proyecto": f"_{subcarpeta}",
+            "proyecto_nombre": proyecto,
             "archivo": pieza["origen"],
             "ruta_original": "",
             "id_archivo": pub["id_archivo"],
@@ -306,7 +315,7 @@ def materializar(simular: bool = False) -> dict[str, Any]:
             "id_publicacion_meta": {"instagram": None, "facebook": None},
             "video": {k: pieza[k] for k in
                       ("ancho", "alto", "duracion", "fps", "codec_video", "codec_audio")},
-            "notas": f"Historia de marca, ciclo {pub['ciclo']}. Visible 24 h.",
+            "notas": pub.get("nota") or f"Historia de marca, ciclo {pub.get('ciclo', 1)}. Visible 24 h.",
             "publicado_por_sistema": False,
         }
         nuevos.append((registro, carpeta_pend))
@@ -329,10 +338,10 @@ def materializar(simular: bool = False) -> dict[str, Any]:
     return resumen
 
 
-def resumen_rotacion() -> dict[str, Any]:
-    """Como va la rotacion, mirando el historial real de esta maquina."""
+def resumen_rotacion(serie: str = PREFIJO) -> dict[str, Any]:
+    """Como va una serie, mirando el historial real de esta maquina."""
     pubs = [p for p in historial.cargar()["publicaciones"]
-            if str(p.get("id", "")).startswith(f"{PREFIJO}-")]
+            if str(p.get("id", "")).startswith(f"{serie}-")]
     por_estado: dict[str, int] = {}
     for p in pubs:
         por_estado[p.get("estado", "?")] = por_estado.get(p.get("estado", "?"), 0) + 1

@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "serie": "PUB",
+  "carpeta": "CAMPANA",
+  "proyecto": "Campana CYMARQ",
+  "creado_en": "2026-09-18T13:25:01-05:00",
+  "nota": "Historias de campana, lunes 21 a domingo 27 de septiembre de 2026, 12:30 y 20:00. Sin texto: una historia no lleva pie. 24 h de vida.",
+  "piezas": [
+    {
+      "id_archivo": "64d1665cd564",
+      "sha256": "64d1665cd5645c1d00352e28eb5d81f966fb17f303c8b03610bf9409e30bdfe9",
+      "nombre": "hist-h01-lun-1230-lote-64d1665c.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h01-lun-1230-lote-64d1665c.mp4",
+      "origen": "h01_lun_1230_lote.mp4",
+      "titulo": "h01_lun_1230_lote",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 2371029
+    },
+    {
+      "id_archivo": "0ede6bfd1de4",
+      "sha256": "0ede6bfd1de4819b13b027ef929a017cbcacf8ca395dc15d2262ccdb462813c2",
+      "nombre": "hist-h02-lun-2000-vivelo-0ede6bfd.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h02-lun-2000-vivelo-0ede6bfd.mp4",
+      "origen": "h02_lun_2000_vivelo.mp4",
+      "titulo": "h02_lun_2000_vivelo",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1564933
+    },
+    {
+      "id_archivo": "1d018a6c549c",
+      "sha256": "1d018a6c549cd2055c989565076e005fd32c713f9e49bf524d95734328b18eb3",
+      "nombre": "hist-h03-mar-1230-terreno-1d018a6c.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h03-mar-1230-terreno-1d018a6c.mp4",
+      "origen": "h03_mar_1230_terreno.mp4",
+      "titulo": "h03_mar_1230_terreno",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1899491
+    },
+    {
+      "id_archivo": "e1c001754489",
+      "sha256": "e1c001754489c59fc53ba1d1f5bc1a075e021bac040e74a58aab5c78478cf3c8",
+      "nombre": "hist-h04-mar-2000-render3d-e1c00175.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h04-mar-2000-render3d-e1c00175.mp4",
+      "origen": "h04_mar_2000_render3d.mp4",
+      "titulo": "h04_mar_2000_render3d",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1823499
+    },
+    {
+      "id_archivo": "cb7751bf3f26",
+      "sha256": "cb7751bf3f268b8b5af804aee573d062072e602f14deede3e1875a8d2c5d049e",
+      "nombre": "hist-h05-mie-1230-cocina-cb7751bf.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h05-mie-1230-cocina-cb7751bf.mp4",
+      "origen": "h05_mie_1230_cocina.mp4",
+      "titulo": "h05_mie_1230_cocina",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1251320
+    },
+    {
+      "id_archivo": "6938ee2485c3",
+      "sha256": "6938ee2485c3f1ec385b8b119ef3221914e68800ca0b8e7fe60e30f776e16004",
+      "nombre": "hist-h06-mie-2000-obra-6938ee24.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h06-mie-2000-obra-6938ee24.mp4",
+      "origen": "h06_mie_2000_obra.mp4",
+      "titulo": "h06_mie_2000_obra",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1760008
+    },
+    {
+      "id_archivo": "9e5abf182fcb",
+      "sha256": "9e5abf182fcbb22d834c672e58fe674e4bbe23f6d785cf7ad855555311d4f05e",
+      "nombre": "hist-h07-jue-1230-remodelar-9e5abf18.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h07-jue-1230-remodelar-9e5abf18.mp4",
+      "origen": "h07_jue_1230_remodelar.mp4",
+      "titulo": "h07_jue_1230_remodelar",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1371096
+    },
+    {
+      "id_archivo": "47d50e04f305",
+      "sha256": "47d50e04f305a02cfb93543872490e1fb6a9962b06c4c6a42ace1d497419a1be",
+      "nombre": "hist-h08-jue-2000-licencias-47d50e04.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h08-jue-2000-licencias-47d50e04.mp4",
+      "origen": "h08_jue_2000_licencias.mp4",
+      "titulo": "h08_jue_2000_licencias",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1374969
+    },
+    {
+      "id_archivo": "591de6f76526",
+      "sha256": "591de6f76526729295b1d2cfecce3e68d4d03b2bb24191ca4103ad5250434b66",
+      "nombre": "hist-h09-vie-1230-ajustes-591de6f7.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h09-vie-1230-ajustes-591de6f7.mp4",
+      "origen": "h09_vie_1230_ajustes.mp4",
+      "titulo": "h09_vie_1230_ajustes",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1011047
+    },
+    {
+      "id_archivo": "7d7bc20817d7",
+      "sha256": "7d7bc20817d7e8832395e6f6fce3d06625a48164dba46d45519a2c0f738be32b",
+      "nombre": "hist-h10-vie-2000-sinsorpresas-7d7bc208.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h10-vie-2000-sinsorpresas-7d7bc208.mp4",
+      "origen": "h10_vie_2000_sinsorpresas.mp4",
+      "titulo": "h10_vie_2000_sinsorpresas",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1508518
+    },
+    {
+      "id_archivo": "72ab7458c8c0",
+      "sha256": "72ab7458c8c061d63cf4e3ca0a2ec3f0e8978aba50c72beff7cafdd39de6528e",
+      "nombre": "hist-h11-sab-1230-interiores-72ab7458.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h11-sab-1230-interiores-72ab7458.mp4",
+      "origen": "h11_sab_1230_interiores.mp4",
+      "titulo": "h11_sab_1230_interiores",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1225300
+    },
+    {
+      "id_archivo": "f33cfdffe2ce",
+      "sha256": "f33cfdffe2ce610bf02040d257663249e7c42422faaa9c99a6eec96e08485a60",
+      "nombre": "hist-h12-sab-2000-asesoria-f33cfdff.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h12-sab-2000-asesoria-f33cfdff.mp4",
+      "origen": "h12_sab_2000_asesoria.mp4",
+      "titulo": "h12_sab_2000_asesoria",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1634951
+    },
+    {
+      "id_archivo": "24f9717a6e96",
+      "sha256": "24f9717a6e96162f7c4a6b5f3fcb3d41b7d7cf46c4a0c9657b16d7c3713307a7",
+      "nombre": "hist-h13-dom-1230-patio-24f9717a.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h13-dom-1230-patio-24f9717a.mp4",
+      "origen": "h13_dom_1230_patio.mp4",
+      "titulo": "h13_dom_1230_patio",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1487685
+    },
+    {
+      "id_archivo": "66fbf1f24b3e",
+      "sha256": "66fbf1f24b3eee929a830484006367e7184f209112287baf23c47ceeb4c7feb2",
+      "nombre": "hist-h14-dom-2000-cucuta-66fbf1f2.mp4",
+      "url": "https://www.cymarq.com.co/social/video/hist-h14-dom-2000-cucuta-66fbf1f2.mp4",
+      "origen": "h14_dom_2000_cucuta.mp4",
+      "titulo": "h14_dom_2000_cucuta",
+      "ancho": 1080,
+      "alto": 1920,
+      "duracion": 6.0,
+      "fps": 30.0,
+      "codec_video": "avc1",
+      "codec_audio": "mp4a",
+      "peso": 1555529
+    }
+  ],
+  "publicaciones": [
+    {
+      "id": "PUB-2026-0001",
+      "id_archivo": "64d1665cd564",
+      "titulo": "h01_lun_1230_lote",
+      "programado_para": "2026-09-21T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 8s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0002",
+      "id_archivo": "0ede6bfd1de4",
+      "titulo": "h02_lun_2000_vivelo",
+      "programado_para": "2026-09-21T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 8s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0003",
+      "id_archivo": "1d018a6c549c",
+      "titulo": "h03_mar_1230_terreno",
+      "programado_para": "2026-09-22T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 15s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0004",
+      "id_archivo": "e1c001754489",
+      "titulo": "h04_mar_2000_render3d",
+      "programado_para": "2026-09-22T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 15s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0005",
+      "id_archivo": "cb7751bf3f26",
+      "titulo": "h05_mie_1230_cocina",
+      "programado_para": "2026-09-23T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 22s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0006",
+      "id_archivo": "6938ee2485c3",
+      "titulo": "h06_mie_2000_obra",
+      "programado_para": "2026-09-23T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 22s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0007",
+      "id_archivo": "9e5abf182fcb",
+      "titulo": "h07_jue_1230_remodelar",
+      "programado_para": "2026-09-24T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 29s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0008",
+      "id_archivo": "47d50e04f305",
+      "titulo": "h08_jue_2000_licencias",
+      "programado_para": "2026-09-24T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 29s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0009",
+      "id_archivo": "591de6f76526",
+      "titulo": "h09_vie_1230_ajustes",
+      "programado_para": "2026-09-25T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 36s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0010",
+      "id_archivo": "7d7bc20817d7",
+      "titulo": "h10_vie_2000_sinsorpresas",
+      "programado_para": "2026-09-25T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 36s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0011",
+      "id_archivo": "72ab7458c8c0",
+      "titulo": "h11_sab_1230_interiores",
+      "programado_para": "2026-09-26T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 43s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0012",
+      "id_archivo": "f33cfdffe2ce",
+      "titulo": "h12_sab_2000_asesoria",
+      "programado_para": "2026-09-26T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 43s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0013",
+      "id_archivo": "24f9717a6e96",
+      "titulo": "h13_dom_1230_patio",
+      "programado_para": "2026-09-27T12:30:00-05:00",
+      "nota": "Campana de una semana. Musica A @ 50s. Visible 24 h."
+    },
+    {
+      "id": "PUB-2026-0014",
+      "id_archivo": "66fbf1f24b3e",
+      "titulo": "h14_dom_2000_cucuta",
+      "programado_para": "2026-09-27T20:00:00-05:00",
+      "nota": "Campana de una semana. Musica B @ 50s. Visible 24 h."
+    }
+  ]
+}
