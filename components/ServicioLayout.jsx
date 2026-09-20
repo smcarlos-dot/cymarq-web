@@ -19,12 +19,13 @@ import { fechaLarga } from '@/lib/seo';
  * respuesta sin recomponerla a partir de media página.
  */
 
-function WhatsAppCta({ message, children, className = '' }) {
+function WhatsAppCta({ message, children, className = '', cta }) {
   return (
     <a
       href={whatsappUrl(whatsappMessages[message] || whatsappMessages.general)}
       target="_blank"
       rel="noopener noreferrer"
+      data-cta={cta}
       className={className}
     >
       {children}
@@ -55,6 +56,7 @@ export default function ServicioLayout({ servicio }) {
             <div className="mt-10 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <WhatsAppCta
                 message={servicio.cta.message}
+                cta="servicio-cabecera"
                 className="inline-flex items-center gap-3 bg-gold px-8 py-4 font-sans text-xs font-medium uppercase tracking-widest2 text-ink transition-colors duration-500 hover:bg-white"
               >
                 {servicio.cta.button}
@@ -301,6 +303,7 @@ export default function ServicioLayout({ servicio }) {
               <p className="mt-6 text-lg leading-relaxed text-white/70">{servicio.cta.text}</p>
               <WhatsAppCta
                 message={servicio.cta.message}
+                cta="servicio-cierre"
                 className="mt-10 inline-flex items-center gap-3 bg-[#25D366] px-10 py-5 font-sans text-sm font-medium uppercase tracking-widest2 text-white transition-transform duration-500 ease-cinema hover:scale-[1.03]"
               >
                 {servicio.cta.button}

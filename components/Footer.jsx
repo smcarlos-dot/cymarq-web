@@ -22,7 +22,7 @@ export default function Footer() {
               Arquitectura, diseño, construcción y trámites urbanísticos en Cúcuta, su área
               metropolitana y Norte de Santander.
             </p>
-            <p className="mt-6 text-sm">
+            <p className="mt-6 text-sm" data-cta="pie-datos">
               <a
                 href={site.whatsappLink}
                 target="_blank"
@@ -98,7 +98,7 @@ export default function Footer() {
         </div>
 
         {/* Redes, legales y aviso */}
-        <div className="flex flex-col items-center gap-8 pt-12 text-center">
+        <div data-cta="pie" className="flex flex-col items-center gap-8 pt-12 text-center">
           <div className="flex items-center gap-8">
             <a
               href={site.instagram}

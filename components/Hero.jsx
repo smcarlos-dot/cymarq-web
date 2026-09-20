@@ -163,6 +163,7 @@ export default function Hero() {
             href={whatsappUrl(whatsappMessages.hero)}
             target="_blank"
             rel="noopener noreferrer"
+            data-cta="hero"
             className="group inline-flex items-center justify-center gap-3 bg-gold px-8 py-4 text-center font-sans text-xs font-medium uppercase tracking-widest2 text-ink transition-all duration-500 ease-cinema hover:bg-white"
           >
             <svg viewBox="0 0 32 32" className="h-4 w-4 shrink-0 fill-current" aria-hidden="true">

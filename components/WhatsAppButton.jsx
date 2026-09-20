@@ -10,6 +10,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`WhatsApp ${site.whatsapp}`}
+      data-cta="boton-flotante"
       title={`WhatsApp ${site.whatsapp}`}
       className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-xl shadow-black/25"
       initial={{ opacity: 0, scale: 0 }}

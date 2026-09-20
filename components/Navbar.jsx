@@ -61,6 +61,7 @@ export default function Navbar() {
             href={whatsappUrl(whatsappMessages.general)}
             target="_blank"
             rel="noopener noreferrer"
+            data-cta="menu-escritorio"
             className="inline-flex items-center gap-2 bg-gold px-5 py-3 font-sans text-xs font-medium uppercase tracking-widest2 text-ink transition-colors duration-500 hover:bg-white"
           >
             Asesoría gratis
@@ -118,6 +119,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.08 * links.length, duration: 0.4 }}
+                data-cta="menu-movil"
                 className="mt-2 inline-flex items-center justify-center bg-gold px-6 py-4 text-center font-sans text-xs font-medium uppercase tracking-widest2 text-ink"
               >
                 Asesoría gratis por WhatsApp

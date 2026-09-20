@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import DevViewportToggle from '@/components/DevViewportToggle';
 import JsonLd from '@/components/JsonLd';
+import AnalyticsWhatsApp from '@/components/AnalyticsWhatsApp';
 import Script from 'next/script';
 import { site } from '@/data/site';
 import { OG_IMAGE, graph, organizationSchema, personSchema, websiteSchema } from '@/lib/seo';
@@ -94,6 +95,9 @@ export default function RootLayout({ children }) {
         </Script>
 
         <JsonLd data={siteJsonLd} />
+
+        {/* Mide los clics que abren WhatsApp, que son la conversión real. */}
+        <AnalyticsWhatsApp />
 
         <Navbar />
         <main>{children}</main>
