@@ -11,6 +11,16 @@
  * En este archivo NO existe ninguna llamada POST. Ni /media ni /media_publish.
  *
  *   npm run instagram:dry-run -- --job=<ID> --metadata=<ruta> --image-url=<url>
+ *
+ * SOLO CUBRE IMAGENES. No sabe nada de reels ni de historias: comprueba una
+ * URL de imagen y analiza un caption, y una historia no tiene ni lo uno ni lo
+ * otro. Si se le pasa --media-type=stories se detiene en vez de evaluarlo como
+ * si fuera una imagen, porque ese camino daba un veredicto falso ("NO LISTO,
+ * caption vacio") sobre historias perfectamente validas.
+ *
+ * Para ensayar video o historia esta el propio publicador sin --confirm, que
+ * si los entiende:
+ *   npm run instagram:publish -- ... --media-type=stories --video-url=<url>
  */
 
 import {
@@ -44,6 +54,25 @@ function marca(ok) {
 
 async function main() {
   const trabajo = leerTrabajo({ varianteCaption: 'instagram', uso: USO });
+
+  // Este ensayo solo sabe de imagenes. Evaluar un video con las reglas de una
+  // imagen no da un resultado incompleto: da uno equivocado, y en la direccion
+  // que hace desconfiar de algo que si funciona.
+  if (trabajo.mediaType !== 'image') {
+    console.error([
+      '',
+      `  ESTE ENSAYO NO CUBRE "${trabajo.mediaType}".`,
+      '  Solo sabe comprobar imagenes: una URL de imagen y un caption.',
+      '',
+      '  Para ensayar un reel o una historia, usa el publicador sin --confirm,',
+      '  que si los entiende y tampoco escribe nada:',
+      '',
+      `      npm run instagram:publish -- --job=${trabajo.jobId} `
+        + `--metadata=<ruta> --media-type=${trabajo.mediaType} --video-url=<url>`,
+      '',
+    ].join('\n'));
+    process.exit(1);
+  }
   const { metadata, caption } = await cargarPropuesta(trabajo);
   const token = await requireSecret('INSTAGRAM_PUBLISH_TOKEN');
   const fallos = [];
