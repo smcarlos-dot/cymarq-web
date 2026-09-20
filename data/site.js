@@ -17,6 +17,19 @@ export const whatsappMessages = {
     'Hola CYMARQ, quiero saber cómo empezar el diseño de mi casa. ¿Me explican el proceso?',
   lote: 'Hola CYMARQ, ya tengo un lote y quiero comenzar a construir. ¿Podemos hablar?',
   servicios: 'Hola CYMARQ, quiero contarles qué necesito para mi proyecto.',
+  licencias:
+    'Hola CYMARQ, necesito tramitar una licencia de construcción en Cúcuta. ¿Me ayudan a revisar mi caso?',
+  desenglobe:
+    'Hola CYMARQ, quiero desenglobar (o subdividir) un lote en Cúcuta. ¿Me dicen si es viable?',
+  reconocimiento:
+    'Hola CYMARQ, tengo una construcción sin licencia y quiero legalizarla. ¿Me ayudan con el reconocimiento?',
+  disenoArquitectonico:
+    'Hola CYMARQ, quiero cotizar el diseño arquitectónico y los planos de mi proyecto.',
+  disenoConstruccion:
+    'Hola CYMARQ, quiero que diseñen y construyan mi proyecto. ¿Cómo empezamos?',
+  usoDelSuelo:
+    'Hola CYMARQ, quiero saber qué puedo construir en mi lote en Cúcuta. ¿Me revisan la norma del predio?',
+  faq: 'Hola CYMARQ, leí sus preguntas frecuentes y quiero resolver mi caso concreto.',
   proyecto: (nombre) =>
     `Hola CYMARQ, vi el proyecto "${nombre}" en su web y me gustaría algo así para mi lote.`,
 };
@@ -36,30 +49,83 @@ export const site = {
   instagram: 'https://www.instagram.com/cymarq.obras/',
   facebook: 'https://www.facebook.com/cymarq.obras',
   location: 'Cúcuta, Norte de Santander, Colombia',
+  // Teléfono en formato E.164: es el que leen los datos estructurados y los
+  // buscadores. El formato legible para personas vive en `whatsapp`.
+  phoneE164: '+573223656579',
+  /**
+   * Fecha de la última revisión del contenido editorial (servicios y FAQ).
+   * Alimenta `dateModified` en los datos estructurados y la línea visible de
+   * "actualizado en". Se sube a mano al revisar los textos: es una afirmación
+   * sobre el contenido, no sobre la fecha del último despliegue.
+   */
+  contentUpdated: '2026-09-20',
+  /**
+   * Una sola frase que define qué es CYMARQ. Se reutiliza en los datos
+   * estructurados y en los textos de la web para que la descripción de la
+   * entidad sea idéntica en todas partes.
+   */
+  entityDescription:
+    'CYMARQ es una empresa de arquitectura, diseño y construcción que trabaja en Cúcuta y Norte de Santander. Diseña vivienda y proyectos comerciales, elabora planos arquitectónicos y acompaña los trámites urbanísticos: licencias de construcción, desenglobe y subdivisión de lotes, reconocimiento de construcciones y consultas de norma y uso del suelo.',
+  /** Área de servicio. CYMARQ no publica oficina abierta al público. */
+  serviceAreas: [
+    { type: 'City', name: 'Cúcuta', containedIn: 'Norte de Santander, Colombia' },
+    { type: 'City', name: 'Villa del Rosario', containedIn: 'Norte de Santander, Colombia' },
+    { type: 'City', name: 'Los Patios', containedIn: 'Norte de Santander, Colombia' },
+    { type: 'City', name: 'Tibú', containedIn: 'Norte de Santander, Colombia' },
+    { type: 'AdministrativeArea', name: 'Norte de Santander, Colombia' },
+  ],
+  /** Temas sobre los que CYMARQ trabaja de verdad. No es una lista de keywords. */
+  knowsAbout: [
+    'Arquitectura',
+    'Diseño arquitectónico',
+    'Planos arquitectónicos',
+    'Licencias de construcción',
+    'Licencias urbanísticas',
+    'Desenglobe de predios',
+    'Subdivisión de lotes',
+    'Reconocimiento de edificaciones',
+    'Normativa urbanística y POT',
+    'Uso del suelo',
+    'Construcción de vivienda',
+    'Remodelación y ampliación',
+    'Interventoría y supervisión de obra',
+    'Presupuestos de obra',
+    'Renderizado y visualización 3D',
+  ],
+  /** Catálogo para `hasOfferCatalog`. `url` sólo cuando existe una página. */
+  catalogo: [
+    { name: 'Diseño arquitectónico', url: '/servicios/diseno-arquitectonico/' },
+    { name: 'Planos arquitectónicos', url: '/servicios/diseno-arquitectonico/' },
+    { name: 'Licencias de construcción', url: '/servicios/licencias-de-construccion/' },
+    { name: 'Licencias urbanísticas', url: '/servicios/licencias-de-construccion/' },
+    { name: 'Desenglobe y subdivisión de lotes', url: '/servicios/desenglobe-y-subdivision/' },
+    {
+      name: 'Reconocimiento y legalización de construcciones',
+      url: '/servicios/reconocimiento-de-construcciones/',
+    },
+    { name: 'Diseño y construcción', url: '/servicios/diseno-y-construccion/' },
+    { name: 'Remodelación y ampliación', url: '/servicios/diseno-y-construccion/' },
+    { name: 'Consultoría urbanística y uso del suelo', url: '/servicios/licencias-de-construccion/' },
+    { name: 'Interventoría y supervisión de obra', url: '/servicios/' },
+    { name: 'Renderizado 3D y visualización', url: '/servicios/diseno-arquitectonico/' },
+  ],
   seo: {
-    title: 'CYMARQ | Diseñamos y construimos tu casa en Cúcuta',
+    title: 'Arquitectos en Cúcuta | Diseño, licencias y construcción — CYMARQ',
     description:
-      'Arquitectos en Cúcuta. Diseñamos tu vivienda y te dejamos recorrerla en 3D antes de iniciar la obra. Asesoría por WhatsApp para familias que ya tienen lote en Cúcuta y Norte de Santander.',
+      'Arquitectos en Cúcuta. Diseño arquitectónico y planos, licencias de construcción, desenglobe de lotes, legalización de construcciones y obra, en Cúcuta y Norte de Santander.',
     keywords: [
-      'Arquitectos en Cúcuta',
-      'Diseño de casas en Cúcuta',
-      'Construir casa en Cúcuta',
-      'Planos de casa Cúcuta',
-      'Diseño arquitectónico',
-      'Construcción',
-      'Remodelaciones',
-      'Interventoría',
-      'Licencias urbanísticas',
-      'Diseño interior',
-      'Renderizado 3D',
-      'Renders',
-      'Levantamientos arquitectónicos',
-      'Presupuestos',
-      'Consultoría',
-      'Supervisión de obra',
-      'Arquitectura Cúcuta',
-      'Construcción en Cúcuta',
-      'Diseño arquitectónico Norte de Santander',
+      'arquitectos en Cúcuta',
+      'arquitectura en Cúcuta',
+      'diseño arquitectónico Cúcuta',
+      'planos arquitectónicos Cúcuta',
+      'licencia de construcción Cúcuta',
+      'licencias urbanísticas Cúcuta',
+      'desenglobe Cúcuta',
+      'subdivisión de lotes Cúcuta',
+      'reconocimiento de construcciones Cúcuta',
+      'uso del suelo Cúcuta',
+      'diseño y construcción Cúcuta',
+      'remodelaciones Cúcuta',
       'CYMARQ',
     ],
   },
@@ -68,10 +134,10 @@ export const site = {
 export const hero = {
   title: 'Antes de construir tu hogar, vívelo.',
   subtitle:
-    'Diseñamos viviendas únicas en Cúcuta para familias que desean construir con la tranquilidad de haber recorrido cada espacio antes de iniciar la obra.',
+    'Arquitectura, diseño y construcción en Cúcuta. Diseñamos tu proyecto, resolvemos la licencia y te dejamos recorrer cada espacio en 3D antes de iniciar la obra.',
   cta: 'Agenda una asesoría por WhatsApp',
   secondary: 'Ver proyectos',
-  place: 'Atendemos proyectos en Cúcuta y Norte de Santander.',
+  place: 'Cúcuta, su área metropolitana y Norte de Santander.',
 };
 
 /**
@@ -110,8 +176,8 @@ export const proceso = {
       text: 'Nos cuentas cómo vive tu familia, qué necesitan hoy y qué imaginan para dentro de diez años. Antes de dibujar, entendemos.',
     },
     {
-      title: 'Visitamos tu lote.',
-      text: 'Vamos al terreno: medidas reales, orientación del sol, accesos y normativa. Lo que se puede y lo que no, dicho con claridad desde el principio.',
+      title: 'Conocemos tu lote.',
+      text: 'Medidas reales, orientación del sol, accesos y normativa. Si estás en Cúcuta o cerca, vamos al terreno; si no, lo resolvemos con fotos, videos y los documentos del predio. Lo que se puede y lo que no, dicho con claridad desde el principio.',
     },
     {
       title: 'Diseñamos según tu forma de vivir.',
@@ -133,52 +199,79 @@ export const proceso = {
   cta: 'Quiero empezar por el paso 1',
 };
 
+/**
+ * Servicios visibles en la home y en /servicios/.
+ * `href` apunta a la página del servicio cuando existe; los que no tienen
+ * página propia se explican dentro del hub /servicios/.
+ */
 export const services = [
   {
     title: 'Diseño arquitectónico',
-    text: 'Propuestas contemporáneas y funcionales, pensadas para ser construidas, habitadas y disfrutadas durante muchos años.',
+    text: 'Proyectos de vivienda, comercio y espacio público diseñados desde cero, pensados para ser construidos y habitados durante muchos años.',
+    href: '/servicios/diseno-arquitectonico/',
   },
   {
-    title: 'Construcción',
-    text: 'Ejecución de obra con conocimiento técnico y normativo, para que lo que se construya sea exactamente lo que aprobaste.',
+    title: 'Planos arquitectónicos',
+    text: 'Planos de plantas, cortes, fachadas y detalles con la calidad técnica que exige una curaduría y que necesita un maestro en obra.',
+    href: '/servicios/diseno-arquitectonico/',
   },
   {
-    title: 'Remodelaciones',
-    text: 'Transformamos espacios existentes en ambientes modernos, coherentes y adaptados a nuevas dinámicas de vida.',
+    title: 'Licencias de construcción',
+    text: 'Preparamos el proyecto y radicamos la licencia ante la curaduría urbana en obra nueva, ampliación, modificación y demolición.',
+    href: '/servicios/licencias-de-construccion/',
+  },
+  {
+    title: 'Desenglobe y subdivisión',
+    text: 'Dividir un predio en varios lotes o unidades, con el estudio previo de norma y los planos que pide el trámite.',
+    href: '/servicios/desenglobe-y-subdivision/',
+  },
+  {
+    title: 'Reconocimiento y legalización',
+    text: 'Construcciones levantadas sin licencia: levantamiento, revisión estructural y trámite de reconocimiento de la edificación.',
+    href: '/servicios/reconocimiento-de-construcciones/',
+  },
+  {
+    title: 'Uso del suelo y norma urbanística',
+    text: 'Revisamos qué permite el POT en tu predio antes de que compres, diseñes o inviertas: uso, altura, aislamientos e índices.',
+    href: '/servicios/licencias-de-construccion/#uso-del-suelo',
+  },
+  {
+    title: 'Diseño y construcción',
+    text: 'El proyecto completo con un solo responsable: quien diseñó la casa es quien la construye y responde por ella.',
+    href: '/servicios/diseno-y-construccion/',
+  },
+  {
+    title: 'Remodelaciones y ampliaciones',
+    text: 'Transformamos espacios existentes y resolvemos el segundo piso o la ampliación, con el trámite que corresponda.',
+    href: '/servicios/diseno-y-construccion/#remodelacion',
+  },
+  {
+    title: 'Renderizado 3D',
+    text: 'Visualización fotorrealista para que recorras cada espacio de tu proyecto antes de construirlo.',
+    href: '/servicios/diseno-arquitectonico/#visualizacion',
+  },
+  {
+    title: 'Levantamientos arquitectónicos',
+    text: 'Registro preciso de edificaciones existentes como base técnica para diseñar, ampliar o legalizar.',
+  },
+  {
+    title: 'Presupuestos',
+    text: 'Presupuestos detallados para que sepas cuánto cuesta tu obra antes de mover el primer bulto de cemento.',
   },
   {
     title: 'Interventoría',
     text: 'Control técnico, administrativo y financiero de proyectos para asegurar su correcta ejecución.',
   },
   {
-    title: 'Licencias urbanísticas',
-    text: 'Gestión y acompañamiento normativo conforme al POT, PBOT y reglamentos vigentes de cada municipio.',
+    title: 'Supervisión de obra',
+    text: 'Acompañamiento permanente en obra para asegurar que lo construido sea fiel al diseño aprobado.',
   },
   {
     title: 'Diseño interior',
     text: 'Interiores con identidad y carácter, en equilibrio con la forma de vivir de cada familia.',
   },
-  {
-    title: 'Renderizado 3D',
-    text: 'Visualización fotorrealista para que recorras cada espacio de tu casa antes de construirlo.',
-  },
-  {
-    title: 'Levantamientos arquitectónicos',
-    text: 'Registro preciso de edificaciones existentes como base técnica para diseño e intervención.',
-  },
-  {
-    title: 'Presupuestos',
-    text: 'Presupuestos detallados para que sepas cuánto cuesta tu casa antes de mover el primer bulto de cemento.',
-  },
-  {
-    title: 'Consultoría',
-    text: 'Asesoría técnica para entidades públicas y privadas en todas las etapas del proyecto.',
-  },
-  {
-    title: 'Supervisión de obra',
-    text: 'Acompañamiento permanente en obra para asegurar que lo construido sea fiel al diseño aprobado.',
-  },
 ];
+
 
 export const about = {
   intro:

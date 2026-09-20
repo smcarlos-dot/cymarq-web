@@ -6,12 +6,14 @@ import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { whatsappMessages, whatsappUrl } from '@/data/site';
 
+// Servicios y Preguntas frecuentes apuntan ahora a páginas propias, no a un
+// ancla de la home: son las dos secciones que resuelven búsquedas por sí solas.
 const links = [
-  { href: '/#proceso', label: 'Proceso' },
-  { href: '/#renders', label: 'Visualiza tu casa' },
+  { href: '/servicios/', label: 'Servicios' },
   { href: '/proyectos/', label: 'Proyectos' },
+  { href: '/#renders', label: 'Visualiza tu casa' },
+  { href: '/preguntas-frecuentes/', label: 'Preguntas' },
   { href: '/#nosotros', label: 'Nosotros' },
-  { href: '/#servicios', label: 'Servicios' },
 ];
 
 export default function Navbar() {
@@ -45,12 +47,12 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop */}
-        <nav className="hidden items-center gap-8 md:flex lg:gap-10">
+        <nav className="hidden items-center gap-6 xl:flex xl:gap-9">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="link-underline font-sans text-xs uppercase tracking-widest2 text-white/90 hover:text-white"
+              className="link-underline whitespace-nowrap font-sans text-xs uppercase tracking-widest2 text-white/90 hover:text-white"
             >
               {l.label}
             </Link>
@@ -67,7 +69,7 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 xl:hidden"
           onClick={() => setOpen(!open)}
           aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
           aria-expanded={open}
@@ -89,7 +91,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden bg-ink md:hidden"
+            className="overflow-hidden bg-ink xl:hidden"
           >
             <div className="container-x flex flex-col gap-6 py-8">
               {links.map((l, i) => (

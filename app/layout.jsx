@@ -4,8 +4,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import DevViewportToggle from '@/components/DevViewportToggle';
+import JsonLd from '@/components/JsonLd';
 import Script from 'next/script';
 import { site } from '@/data/site';
+import { OG_IMAGE, graph, organizationSchema, websiteSchema } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,6 +30,7 @@ export const metadata = {
   description: site.seo.description,
   keywords: site.seo.keywords,
   authors: [{ name: 'CYMARQ' }],
+  applicationName: 'CYMARQ',
   openGraph: {
     title: site.seo.title,
     description: site.seo.description,
@@ -35,49 +38,41 @@ export const metadata = {
     siteName: 'CYMARQ',
     locale: 'es_CO',
     type: 'website',
-    images: [
-      {
-        url: '/photos/edificio-cyma.webp',
-        width: 1200,
-        height: 630,
-        alt: 'CYMARQ — Edificio CYMA',
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: site.seo.title,
     description: site.seo.description,
-    images: ['/photos/edificio-cyma.webp'],
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   },
   icons: {
     icon: '/brand/logo.png',
+    apple: '/brand/logo.png',
   },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'ProfessionalService',
-  name: 'CYMARQ',
-  description: site.seo.description,
-  url: `${site.url}/`,
-  email: site.email,
-  telephone: site.whatsapp,
-  areaServed: {
-    '@type': 'City',
-    name: 'Cúcuta',
-    containedInPlace: {
-      '@type': 'AdministrativeArea',
-      name: 'Norte de Santander, Colombia',
-    },
-  },
-  sameAs: [site.instagram, site.facebook],
-  knowsAbout: site.seo.keywords,
-};
+/**
+ * Identidad de la entidad, una sola vez en todo el sitio.
+ *
+ * Antes cada página repetía un nodo `ProfessionalService` completo, incluidas
+ * las de proyecto, lo que hacía que cada URL se declarara a sí misma como la
+ * empresa. Ahora el layout emite `ProfessionalService` y `WebSite` con `@id`
+ * estables, y cada página añade sus propios nodos (`WebPage`, `Service`,
+ * `BreadcrumbList`, `FAQPage`) apuntando a esos identificadores.
+ */
+const siteJsonLd = graph([organizationSchema(), websiteSchema()]);
 
 export default function RootLayout({ children }) {
   return (
@@ -98,13 +93,7 @@ export default function RootLayout({ children }) {
           `}
         </Script>
 
-        {/* Datos estructurados SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd),
-          }}
-        />
+        <JsonLd data={siteJsonLd} />
 
         <Navbar />
         <main>{children}</main>

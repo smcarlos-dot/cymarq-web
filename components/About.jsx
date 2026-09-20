@@ -7,9 +7,9 @@ import { about } from '@/data/site';
 
 export default function About() {
   return (
-    <section id="nosotros" className="scroll-mt-20 bg-paper py-24 md:py-32">
+    <section id="nosotros" className="scroll-mt-20 bg-paper py-20 md:py-32">
       <div className="container-x">
-        <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
           {/* Texto */}
           <div>
             <Reveal>
@@ -19,7 +19,7 @@ export default function About() {
               </h2>
             </Reveal>
             <Reveal delay={0.15}>
-              <p className="mt-8 text-lg leading-relaxed text-stone">{about.intro}</p>
+              <p className="mt-6 leading-relaxed text-stone md:mt-8 md:text-lg">{about.intro}</p>
             </Reveal>
             <Reveal delay={0.25}>
               <p className="mt-6 leading-relaxed text-stone">{about.extra}</p>
@@ -28,7 +28,7 @@ export default function About() {
               <p className="mt-6 leading-relaxed text-stone">{about.team}</p>
             </Reveal>
             <Reveal delay={0.35}>
-              <ul className="mt-10 space-y-4 border-l-2 border-gold pl-6">
+              <ul className="mt-8 space-y-3 border-l-2 border-gold pl-6 md:mt-10 md:space-y-4">
                 {about.manifesto.map((m) => (
                   <li key={m} className="font-display text-lg leading-snug md:text-xl">
                     {m}
@@ -57,31 +57,20 @@ export default function About() {
         </div>
 
         {/* Pilares */}
-        <div className="mt-32 grid gap-px bg-mist sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-2 gap-px bg-mist md:mt-28 lg:grid-cols-4">
           {about.pillars.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.12} className="bg-paper">
-              <div className="group h-full border-t-2 border-transparent bg-paper p-8 transition-all duration-500 ease-cinema hover:border-gold hover:bg-mist/60">
-                <span className="font-display text-3xl text-mist transition-colors duration-500 group-hover:text-gold">
+              <div className="group h-full border-t-2 border-transparent bg-paper p-5 transition-all duration-500 ease-cinema hover:border-gold hover:bg-mist/60 sm:p-8">
+                <span className="font-display text-2xl text-mist transition-colors duration-500 group-hover:text-gold sm:text-3xl">
                   0{i + 1}
                 </span>
-                <h3 className="mt-4 font-display text-xl leading-snug">{p.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-stone">{p.text}</p>
+                <h3 className="mt-3 font-display text-base leading-snug sm:mt-4 sm:text-xl">{p.title}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-stone sm:mt-3 sm:text-sm">{p.text}</p>
               </div>
             </Reveal>
           ))}
         </div>
 
-        {/* Misión y visión */}
-        <div className="mt-24 grid gap-12 border-t border-mist pt-16 md:grid-cols-2 md:gap-20">
-          <Reveal>
-            <p className="text-[11px] uppercase tracking-widest2 text-gold">Misión</p>
-            <p className="mt-4 leading-relaxed text-stone">{about.mision}</p>
-          </Reveal>
-          <Reveal delay={0.12}>
-            <p className="text-[11px] uppercase tracking-widest2 text-gold">Visión</p>
-            <p className="mt-4 leading-relaxed text-stone">{about.vision}</p>
-          </Reveal>
-        </div>
       </div>
     </section>
   );

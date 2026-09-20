@@ -10,7 +10,7 @@ import { momento, whatsappMessages, whatsappUrl } from '@/data/site';
  */
 export default function Momento() {
   return (
-    <section id="momento" className="scroll-mt-20 bg-paper py-24 md:py-32">
+    <section id="momento" className="scroll-mt-20 bg-paper py-20 md:py-32">
       <div className="container-x">
         {/* El titular va a todo el ancho: en una columna estrecha se partía en
             líneas muy cortas ("más" / "importantes de") y se leía mal. */}

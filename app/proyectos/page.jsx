@@ -1,50 +1,66 @@
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import JsonLd from '@/components/JsonLd';
 import PortfolioGrid from '@/components/PortfolioGrid';
 import Reveal from '@/components/Reveal';
-import { whatsappMessages, whatsappUrl } from '@/data/site';
+import { projects } from '@/data/projects';
+import { site, whatsappMessages, whatsappUrl } from '@/data/site';
+import {
+  breadcrumbSchema,
+  graph,
+  pageMetadata,
+  webPageSchema,
+} from '@/lib/seo';
 
-const title = 'Portafolio de proyectos';
+const path = '/proyectos/';
+const title = 'Proyectos de arquitectura en Cúcuta y Norte de Santander | CYMARQ';
 const description =
-  'Portafolio de CYMARQ: proyectos residenciales, comerciales, de espacio público e infraestructura diseñados y desarrollados en Cúcuta y Norte de Santander.';
+  'Portafolio de CYMARQ: viviendas, proyectos comerciales, edificaciones de uso mixto y espacio público diseñados en Cúcuta, Tibú y Norte de Santander.';
 
-export const metadata = {
+export const metadata = pageMetadata({
   title,
+  socialTitle: 'Portafolio de proyectos | CYMARQ',
   description,
-  alternates: {
-    canonical: '/proyectos/',
-  },
-  openGraph: {
-    title: `${title} | CYMARQ`,
-    description,
-    url: '/proyectos/',
-    siteName: 'CYMARQ',
-    locale: 'es_CO',
-    type: 'website',
-    images: [
-      {
-        url: '/photos/edificio-cyma.webp',
-        width: 1200,
-        height: 630,
-        alt: 'CYMARQ — Edificio CYMA',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} | CYMARQ`,
-    description,
-    images: ['/photos/edificio-cyma.webp'],
-  },
-};
+  path,
+});
+
+const trail = [
+  { name: 'Inicio', path: '/' },
+  { name: 'Proyectos', path },
+];
 
 export default function ProyectosPage() {
   return (
     <>
+      <JsonLd
+        data={graph([
+          webPageSchema({
+            path,
+            name: 'Portafolio de proyectos de CYMARQ',
+            description,
+            breadcrumb: true,
+          }),
+          breadcrumbSchema(path, trail),
+          {
+            '@type': 'ItemList',
+            '@id': `${site.url}${path}#proyectos`,
+            name: 'Proyectos de CYMARQ',
+            itemListElement: projects.map((p, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name: p.name,
+              url: `${site.url}/proyectos/${p.slug}/`,
+            })),
+          },
+        ])}
+      />
+
       {/* Hero corto */}
-      <section className="bg-ink pb-16 pt-36 text-white md:pb-24 md:pt-44">
+      <section className="bg-ink pb-16 pt-32 text-white md:pb-24 md:pt-40">
         <div className="container-x">
+          <Breadcrumbs trail={trail} />
           <Reveal>
-            <span className="section-label">Portafolio</span>
+            <span className="section-label mt-8">Portafolio</span>
             <h1 className="h-display max-w-4xl">
               Cada proyecto nace de{' '}
               <em className="text-gold">una historia diferente.</em>
@@ -80,10 +96,10 @@ export default function ProyectosPage() {
               <span aria-hidden="true">→</span>
             </a>
             <Link
-              href="/#renders"
+              href="/servicios/diseno-arquitectonico/"
               className="link-underline text-xs uppercase tracking-widest2 text-ink"
             >
-              Ver cómo visualizarás tu casa →
+              Ver el servicio de diseño arquitectónico →
             </Link>
           </div>
         </Reveal>

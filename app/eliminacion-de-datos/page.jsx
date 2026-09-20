@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import LegalPage, { LegalList, LegalNote, LegalSection } from '@/components/LegalPage';
 import { site } from '@/data/site';
+import { pageMetadata } from '@/lib/seo';
 
 const title = 'Eliminación de datos';
 const description =
@@ -8,35 +9,11 @@ const description =
 
 const SUBJECT = 'Solicitud de eliminacion de datos - Instagram';
 
-export const metadata = {
-  title,
+export const metadata = pageMetadata({
+  title: `${title} | CYMARQ`,
   description,
-  alternates: {
-    canonical: '/eliminacion-de-datos/',
-  },
-  openGraph: {
-    title: `${title} | CYMARQ`,
-    description,
-    url: '/eliminacion-de-datos/',
-    siteName: 'CYMARQ',
-    locale: 'es_CO',
-    type: 'website',
-    images: [
-      {
-        url: '/photos/edificio-cyma.webp',
-        width: 1200,
-        height: 630,
-        alt: 'CYMARQ — Edificio CYMA',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} | CYMARQ`,
-    description,
-    images: ['/photos/edificio-cyma.webp'],
-  },
-};
+  path: '/eliminacion-de-datos/',
+});
 
 export default function EliminacionDeDatosPage() {
   const mailto = `mailto:${site.privacyEmail}?subject=${encodeURIComponent(SUBJECT)}`;

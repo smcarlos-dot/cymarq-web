@@ -1,40 +1,17 @@
 import Link from 'next/link';
 import LegalPage, { LegalList, LegalNote, LegalSection } from '@/components/LegalPage';
 import { site } from '@/data/site';
+import { pageMetadata } from '@/lib/seo';
 
 const title = 'Política de privacidad';
 const description =
   'Política de privacidad de CYMARQ: qué datos personales tratamos, incluida la información recibida a través de la integración con Instagram y Meta, con qué finalidad, cuánto tiempo los conservamos y cómo ejercer tus derechos.';
 
-export const metadata = {
-  title,
+export const metadata = pageMetadata({
+  title: `${title} | CYMARQ`,
   description,
-  alternates: {
-    canonical: '/politica-de-privacidad/',
-  },
-  openGraph: {
-    title: `${title} | CYMARQ`,
-    description,
-    url: '/politica-de-privacidad/',
-    siteName: 'CYMARQ',
-    locale: 'es_CO',
-    type: 'website',
-    images: [
-      {
-        url: '/photos/edificio-cyma.webp',
-        width: 1200,
-        height: 630,
-        alt: 'CYMARQ — Edificio CYMA',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} | CYMARQ`,
-    description,
-    images: ['/photos/edificio-cyma.webp'],
-  },
-};
+  path: '/politica-de-privacidad/',
+});
 
 export default function PoliticaDePrivacidadPage() {
   return (

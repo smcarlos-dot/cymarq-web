@@ -10,7 +10,7 @@ import { proceso, whatsappMessages, whatsappUrl } from '@/data/site';
  */
 export default function Proceso() {
   return (
-    <section id="proceso" className="scroll-mt-20 bg-ink py-24 text-white md:py-32">
+    <section id="proceso" className="scroll-mt-20 bg-ink py-20 text-white md:py-32">
       <div className="container-x">
         <Reveal>
           <span className="section-label">{proceso.label}</span>
@@ -20,19 +20,23 @@ export default function Proceso() {
           <p className="mt-6 max-w-xl text-white/70">{proceso.intro}</p>
         </Reveal>
 
-        <ol className="mt-16 grid gap-px bg-white/10 md:grid-cols-2 lg:grid-cols-3">
+        <ol className="mt-10 grid gap-px bg-white/10 md:mt-16 md:grid-cols-2 lg:grid-cols-3">
           {proceso.steps.map((s, i) => (
             <li key={s.title} className="bg-ink">
               <Reveal delay={(i % 3) * 0.1} className="h-full">
-                <div className="group flex h-full flex-col bg-ink p-8 transition-colors duration-500 ease-cinema hover:bg-white/5 md:p-10">
-                  <span className="font-display text-4xl text-white/20 transition-colors duration-500 group-hover:text-gold">
+                <div className="group flex h-full gap-4 bg-ink px-5 py-5 transition-colors duration-500 ease-cinema hover:bg-white/5 md:flex-col md:gap-0 md:p-10">
+                  <span className="mt-[3px] shrink-0 font-display text-sm leading-none text-white/25 transition-colors duration-500 group-hover:text-gold md:mt-0 md:text-4xl">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="mt-5 font-display text-xl leading-snug md:text-2xl">
-                    {s.title}
-                  </h3>
-                  <p className="mt-4 flex-1 text-sm leading-relaxed text-white/65">{s.text}</p>
-                  <div className="mt-8 h-px w-8 bg-gold/60 transition-all duration-700 ease-cinema group-hover:w-full" />
+                  <div className="flex flex-1 flex-col">
+                    <h3 className="font-display text-base leading-snug md:mt-5 md:text-2xl">
+                      {s.title}
+                    </h3>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-white/65 md:mt-4">
+                      {s.text}
+                    </p>
+                    <div className="mt-4 h-px w-8 bg-gold/60 transition-all duration-700 ease-cinema group-hover:w-full md:mt-8" />
+                  </div>
                 </div>
               </Reveal>
             </li>
@@ -40,8 +44,8 @@ export default function Proceso() {
         </ol>
 
         <Reveal delay={0.2}>
-          <div className="mt-16 flex flex-col items-start gap-6 border-t border-white/10 pt-12 sm:flex-row sm:items-center sm:justify-between">
-            <p className="max-w-md font-display text-2xl leading-snug">
+          <div className="mt-10 flex flex-col items-start gap-5 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:mt-16 md:pt-10">
+            <p className="max-w-md font-display text-xl leading-snug md:text-2xl">
               El primer paso es una conversación. Nada más.
             </p>
             <a

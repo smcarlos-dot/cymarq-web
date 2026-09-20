@@ -1,40 +1,17 @@
 import Link from 'next/link';
 import LegalPage, { LegalList, LegalNote, LegalSection } from '@/components/LegalPage';
 import { site } from '@/data/site';
+import { pageMetadata } from '@/lib/seo';
 
 const title = 'Términos y condiciones';
 const description =
   'Términos y condiciones de uso del sitio web de CYMARQ y de sus canales de contacto, incluida la interacción a través de servicios externos como Meta e Instagram.';
 
-export const metadata = {
-  title,
+export const metadata = pageMetadata({
+  title: `${title} | CYMARQ`,
   description,
-  alternates: {
-    canonical: '/terminos-y-condiciones/',
-  },
-  openGraph: {
-    title: `${title} | CYMARQ`,
-    description,
-    url: '/terminos-y-condiciones/',
-    siteName: 'CYMARQ',
-    locale: 'es_CO',
-    type: 'website',
-    images: [
-      {
-        url: '/photos/edificio-cyma.webp',
-        width: 1200,
-        height: 630,
-        alt: 'CYMARQ — Edificio CYMA',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${title} | CYMARQ`,
-    description,
-    images: ['/photos/edificio-cyma.webp'],
-  },
-};
+  path: '/terminos-y-condiciones/',
+});
 
 export default function TerminosYCondicionesPage() {
   return (
