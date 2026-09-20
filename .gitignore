@@ -46,6 +46,14 @@ PROYECTOS/
 PENDIENTES/
 PUBLICADOS/
 
+# En Windows Git compara sin distinguir mayúsculas (core.ignorecase), así que
+# `PROYECTOS/` también coincidía con `app/proyectos/`, la ruta del portafolio
+# de la web. Los archivos actuales no se vieron afectados porque ya estaban
+# rastreados, pero uno nuevo se habría ignorado en silencio y no se habría
+# publicado. La excepción va después para que tenga prioridad, y deja intacta
+# la protección del material de clientes en cualquier otra carpeta.
+!app/proyectos/
+
 # ---------- Datos locales generados ----------
 # Sin ruta a propósito. Un patrón que lleva barra queda anclado a la carpeta
 # de este .gitignore, así que `CONFIG/historial...` NO cubriría
