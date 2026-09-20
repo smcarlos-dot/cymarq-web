@@ -7,7 +7,7 @@ import DevViewportToggle from '@/components/DevViewportToggle';
 import JsonLd from '@/components/JsonLd';
 import Script from 'next/script';
 import { site } from '@/data/site';
-import { OG_IMAGE, graph, organizationSchema, websiteSchema } from '@/lib/seo';
+import { OG_IMAGE, graph, organizationSchema, personSchema, websiteSchema } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -72,7 +72,7 @@ export const metadata = {
  * estables, y cada página añade sus propios nodos (`WebPage`, `Service`,
  * `BreadcrumbList`, `FAQPage`) apuntando a esos identificadores.
  */
-const siteJsonLd = graph([organizationSchema(), websiteSchema()]);
+const siteJsonLd = graph([organizationSchema(), personSchema(), websiteSchema()]);
 
 export default function RootLayout({ children }) {
   return (

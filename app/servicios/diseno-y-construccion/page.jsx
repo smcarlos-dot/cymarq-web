@@ -42,6 +42,7 @@ export default function ServicioPage() {
             description: servicio.description,
             breadcrumb: true,
             image: servicio.cover,
+            author: true,
           }),
           breadcrumbSchema(path, trail),
           serviceSchema({

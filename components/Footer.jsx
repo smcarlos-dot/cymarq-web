@@ -117,6 +117,14 @@ export default function Footer() {
               Facebook
             </a>
             <a
+              href={site.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-underline text-sm text-white/80 hover:text-gold"
+            >
+              LinkedIn
+            </a>
+            <a
               href={site.whatsappLink}
               target="_blank"
               rel="noopener noreferrer"

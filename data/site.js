@@ -48,6 +48,7 @@ export const site = {
   whatsappLink: whatsappUrl(whatsappMessages.general),
   instagram: 'https://www.instagram.com/cymarq.obras/',
   facebook: 'https://www.facebook.com/cymarq.obras',
+  linkedin: 'https://www.linkedin.com/in/carloslasso-arquitecto/',
   location: 'Cúcuta, Norte de Santander, Colombia',
   // Teléfono en formato E.164: es el que leen los datos estructurados y los
   // buscadores. El formato legible para personas vive en `whatsapp`.
@@ -129,6 +130,56 @@ export const site = {
       'CYMARQ',
     ],
   },
+};
+
+/**
+ * Quién responde por el trabajo.
+ *
+ * Se publica el dato, no el documento: nombre, títulos, número de matrícula y
+ * las entidades donde cualquiera puede verificarlos. Fuera quedan la cédula,
+ * el teléfono personal y el resto de la hoja de vida, que no le sirven a nadie
+ * en una web pública.
+ *
+ * Nota sobre la matrícula: el CPNAA la expide como "A21412021-<cédula>". Aquí
+ * se publica sólo el número de matrícula, sin el sufijo, para no exponer un
+ * documento de identidad en una página indexable.
+ */
+export const ceo = {
+  nombre: 'Carlos Eduardo Lasso Ramírez',
+  nombreCorto: 'Carlos Lasso',
+  rol: 'Arquitecto y CEO de CYMARQ',
+  jobTitle: 'CEO y director de proyectos',
+  linkedin: 'https://www.linkedin.com/in/carloslasso-arquitecto/',
+  bio: 'Arquitecto de la Universidad Francisco de Paula Santander y especialista en Interventoría de Obras Civiles. Antes de dedicarse por completo a CYMARQ trabajó en el área de control urbano de la Secretaría de Planeación de Tibú, verificando el cumplimiento de licencias, y en el Instituto Geográfico Agustín Codazzi en control de calidad catastral. Esa experiencia en el lado de la administración es la que hoy sostiene el trabajo de CYMARQ en licencias, desenglobe y norma urbanística: conocemos el trámite desde adentro.',
+  titulos: [
+    { titulo: 'Arquitecto', entidad: 'Universidad Francisco de Paula Santander', anio: 2021 },
+    {
+      titulo: 'Especialista en Interventoría de Obras Civiles',
+      entidad: 'Universidad Francisco de Paula Santander',
+      anio: 2026,
+    },
+    {
+      titulo: 'Tecnólogo en Obras Civiles',
+      entidad: 'Universidad Francisco de Paula Santander',
+      anio: 2016,
+    },
+  ],
+  credenciales: [
+    {
+      nombre: 'Matrícula profesional de arquitectura',
+      numero: 'A21412021',
+      entidad: 'Consejo Profesional Nacional de Arquitectura y sus Profesiones Auxiliares (CPNAA)',
+      entidadCorta: 'CPNAA',
+      url: 'https://cpnaa.gov.co/',
+    },
+    {
+      nombre: 'Certificado de inscripción profesional',
+      numero: '123864-0553316 NTS',
+      entidad: 'Consejo Profesional Nacional de Ingeniería (COPNIA)',
+      entidadCorta: 'COPNIA',
+      url: 'https://www.copnia.gov.co/',
+    },
+  ],
 };
 
 export const hero = {
@@ -279,7 +330,7 @@ export const about = {
   extra:
     'Nuestro trabajo consiste en comprender cómo quieres vivir para transformar esas ideas en espacios funcionales, estéticos y preparados para ser construidos con confianza.',
   team:
-    'Somos un equipo interdisciplinario formado por un arquitecto y una ingeniera civil. Por eso el diseño y la viabilidad constructiva se resuelven en la misma mesa: lo que ves en pantalla es lo que se puede levantar en tu lote.',
+    'CYMARQ es un equipo interdisciplinario que reúne arquitectura, ingeniería y gestión de obra. Por eso el diseño y la viabilidad constructiva se resuelven en la misma mesa: lo que ves en pantalla es lo que se puede levantar en tu lote.',
   manifesto: [
     'No diseñamos para lotes. Diseñamos para las personas que van a vivir en ellos.',
     'No vendemos renders. Vendemos la tranquilidad de construir la casa correcta.',

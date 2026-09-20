@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Reveal from '@/components/Reveal';
 import AboutCarousel from '@/components/AboutCarousel';
-import { about } from '@/data/site';
+import { about, ceo } from '@/data/site';
 
 export default function About() {
   return (
@@ -54,6 +54,79 @@ export default function About() {
               </p>
             </motion.div>
           </Reveal>
+        </div>
+
+        {/* Quién responde por el trabajo.
+            El dato publicado es verificable por cualquiera en los registros
+            del CPNAA y el COPNIA; la cédula y el resto de la hoja de vida no
+            se publican porque no le sirven a nadie aquí. */}
+        <div className="mt-14 border-t border-mist pt-10 md:mt-28 md:pt-12">
+          <Reveal>
+            <span className="section-label">Quién responde</span>
+          </Reveal>
+          <div className="mt-6 grid gap-8 md:mt-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-16">
+            <Reveal>
+              <h3 className="font-display text-xl leading-snug md:text-3xl">{ceo.nombre}</h3>
+              <p className="mt-2 text-xs uppercase tracking-widest2 text-gold">{ceo.rol}</p>
+              <p className="mt-5 text-[15px] leading-relaxed text-stone md:mt-6 md:text-base">{ceo.bio}</p>
+              <a
+                href={ceo.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-underline mt-5 inline-block text-xs uppercase tracking-widest2 text-ink md:mt-6"
+              >
+                Perfil profesional en LinkedIn →
+              </a>
+            </Reveal>
+
+            <Reveal delay={0.12}>
+              <div className="bg-mist p-6 md:p-8">
+                <p className="text-[11px] uppercase tracking-widest2 text-ink/60">
+                  Formación
+                </p>
+                <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-stone md:mt-4 md:space-y-3 md:text-sm">
+                  {ceo.titulos.map((t) => (
+                    <li key={t.titulo} className="flex gap-3">
+                      <span aria-hidden="true" className="mt-[9px] h-px w-3 shrink-0 bg-gold" />
+                      <span>
+                        <strong className="font-medium text-ink">{t.titulo}</strong>
+                        <br />
+                        {t.entidad}, {t.anio}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mt-6 text-[11px] uppercase tracking-widest2 text-ink/60 md:mt-7">
+                  Matrículas vigentes
+                </p>
+                <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-stone md:mt-4 md:space-y-3 md:text-sm">
+                  {ceo.credenciales.map((c) => (
+                    <li key={c.numero} className="flex gap-3">
+                      <span aria-hidden="true" className="mt-[9px] h-px w-3 shrink-0 bg-gold" />
+                      <span>
+                        <strong className="font-medium text-ink">{c.numero}</strong>
+                        <br />
+                        {c.nombre} —{' '}
+                        <a
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-underline text-ink hover:text-gold"
+                        >
+                          {c.entidadCorta}
+                        </a>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-5 text-xs leading-relaxed text-stone/70 md:mt-6">
+                  Ambas matrículas se pueden verificar directamente en los registros públicos
+                  del CPNAA y el COPNIA.
+                </p>
+              </div>
+            </Reveal>
+          </div>
         </div>
 
         {/* Pilares */}

@@ -42,6 +42,7 @@ export default function PreguntasFrecuentesPage() {
             name: 'Preguntas frecuentes sobre arquitectura y trámites urbanísticos en Cúcuta',
             description,
             breadcrumb: true,
+            author: true,
           }),
           breadcrumbSchema(path, trail),
           faqSchema(
