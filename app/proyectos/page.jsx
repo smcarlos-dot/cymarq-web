@@ -88,6 +88,7 @@ export default function ProyectosPage() {
           <div className="mt-10 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <a
               href={whatsappUrl(whatsappMessages.lote)}
+              data-cta="proyectos-cierre"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#25D366] px-8 py-4 font-sans text-xs font-medium uppercase tracking-widest2 text-white transition-transform duration-500 ease-cinema hover:scale-[1.03]"

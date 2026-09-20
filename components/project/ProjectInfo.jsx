@@ -139,6 +139,7 @@ export default function ProjectInfo({ project }) {
               </p>
               <a
                 href={whatsappUrl(whatsappMessages.proyecto(project.name))}
+                data-cta="proyecto-detalle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-line mt-8 text-ink"

@@ -210,6 +210,7 @@ export default function ServiciosPage() {
               </p>
               <a
                 href={whatsappUrl(whatsappMessages.servicios)}
+                data-cta="servicios-cierre"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-10 inline-flex items-center gap-3 bg-[#25D366] px-10 py-5 font-sans text-sm font-medium uppercase tracking-widest2 text-white transition-transform duration-500 ease-cinema hover:scale-[1.03]"
