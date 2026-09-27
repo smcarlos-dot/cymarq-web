@@ -25,6 +25,7 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any
 
 from . import (catalogo_social, catalogo_video, config as cfg_mod, ejecutor,
@@ -81,6 +82,73 @@ SCRIPTS_NECESARIOS = (
 )
 
 
+#: Con cuanta antelacion se avisa de que el token de Instagram va a caducar.
+#: El renovador automatico actua a los 10 dias, asi que a los 14 todavia queda
+#: margen de sobra para intervenir a mano si el timer estuviera parado.
+AVISO_CADUCIDAD_DIAS = 14
+
+#: Lo escribe `produccion/refrescar-tokens.py` cada vez que renueva. Meta no
+#: deja consultar la caducidad de un token IGAA, de modo que la unica forma de
+#: saberla es haberla anotado nosotros al obtenerlo.
+ARCHIVO_TOKENS = rutas.CONFIG / "tokens_estado.json"
+
+
+def caducidad_instagram() -> Chequeo:
+    """Avisa ANTES de que caduque el token de Instagram.
+
+    Ojo con lo que esto es y lo que no es: NO comprueba si el token sirve
+    ahora mismo — de eso se encarga `social-health.mjs` consultando a Meta.
+    Esto solo lee la fecha que anotamos al renovar, para poder avisar con
+    semanas de antelacion en vez de enterarnos el dia que deje de publicar.
+
+    Nunca devuelve ERROR a proposito: `ciclo.sh` aborta el ciclo entero ante un
+    ERROR, y un token de Instagram a punto de caducar no es motivo para
+    impedir una publicacion de Facebook que si podria salir.
+    """
+    try:
+        datos = json.loads(ARCHIVO_TOKENS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return Chequeo(
+            nombre="caducidad_instagram",
+            estado=ADVERTENCIA,
+            mensaje="sin registro de caducidad; ejecuta produccion/refrescar-tokens.py",
+            detalle={"archivo": str(ARCHIVO_TOKENS)},
+        )
+
+    instagram = datos.get("instagram") or {}
+    try:
+        caduca = datetime.fromisoformat(instagram.get("caduca", ""))
+    except (TypeError, ValueError):
+        return Chequeo(
+            nombre="caducidad_instagram",
+            estado=ADVERTENCIA,
+            mensaje="la fecha anotada no se puede leer",
+            detalle={"archivo": str(ARCHIVO_TOKENS), "valor": instagram.get("caduca")},
+        )
+
+    if caduca.tzinfo is None:
+        caduca = caduca.replace(tzinfo=timezone.utc)
+    dias = (caduca - datetime.now(timezone.utc)).total_seconds() / 86400.0
+
+    detalle = {
+        "caduca": caduca.isoformat(),
+        "dias_restantes": round(dias, 1),
+        "renovado": instagram.get("renovado"),
+        "renovaciones": instagram.get("renovaciones"),
+    }
+    fecha = caduca.strftime("%Y-%m-%d")
+
+    if dias <= 0:
+        mensaje = f"caduco el {fecha}: renuevalo cuanto antes"
+    elif dias < AVISO_CADUCIDAD_DIAS:
+        mensaje = f"quedan {dias:.0f} dias (caduca el {fecha})"
+    else:
+        return Chequeo("caducidad_instagram", OK,
+                       f"quedan {dias:.0f} dias (caduca el {fecha})", detalle)
+
+    return Chequeo("caducidad_instagram", ADVERTENCIA, mensaje, detalle)
+
+
 def salud_sistema() -> list[Chequeo]:
     """Todo lo que se puede comprobar sin salir de este equipo."""
     repo = catalogo_social.repo_web()
@@ -106,6 +174,8 @@ def salud_sistema() -> list[Chequeo]:
     env = repo / ".env.local"
     checks.append(_c("credenciales", env.is_file(),
                      f"{env.name} accesible", f"no existe {env}"))
+
+    checks.append(caducidad_instagram())
 
     checks.append(_c("historial", rutas.ARCHIVO_HISTORIAL.is_file(),
                      "historial accesible", "no se encuentra el historial"))

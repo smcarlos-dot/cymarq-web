@@ -1,0 +1,47 @@
+[Unit]
+Description=CYMARQ SOCIAL — renovacion del token de larga duracion de Instagram
+Documentation=file:///home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/refrescar-tokens.py
+# Hace falta red: el guion habla con graph.instagram.com.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=celassor
+Group=celassor
+WorkingDirectory=/home/celassor/cymarq-web/CYMARQ_SOCIAL
+
+Environment=TZ=America/Bogota
+Environment=PYTHONUNBUFFERED=1
+
+# El guion decide por su cuenta si toca renovar: si aun quedan mas de 10 dias
+# no llama a Meta y sale en un instante. Por eso puede correr a diario.
+ExecStart=/home/celassor/cymarq-web/CYMARQ_SOCIAL/.venv/bin/python \
+  /home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/refrescar-tokens.py
+
+TimeoutStartSec=180
+
+# Sin reinicio automatico: si una renovacion falla, el disparo del dia
+# siguiente lo reintenta. Insistir en bucle contra Meta no arregla nada, y el
+# margen de 10 dias deja sitio de sobra para varios intentos.
+Restart=no
+
+# --- Endurecimiento ---
+# Deliberadamente MENOS estricto que cymarq-social.service en un punto: este
+# servicio SI tiene que reescribir .env.local. Para sustituirlo de forma
+# atomica (temporal + rename) necesita escribir en la carpeta que lo contiene,
+# no solo en el fichero, asi que la raiz del repositorio va en ReadWritePaths.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/celassor/cymarq-web
+ReadWritePaths=-/home/celassor/cymarq-web/CYMARQ_SOCIAL/CONFIG
+ReadWritePaths=-/home/celassor/respaldos-tokens
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

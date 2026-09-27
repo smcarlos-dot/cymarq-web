@@ -168,6 +168,7 @@ async function saludFacebook() {
   // una vez. El valor nunca se imprime ni se registra.
   let expira = null;
   let determinable = false;
+  let sinCaducidadPropia = false;   // expires_at=0: el token no caduca solo
   let scopes = null;
   let notaExp = 'Meta no devolvio informacion de expiracion utilizable.';
   let estadoToken = 'OK';
@@ -187,7 +188,8 @@ async function saludFacebook() {
     // no caduca por si mismo (expires_at=0), pero el acceso a datos si.
     const partes = [];
     if (typeof info.expires_at === 'number') {
-      partes.push(info.expires_at === 0
+      sinCaducidadPropia = info.expires_at === 0;
+      partes.push(sinCaducidadPropia
         ? 'expires_at=0 (el token no caduca por si mismo)'
         : `expires_at=${new Date(info.expires_at * 1000).toISOString()}`);
     }
@@ -207,12 +209,27 @@ async function saludFacebook() {
   }
 
   // Avisa cuando queda poco, para que se renueve antes de una publicacion.
+  //
+  // El margen son 21 dias y no 7 a proposito. Lo que caduca aqui casi nunca es
+  // el token (un Page Access Token trae expires_at=0 y no caduca por si mismo),
+  // sino `data_access_expires_at`: la ventana de 90 dias que Meta concede desde
+  // la ultima vez que un humano autorizo la app. Eso NO se puede renovar por
+  // programa — es un mecanismo de privacidad y exige que alguien con permisos
+  // vuelva a autorizar la aplicacion a mano. Avisar con una semana es poco para
+  // una gestion que depende de que una persona se siente a hacerla.
+  const MARGEN_AVISO_DIAS = 21;
+
   let diasRestantes = null;
   if (expira) {
     diasRestantes = Math.floor((new Date(expira) - Date.now()) / 86400000);
-    if (diasRestantes <= 7 && estadoToken === 'OK') {
+    if (diasRestantes <= MARGEN_AVISO_DIAS && estadoToken === 'OK') {
       estadoToken = 'ADVERTENCIA';
-      mensajeToken = `token valido, pero el acceso a datos caduca en ${diasRestantes} dias`;
+      const queCaduca = sinCaducidadPropia
+        ? 'el acceso a datos'
+        : 'el token';
+      mensajeToken = diasRestantes <= 0
+        ? `${queCaduca} ya caduco: hay que reautorizar la app en Meta`
+        : `${queCaduca} caduca en ${diasRestantes} dias: reautoriza la app en Meta`;
     }
   }
 
@@ -220,6 +237,10 @@ async function saludFacebook() {
     expira_en: expira,
     expiracion_determinable: determinable,
     dias_restantes: diasRestantes,
+    // Distingue las dos cosas que la gente confunde: un token permanente cuyo
+    // ACCESO A DATOS caduca no se arregla generando otro token.
+    sin_caducidad_propia: sinCaducidadPropia,
+    caduca_el_acceso_a_datos: sinCaducidadPropia && Boolean(expira),
     permisos_del_token: scopes,
     nota: notaExp,
   });

@@ -1,0 +1,24 @@
+[Unit]
+Description=CYMARQ SOCIAL — revision diaria de la caducidad de los tokens
+Documentation=file:///home/celassor/cymarq-web/CYMARQ_SOCIAL/produccion/refrescar-tokens.py
+
+[Timer]
+Unit=cymarq-tokens.service
+
+# Una vez al dia, de madrugada y lejos de la hora de publicacion (18:30), para
+# que una renovacion nunca coincida con un envio a Meta.
+OnCalendar=*-*-* 03:20:00
+
+# Si la VM estuvo apagada a esa hora, se ejecuta al arrancar. Un token que no
+# se renuevo es justo lo que no queremos dejar pasar.
+Persistent=true
+
+# El margen de renovacion son 10 dias, asi que perder un disparo concreto no
+# es grave: hay diez oportunidades antes de que el token muera.
+RandomizedDelaySec=15min
+
+OnBootSec=10min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
