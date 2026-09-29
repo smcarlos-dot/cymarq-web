@@ -146,6 +146,28 @@ export default function Footer() {
             </Link>
           </nav>
 
+          {/* Sello de Calidad de SoloArquitectos.
+              La imagen se sirve desde el dominio oficial, sin copia local, y
+              no se altera: es un sello de un tercero. width/height reservan su
+              hueco para que el pie no dé un salto al cargar. */}
+          <a
+            href="https://www.soloarquitectos.com/estudio/cymarq/7595"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block"
+          >
+            <img
+              src="https://www.soloarquitectos.com/sc.png"
+              width={199}
+              height={59}
+              alt="Sello de Calidad de SoloArquitectos — ficha de Cymarq"
+              title="Cymarq"
+              loading="lazy"
+              decoding="async"
+              className="border-0"
+            />
+          </a>
+
           <div className="h-px w-24 bg-gold/60" />
 
           <p className="text-xs text-white/40">
